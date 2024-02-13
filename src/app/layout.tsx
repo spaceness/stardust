@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Computer, Settings } from "@/components/icons";
 import "./globals.css";
 import {
   NavigationMenu,
@@ -20,14 +21,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} default-background`}>
-        <NavigationMenu className="fixed left-1/2 top-12 -translate-x-1/2 rounded-full">
+      <body
+        className={`${inter.className} bg-[url('/images/background.jpg')] bg-cover overflow-scroll`}
+      >
+        <NavigationMenu className="fixed left-1/2 top-12 -translate-x-1/2">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuMainLink href="/">Apps</NavigationMenuMainLink>
+              <NavigationMenuMainLink href="/">
+                <Computer className="mr-3" />
+                Workspaces
+              </NavigationMenuMainLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuMainLink href="/about">
+              <NavigationMenuMainLink href="/settings">
+                <Settings className="mr-3" />
                 Settings
               </NavigationMenuMainLink>
             </NavigationMenuItem>
