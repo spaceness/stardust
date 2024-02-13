@@ -14,11 +14,18 @@ export const NavigationMenu = forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={cn("relative z-10 flex max-w-max flex-1 items-center justify-center", className)}
+    className={cn(
+      "relative z-10 flex max-w-max flex-1 items-center justify-center",
+      className,
+    )}
     {...props}
   >
     {children}
-    <div className={cn("absolute top-full flex justify-center md:left-1/2 md:-translate-x-1/2")}>
+    <div
+      className={cn(
+        "absolute top-full flex justify-center md:left-1/2 md:-translate-x-1/2",
+      )}
+    >
       <NavigationMenuPrimitive.Viewport
         className={cn(
           "card relative mt-4 h-[--radix-navigation-menu-viewport-height] w-full origin-[top_center] overflow-hidden rounded-full bg-bg-idle backdrop-blur transition-all",
@@ -49,7 +56,9 @@ export const NavigationMenuItem = NavigationMenuPrimitive.Item;
 
 export const NavigationMenuLink = forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Link>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Link> & { unstyled?: boolean }
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Link> & {
+    unstyled?: boolean;
+  }
 >(({ unstyled, className, style, onMouseMove, ...props }, ref) => (
   <NavigationMenuPrimitive.Link
     className={cn(
@@ -67,7 +76,10 @@ NavigationMenuLink.displayName = NavigationMenuPrimitive.Link.displayName;
 export const NavigationMenuMainLink = forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Link>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Link>
->(function NavigationMenuMainLink({ className, style, onMouseMove, ...props }, ref) {
+>(function NavigationMenuMainLink(
+  { className, style, onMouseMove, ...props },
+  ref,
+) {
   return (
     <NavigationMenuPrimitive.Link
       ref={ref}

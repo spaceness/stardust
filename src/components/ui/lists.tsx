@@ -14,16 +14,27 @@ export const List = forwardRef<HTMLDivElement, BaseProps<"div">>(function List(
   ref,
 ) {
   const Component = asChild ? Slot : "div";
-  return <Component {...props} className={cn("flex flex-col gap-2", className)} ref={ref} />;
+  return (
+    <Component
+      {...props}
+      className={cn("flex flex-col gap-2", className)}
+      ref={ref}
+    />
+  );
 });
 
-export const ListHeader = forwardRef<HTMLDivElement, BaseProps<"div">>(function ListHeader(
-  { asChild, className, ...props },
-  ref,
-) {
-  const Component = asChild ? Slot : "div";
-  return <Component {...props} className={cn("px-6 text-lg font-bold", className)} ref={ref} />;
-});
+export const ListHeader = forwardRef<HTMLDivElement, BaseProps<"div">>(
+  function ListHeader({ asChild, className, ...props }, ref) {
+    const Component = asChild ? Slot : "div";
+    return (
+      <Component
+        {...props}
+        className={cn("px-6 text-lg font-bold", className)}
+        ref={ref}
+      />
+    );
+  },
+);
 
 const withSeparatorClasses = cn(
   // LOL
@@ -34,7 +45,8 @@ const listContentVariants = cva({
   variants: {
     variant: {
       plain: "[&_[data-li-inner]:hover]:bg-bg-idle [&_[data-li-inner]]:rounded",
-      inset: "[&_[data-li-inner]:hover]:bg-bg-hover [&_[data-li-inner]]:bg-bg-darker",
+      inset:
+        "[&_[data-li-inner]:hover]:bg-bg-hover [&_[data-li-inner]]:bg-bg-darker",
     },
     withSeparator: {
       true: withSeparatorClasses,
@@ -69,30 +81,32 @@ export const ListContent = forwardRef<
   );
 });
 
-export const ListItem = forwardRef<HTMLDivElement, BaseProps<"div">>(function ListItem(
-  { asChild, className, style, onMouseMove, ...props },
-  ref,
-) {
-  const Component = asChild ? Slot : "div";
-  return (
-    <div data-li>
+export const ListItem = forwardRef<HTMLDivElement, BaseProps<"div">>(
+  function ListItem({ asChild, className, style, onMouseMove, ...props }, ref) {
+    const Component = asChild ? Slot : "div";
+    return (
+      <div data-li>
+        <Component
+          {...props}
+          className={cn("hover-bg flex w-full flex-row", className)}
+          {...useHoverBackground({ style, onMouseMove })}
+          data-li-inner
+          ref={ref}
+        />
+      </div>
+    );
+  },
+);
+
+export const ListFooter = forwardRef<HTMLDivElement, BaseProps<"div">>(
+  function ListFooter({ asChild, className, ...props }, ref) {
+    const Component = asChild ? Slot : "div";
+    return (
       <Component
         {...props}
-        className={cn("hover-bg flex w-full flex-row", className)}
-        {...useHoverBackground({ style, onMouseMove })}
-        data-li-inner
+        className={cn("px-6 text-xs text-text-secondary", className)}
         ref={ref}
       />
-    </div>
-  );
-});
-
-export const ListFooter = forwardRef<HTMLDivElement, BaseProps<"div">>(function ListFooter(
-  { asChild, className, ...props },
-  ref,
-) {
-  const Component = asChild ? Slot : "div";
-  return (
-    <Component {...props} className={cn("px-6 text-xs text-text-secondary", className)} ref={ref} />
-  );
-});
+    );
+  },
+);

@@ -5,7 +5,10 @@ import { cn } from "@/lib/cn";
 
 export const Link = forwardRef<
   HTMLAnchorElement,
-  React.ComponentPropsWithoutRef<typeof NextLink> & { href: string; unstyled?: boolean }
+  React.ComponentPropsWithoutRef<typeof NextLink> & {
+    href: string;
+    unstyled?: boolean;
+  }
 >(function Link({ href, className, unstyled, ...rest }, ref) {
   const isExternal = href.startsWith("http");
   return (

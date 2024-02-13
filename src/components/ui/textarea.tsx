@@ -11,11 +11,17 @@ import { useHoverBackground } from "./hooks/use-hover-background";
 export const TextArea = forwardRef<
   HTMLTextAreaElement,
   // Force controlled component
-  Omit<React.ComponentProps<"textarea">, "defaultValue" | "value" | "onChange"> & {
+  Omit<
+    React.ComponentProps<"textarea">,
+    "defaultValue" | "value" | "onChange"
+  > & {
     value?: string;
     onValueChange?: (val: string) => void;
   }
->(function TextArea({ className, disabled, value, onValueChange, ...props }, ref) {
+>(function TextArea(
+  { className, disabled, value, onValueChange, ...props },
+  ref,
+) {
   const onClear = useCallback(() => {
     onValueChange?.("");
   }, [onValueChange]);
@@ -36,7 +42,7 @@ export const TextArea = forwardRef<
         disabled={disabled}
         {...props}
         value={value}
-        onChange={event => onValueChange?.(event.target.value)}
+        onChange={(event) => onValueChange?.(event.target.value)}
         ref={ref}
       />
       <div

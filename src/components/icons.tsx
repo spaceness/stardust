@@ -17,7 +17,11 @@
  */
 import { cn } from "@/lib/cn";
 
-function createIcon(name: string, svgContent: React.ReactNode, withStrokeCurrent = true) {
+function createIcon(
+  name: string,
+  svgContent: React.ReactNode,
+  withStrokeCurrent = true,
+) {
   const icon = ({ className, ...props }: React.ComponentProps<"svg">) => (
     <svg
       {...props}
@@ -38,7 +42,10 @@ function createIcon(name: string, svgContent: React.ReactNode, withStrokeCurrent
   return icon;
 }
 
-export const AlignJustify = createIcon("AlignJustify", <path d="M3 6h18M3 12h18M3 18h18" />);
+export const AlignJustify = createIcon(
+  "AlignJustify",
+  <path d="M3 6h18M3 12h18M3 18h18" />,
+);
 
 export const ArrowDownUp = createIcon(
   "ArrowDownUp",
@@ -79,11 +86,20 @@ export const CheckCircle = createIcon(
 
 export const ChevronDown = createIcon("ChevronDown", <path d="m6 9 6 6 6-6" />);
 
-export const ChevronLeft = createIcon("ChevronLeft", <path d="m15 18-6-6 6-6" />);
+export const ChevronLeft = createIcon(
+  "ChevronLeft",
+  <path d="m15 18-6-6 6-6" />,
+);
 
-export const ChevronRight = createIcon("ChevronRight", <path d="m9 18 6-6-6-6" />);
+export const ChevronRight = createIcon(
+  "ChevronRight",
+  <path d="m9 18 6-6-6-6" />,
+);
 
-export const ChevronsRight = createIcon("ChevronsRight", <path d="m6 17 5-5-5-5m7 10 5-5-5-5" />);
+export const ChevronsRight = createIcon(
+  "ChevronsRight",
+  <path d="m6 17 5-5-5-5m7 10 5-5-5-5" />,
+);
 
 export const Circle = createIcon(
   "Circle",
@@ -95,7 +111,10 @@ export const Cloud = createIcon(
   <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />,
 );
 
-export const Code = createIcon("Code", <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />);
+export const Code = createIcon(
+  "Code",
+  <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />,
+);
 
 export const Copy = createIcon(
   "Copy",
@@ -184,7 +203,10 @@ export const Music = createIcon(
   <path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />,
 );
 
-export const Pause = createIcon("Pause", <path d="M10 4H6v16h4V4ZM18 4h-4v16h4V4Z" />);
+export const Pause = createIcon(
+  "Pause",
+  <path d="M10 4H6v16h4V4ZM18 4h-4v16h4V4Z" />,
+);
 
 export const PauseCircle = createIcon(
   "PauseCircle",
@@ -218,7 +240,10 @@ export const Repeat = createIcon(
   <path d="m17 2 4 4m0 0-4 4m4-4H7a4 4 0 0 0-4 4v1m4 11-4-4m0 0 4-4m-4 4h14a4 4 0 0 0 4-4v-1" />,
 );
 
-export const Reply = createIcon("Reply", <path d="m9 17-5-5m0 0 5-5m-5 5h12a4 4 0 0 1 4 4v2" />);
+export const Reply = createIcon(
+  "Reply",
+  <path d="m9 17-5-5m0 0 5-5m-5 5h12a4 4 0 0 1 4 4v2" />,
+);
 
 export const RotateCcw = createIcon(
   "RotateCcw",

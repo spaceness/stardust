@@ -2,10 +2,10 @@ import { forwardRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-export const Card = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<"div">>(function Card(
-  { className, children, ...rest },
-  ref,
-) {
+export const Card = forwardRef<
+  HTMLDivElement,
+  React.ComponentPropsWithoutRef<"div">
+>(function Card({ className, children, ...rest }, ref) {
   return (
     <div
       className={cn(

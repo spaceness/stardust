@@ -5,7 +5,9 @@ interface HoverBackgroundHookProps {
   onMouseMove?: React.MouseEventHandler;
 }
 
-export function useHoverBackground(props: HoverBackgroundHookProps): HoverBackgroundHookProps {
+export function useHoverBackground(
+  props: HoverBackgroundHookProps,
+): HoverBackgroundHookProps {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const onMouseMove = useCallback(
     (e: React.MouseEvent) => {
@@ -16,7 +18,11 @@ export function useHoverBackground(props: HoverBackgroundHookProps): HoverBackgr
     [props],
   );
   return {
-    style: { "--hover-bg-left": `${mouse.x}px`, "--hover-bg-top": `${mouse.y}px`, ...props.style },
+    style: {
+      "--hover-bg-left": `${mouse.x}px`,
+      "--hover-bg-top": `${mouse.y}px`,
+      ...props.style,
+    },
     onMouseMove,
   };
 }

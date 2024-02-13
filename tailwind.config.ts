@@ -2,14 +2,12 @@ import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 import defaultTheme from "tailwindcss/defaultTheme";
-
+import color from "tailwindcss/colors";
 const config: Config = {
   future: { hoverOnlyWhenSupported: true },
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./mdx-components.tsx",
   ],
   theme: {
     borderRadius: { DEFAULT: "1.25rem", full: "2rem", none: "0" },
@@ -28,6 +26,7 @@ const config: Config = {
         hover: "var(--bg-hover)",
         active: "var(--bg-active)",
         disabled: "var(--bg-disabled)",
+        default: "linear-gradient(201deg, rgba(0,212,255,1) 1%, rgba(2,0,36,1) 94%);",
       },
       separator: "var(--separator)",
       black: "black",
@@ -41,6 +40,8 @@ const config: Config = {
       mint: "var(--mint)",
       cyan: "var(--cyan)",
       blue: "var(--blue)",
+      "indigo900": color.indigo[900],
+      
     },
     fontFamily: {
       sans: ["var(--sans)", ...defaultTheme.fontFamily.sans],
@@ -83,7 +84,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [animate, typography],
+  plugins: [animate, typography, ],
 };
 
 export default config;

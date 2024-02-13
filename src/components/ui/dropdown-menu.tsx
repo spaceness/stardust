@@ -48,7 +48,8 @@ export const DropdownMenuSubTrigger = forwardRef<
     <ChevronRight className="ml-auto size-4" />
   </DropdownMenuPrimitive.SubTrigger>
 ));
-DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName;
+DropdownMenuSubTrigger.displayName =
+  DropdownMenuPrimitive.SubTrigger.displayName;
 
 export const DropdownMenuSubContent = forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
@@ -64,7 +65,8 @@ export const DropdownMenuSubContent = forwardRef<
     />
   </DropdownMenuPrimitive.SubContent>
 ));
-DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
+DropdownMenuSubContent.displayName =
+  DropdownMenuPrimitive.SubContent.displayName;
 
 export const DropdownMenuContent = forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
@@ -121,7 +123,8 @@ export const DropdownMenuCheckboxItem = forwardRef<
     {children}
   </DropdownMenuPrimitive.CheckboxItem>
 ));
-DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName;
+DropdownMenuCheckboxItem.displayName =
+  DropdownMenuPrimitive.CheckboxItem.displayName;
 
 export const DropdownMenuRadioItem = forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
@@ -178,7 +181,10 @@ export const DropdownMenuShortcut = forwardRef<
 >(function DropdownMenuShortcut({ className, ...props }, ref) {
   return (
     <span
-      className={cn("ml-auto text-xs tracking-widest text-text-secondary", className)}
+      className={cn(
+        "ml-auto text-xs tracking-widest text-text-secondary",
+        className,
+      )}
       {...props}
       ref={ref}
     />

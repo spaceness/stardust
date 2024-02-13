@@ -15,7 +15,10 @@ export const Input = forwardRef<
     value?: string;
     onValueChange?: (val: string) => void;
   }
->(function Input({ className, type, disabled, value, onValueChange, ...props }, ref) {
+>(function Input(
+  { className, type, disabled, value, onValueChange, ...props },
+  ref,
+) {
   const onClear = useCallback(() => {
     onValueChange?.("");
   }, [onValueChange]);
@@ -42,7 +45,7 @@ export const Input = forwardRef<
         disabled={disabled}
         {...props}
         value={value}
-        onChange={event => onValueChange?.(event.target.value)}
+        onChange={(event) => onValueChange?.(event.target.value)}
         ref={ref}
       />
       <div
