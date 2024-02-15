@@ -12,10 +12,10 @@ export async function POST() {
       Cmd: ["echo", "hello world"],
     },
     function (err, container) {
-        if (!container) return;
+      if (!container) return;
       container.start(function (err, data) {
         console.log(data);
       });
-    }
+    },
   );
 }

@@ -1,11 +1,9 @@
 "use client";
 
-import { forwardRef, useCallback } from "react";
+import { forwardRef } from "react";
 
-import { X } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
-import { Button } from "./button";
 import { useHoverBackground } from "./hooks/use-hover-background";
 
 export const Input = forwardRef<
@@ -19,9 +17,6 @@ export const Input = forwardRef<
   { className, type, disabled, value, onValueChange, ...props },
   ref,
 ) {
-  const onClear = useCallback(() => {
-    onValueChange?.("");
-  }, [onValueChange]);
   return (
     <div
       className={cn(
@@ -33,7 +28,7 @@ export const Input = forwardRef<
       <input
         type={type}
         className={cn(
-          "peer w-full bg-transparent py-[9px] pl-4 pr-[42px] caret-blue placeholder:font-medium placeholder:text-text-secondary",
+          "peer bg-transparent py-[9px] px-4 caret-blue placeholder:font-medium placeholder:text-text-secondary",
           // type === "file" ? "py-[6px] pl-[7px]" : "py-[9px] pl-4",
           // "file:rounded-full file:border-none file:bg-bg-idle file:px-3 file:py-1 file:text-sm file:text-text-primary file:transition-colors file:active:bg-bg-active",
           // https://stackoverflow.com/a/27935448
@@ -44,20 +39,7 @@ export const Input = forwardRef<
         )}
         disabled={disabled}
         {...props}
-        value={value}
-        onChange={(event) => onValueChange?.(event.target.value)}
-        ref={ref}
       />
-      <div
-        className={cn(
-          "absolute right-[7px] top-1/2 -translate-y-1/2 transition-opacity peer-disabled:pointer-events-none peer-disabled:opacity-0",
-          value === "" ? "pointer-events-none opacity-0" : "opacity-100",
-        )}
-      >
-        <Button variants={{ size: "icon-sm" }} onClick={() => onClear()}>
-          <X />
-        </Button>
-      </div>
     </div>
   );
 });
