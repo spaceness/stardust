@@ -14,7 +14,7 @@ const nextConfig = {
         hostname: "registry.kasmweb.com",
         port: "",
         pathname: "/1.0/icons/**",
-      }
+      },
     ],
   },
 };

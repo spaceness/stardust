@@ -7,13 +7,11 @@ export default function Home() {
     <main className="flex justify-center items-center mx-auto mt-72">
       <Card className="flex p-5 bg-bg-darker flex-col">
         <section className="flex flex-wrap justify-center">
-          {images.map((image,key) => {
+          {images.map((image, key) => {
             return (
               <div className="w-1/4 p-2" key={key}>
                 <Link href={`/image/${image.dockerImage.split("/")[2]}`}>
-                  <Card
-                    className="flex bg-bg-idle hover:bg-bg-active w-64 h-24 flex-row gap-2"
-                  >
+                  <Card className="flex bg-bg-idle hover:bg-bg-active w-64 h-24 flex-row gap-2">
                     <Image
                       src={image.icon}
                       alt={image.friendlyName}
@@ -21,10 +19,10 @@ export default function Home() {
                       height={45}
                     />
                     <div className="flex flex-col justify-center">
-                      <p className="text-cyan font-bold text-md">
+                      <p className="text-cyan font-bold text-md text-nowrap">
                         {image.friendlyName}
                       </p>
-                      <p className="text-text-tertiary text-xs">
+                      <p className="text-text-secondary text-xs">
                         {image.category}
                       </p>
                     </div>

@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Link } from "@/components/ui/link";
 export default function NotFound() {
   return (
-    <main className="container max-w-screen-md mt-36">
+    <main className="container max-w-screen-md mt-72">
       <Card className="flex flex-col p-0 bg-bg-darker">
         <section className="flex items-center gap-6  p-6 justify-center sm:p-9 text-center">
           <h1 className="text-6xl text-white">404</h1>

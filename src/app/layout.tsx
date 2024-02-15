@@ -14,8 +14,8 @@ const navItems: {
   icon: React.ReactNode;
 }[] = [
   {
-    name: "Images",
-    href: "/images",
+    name: "Workspaces",
+    href: "/",
     icon: <Computer className="mr-3" />,
   },
   {

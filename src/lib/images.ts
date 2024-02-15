@@ -4,8 +4,7 @@ type Image = {
   supportedArch: string[];
   category: string[];
   icon: string;
-
-}
+};
 const images: Image[] = [
   {
     friendlyName: "Chromium",
