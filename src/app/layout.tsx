@@ -48,8 +48,8 @@ export default function RootLayout({
       >
         <NavigationMenu className="fixed left-1/2 top-12 -translate-x-1/2">
           <NavigationMenuList>
-            {navItems.map((item) => (
-              <NavigationMenuItem key={item.name}>
+            {navItems.map((item, key) => (
+              <NavigationMenuItem key={key}>
                 <NavigationMenuMainLink
                   href={item.href}
                   className="flex items-center justify-center"
