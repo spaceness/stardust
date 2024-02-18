@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import { Computer, Settings } from "@/components/icons";
 import "./globals.css";
 import {
@@ -24,7 +25,7 @@ const navItems: {
     icon: <Settings className="mr-3" />,
   },
 ];
-const fontSans = Inter({ subsets: ["latin"] });
+const fontSans = GeistSans;
 export const metadata: Metadata = {
   title: "stardust",
   description: "Open source kasm alternative powered by spaceness",
@@ -44,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontSans.className} bg-[url('/images/background.jpg')] bg-cover overflow-scroll`}
+        className={`${fontSans.className} bg-[url('/images/background.webp')] bg-cover overflow-scroll`}
       >
         <NavigationMenu className="fixed left-1/2 top-12 -translate-x-1/2">
           <NavigationMenuList>

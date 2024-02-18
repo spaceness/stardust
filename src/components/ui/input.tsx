@@ -22,6 +22,7 @@ export const Input = forwardRef<
       className={cn(
         "relative overflow-hidden rounded-full bg-bg-darker backdrop-blur",
         disabled ? "opacity-50" : "hover-bg recessed",
+        className,
       )}
       {...useHoverBackground({})}
     >

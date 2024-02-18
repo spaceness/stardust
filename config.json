@@ -1,13 +1,6 @@
 {
   "images": [
     {
-      "friendlyName": "Arch Linux",
-      "dockerImage": "ghcr.io/spaceness/archlinux",
-      "supportedArch": ["amd64", "arm64"],
-      "category": ["Desktop"],
-      "icon": "/images/workspaces/archlinux.svg"
-    },
-    {
       "friendlyName": "Chromium",
       "dockerImage": "ghcr.io/spaceness/chromium",
       "supportedArch": ["amd64", "arm64"],
@@ -40,7 +33,7 @@
       "friendlyName": "Vesktop",
       "dockerImage": "ghcr.io/spaceness/vesktop",
       "supportedArch": ["amd64", "arm64"],
-      "category": ["Commnication"],
+      "category": ["Communication"],
       "icon": "/images/workspaces/vesktop.png"
     }
   ]

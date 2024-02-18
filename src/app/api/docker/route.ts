@@ -1,26 +1,30 @@
 import Dockerode from "dockerode";
-import config from "@root/config.json";
 import { NextRequest } from "next/server";
 const docker = new Dockerode({
   port: 2375,
   protocol: "http",
   host: "10.53.19.10",
 });
-let containerId: string;
-const images: Image[] = config.images;
 
+let containerId: string;
 export async function GET(req: NextRequest) {
   const { id } = await req.json();
   const container = docker.getContainer(id);
   const data = await container.inspect();
   return Response.json({ data });
-
 }
 export async function PUT(req: NextRequest) {
+  const protocol = process?.env.SSL === "true" ? "https" : "http";
+  const config = await fetch(
+    `${protocol}://${req.headers.get("host")}/api/config`,
+  )
+    .then((res) => res.json())
+    .then((data) => data.config);
+  const configImages: Image[] = await config.images;
   const { image } = await req.json();
-  if (!images.find((img) => img.dockerImage === image)) {
+  if (!configImages.find((img) => img.dockerImage === image)) {
     return Response.json(
-      { error: "Image not found", success: false },
+      { error: "Image not allowed", success: false },
       { status: 400 },
     );
   } else {
