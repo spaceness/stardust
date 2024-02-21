@@ -1,60 +1,98 @@
 import Dockerode from "dockerode";
 import { NextRequest } from "next/server";
-const docker = new Dockerode({
-  port: 2375,
-  protocol: "http",
-  host: "10.53.19.10",
-});
+import fetchConfig from "@/lib/fetchConfig";
 
-let containerId: string;
-export async function GET(req: NextRequest) {
-  const { id } = await req.json();
-  const container = docker.getContainer(id);
-  const data = await container.inspect();
-  return Response.json({ data });
+const docker = new Dockerode({
+  port: process.env.DOCKER_PORT,
+  protocol: "http",
+  host: process.env.DOCKER_HOST,
+});
+async function checkRequest(
+  header: string | null,
+  container: string,
+): Promise<boolean> {
+  const config = await fetchConfig(header);
+  const images: Image[] = await config.images;
+  const containerData = await docker.getContainer(container).inspect();
+  return images.find((img) => img.dockerImage === containerData.Config.Image)
+    ? true
+    : false;
 }
+export async function POST(req: NextRequest) {
+  const { id } = await req.json();
+  try {
+    const container = docker.getContainer(id);
+    const data = await container.inspect();
+    const check = await checkRequest(req.headers.get("host"), id);
+    if (!check) {
+      return Response.json(
+        {
+          error:
+            "Container data can't be fetched since it's not allowed, or it's not a real container",
+          success: false,
+        },
+        { status: 400 },
+      );
+    }
+    return Response.json(data, { status: 200 });
+  } catch (error) {
+    return Response.json({ error: error }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest) {
-  const protocol = process?.env.SSL === "true" ? "https" : "http";
-  const config = await fetch(
-    `${protocol}://${req.headers.get("host")}/api/config`,
-  )
-    .then((res) => res.json())
-    .then((data) => data.config);
+  const config = await fetchConfig(req.headers.get("host"));
   const configImages: Image[] = await config.images;
   const { image } = await req.json();
-  if (!configImages.find((img) => img.dockerImage === image)) {
+  const check = configImages.find((img) => img.dockerImage === image);
+  if (!check) {
     return Response.json(
-      { error: "Image not allowed", success: false },
+      { error: "bro thought he could use any docker image", success: false },
       { status: 400 },
     );
   } else {
-    await docker.pull(image, (err: any, stream: NodeJS.ReadableStream) => {
-      if (err) {
-        return Response.json({ error: err, success: false }, { status: 500 });
-      }
-      docker.modem.followProgress(stream, onFinished);
-      async function onFinished() {
-        const container = await docker.createContainer({
-          Image: image,
-          name: Date.now() + "-" + image.split("/")[2],
-          HostConfig: {
-            PortBindings: {
-              "3000/tcp": [{ HostPort: "3000" }],
-            },
-          },
+    try {
+      const containerId = await new Promise((resolve, reject) => {
+        docker.pull(image, (err: any, stream: NodeJS.ReadableStream) => {
+          if (err) {
+            return reject(err);
+          }
+          docker.modem.followProgress(stream, onFinished);
+          async function onFinished() {
+            const container = await docker.createContainer({
+              Image: image,
+              name: Date.now() + "-" + image.split("/")[2],
+              HostConfig: {
+                PortBindings: {
+                  "3000/tcp": [{ HostPort: "3000" }],
+                },
+              },
+            });
+            await container.start();
+            resolve(container.id);
+          }
         });
-        container.start();
-        containerId = container.id;
-      }
-    });
-    return Response.json({ id: containerId, success: true }, { status: 201 });
+      });
+      return Response.json({ id: containerId, success: true }, { status: 201 });
+    } catch (e) {
+      return Response.json(
+        { error: e as any, success: false },
+        { status: 500 },
+      );
+    }
   }
 }
 export async function DELETE(req: NextRequest) {
   const { id } = await req.json();
   const container = docker.getContainer(id);
+  const check = await checkRequest(req.headers.get("host"), id);
+  if (!check) {
+    return Response.json(
+      { error: "Action not allowed; nice try", success: false },
+      { status: 400 },
+    );
+  }
   try {
-    await container.stop();
     await container.remove();
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
@@ -62,18 +100,29 @@ export async function DELETE(req: NextRequest) {
   }
 }
 export async function PATCH(req: NextRequest) {
-  const { id, action } = await req.json();
+  const { id, action }: { id: string; action: keyof Dockerode.Container } =
+    await req.json();
   const container = docker.getContainer(id);
+  const check = await checkRequest(req.headers.get("host"), id);
+  if (!check) {
+    return Response.json(
+      { error: "Action not allowed; nice try", success: false },
+      { status: 400 },
+    );
+  }
   try {
-    if (action === "pause") {
-      await container.pause();
-    } else if (action === "unpause") {
-      await container.unpause();
-    } else if (action === "start") {
-      await container.start();
-    } else if (action === "stop") {
-      await container.stop();
+    const allowedActions: Array<keyof Dockerode.Container> = [
+      "pause",
+      "unpause",
+      "start",
+      "stop",
+      "restart",
+      "kill",
+    ];
+    if (!allowedActions.includes(action)) {
+      throw new Error("Action is not valid or allowed");
     }
+    await container[action]();
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
     return Response.json({ error: error, success: false }, { status: 500 });

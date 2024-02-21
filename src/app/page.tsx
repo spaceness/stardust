@@ -1,15 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
+import fetchConfig from "@/lib/fetchConfig";
 import { Card } from "@/components/ui/card";
 
 export default async function Home() {
-  const protocol = process?.env.SSL === "true" ? "https" : "http";
-  const config = await fetch(
-    `${protocol}://${headers().get("host")}/api/config`,
-  )
-    .then((res) => res.json())
-    .then((data) => data.config);
+  const config = await fetchConfig(headers().get("host"));
   const images: Image[] = await config.images;
   return (
     <main className="flex items-center justify-center min-h-screen">
