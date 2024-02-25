@@ -1,9 +1,11 @@
 "use client";
+import { useRef } from "react";
 import { signIn } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 export default function Login() {
+	const emailRef = useRef<HTMLInputElement>(null);
 	return (
 		<main className="mx-auto flex min-h-screen items-center justify-center">
 			<Card className="mx-auto flex h-96 w-[576px] flex-col items-center justify-center p-0">
@@ -11,13 +13,17 @@ export default function Login() {
 					Welcome to Stardust
 				</h2>
 				<section className="flex flex-col items-center justify-center gap-4 p-6">
-					<Input className="w-96 text-text-primary" placeholder="Email" />
+					<Input
+						ref={emailRef}
+						className="w-96 text-text-primary"
+						placeholder="Email"
+					/>
 					<Button
 						className="w-48"
 						variants={{ variant: "primary" }}
-						onClick={(values: any) => {
+						onClick={() => {
 							signIn("email", {
-								...values,
+								...(emailRef.current && { email: emailRef.current.value }),
 							});
 						}}
 					>

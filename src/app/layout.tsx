@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getServerSession } from "next-auth/next";
+import authOptions from "@/app/api/auth/[...nextauth]/route";
 import { GeistSans } from "geist/font/sans";
 import { Computer, Settings } from "@/components/icons";
 import "./globals.css";
@@ -8,6 +10,7 @@ import {
 	NavigationMenuList,
 	NavigationMenuMainLink,
 } from "@/components/ui/navigation-menu";
+const session = await getServerSession(authOptions);
 const navItems: {
 	name: string;
 	href: string;
@@ -38,9 +41,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
 	children,
-}: Readonly<{
-	children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html lang="en">
 			<body
