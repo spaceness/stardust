@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
-import authOptions from "@/app/api/auth/[...nextauth]/route";
+import { authConfig } from "@/app/api/auth/[...nextauth]/route";
 import { GeistSans } from "geist/font/sans";
 import { Computer, Settings } from "@/components/icons";
 import "./globals.css";
@@ -10,7 +10,7 @@ import {
 	NavigationMenuList,
 	NavigationMenuMainLink,
 } from "@/components/ui/navigation-menu";
-const session = await getServerSession(authOptions);
+const session = await getServerSession(authConfig);
 const navItems: {
 	name: string;
 	href: string;
