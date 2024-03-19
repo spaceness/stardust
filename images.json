@@ -1,0 +1,38 @@
+[
+	{
+		"friendlyName": "Chromium",
+		"dockerImage": "ghcr.io/spaceness/chromium",
+		"supportedArch": ["AMD64", "ARM64"],
+		"category": ["Browser"],
+		"icon": "/images/workspaces/chromium.svg"
+	},
+	{
+		"friendlyName": "Code",
+		"dockerImage": "ghcr.io/spaceness/vscode",
+		"supportedArch": ["AMD64", "ARM64"],
+		"category": ["IDE"],
+		"icon": "/images/workspaces/vscode.svg"
+	},
+
+	{
+		"friendlyName": "Debian",
+		"dockerImage": "ghcr.io/spaceness/debian",
+		"supportedArch": ["AMD64", "ARM64"],
+		"category": ["Desktop"],
+		"icon": "/images/workspaces/debian.svg"
+	},
+	{
+		"friendlyName": "Firefox",
+		"dockerImage": "ghcr.io/spaceness/firefox",
+		"supportedArch": ["AMD64", "ARM64"],
+		"category": ["Browser"],
+		"icon": "/images/workspaces/firefox.svg"
+	},
+	{
+		"friendlyName": "Vesktop",
+		"dockerImage": "ghcr.io/spaceness/vesktop",
+		"supportedArch": ["AMD64", "ARM64"],
+		"category": ["Communication"],
+		"icon": "/images/workspaces/vesktop.png"
+	}
+]

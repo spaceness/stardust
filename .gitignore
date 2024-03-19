@@ -26,8 +26,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
-.env
+.env*
 
 # vercel
 .vercel
@@ -35,18 +34,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-!.vscode/css_custom_data.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Database
-*.db
