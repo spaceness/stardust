@@ -1,79 +1,56 @@
-"use client";
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { type VariantProps, cva } from "cva";
-import { forwardRef } from "react";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/cn";
-
-import { useHoverBackground } from "./hooks/use-hover-background";
-import { Link } from "./link";
-
-export const buttonVariants = cva({
-	base: "hover-bg inline-flex shrink-0 flex-row items-center justify-center gap-[--button-gap] rounded-full outline-offset-4 backdrop-blur transition disabled:cursor-not-allowed disabled:bg-bg-disabled disabled:text-text-tertiary",
-	variants: {
-		variant: {
-			primary: "bg-text-primary text-black shadow disabled:shadow-none",
-			secondary: "bg-bg-idle text-text-primary active:bg-bg-active",
-			ghost:
-				"bg-transparent text-text-primary hover:bg-bg-hover active:bg-bg-active",
+const buttonVariants = cva(
+	"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+	{
+		variants: {
+			variant: {
+				default: "bg-primary text-primary-foreground hover:bg-primary/90",
+				destructive:
+					"bg-destructive text-destructive-foreground hover:bg-destructive/90",
+				outline:
+					"border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+				secondary:
+					"bg-secondary text-secondary-foreground hover:bg-secondary/80",
+				ghost: "hover:bg-accent hover:text-accent-foreground",
+				link: "text-primary underline-offset-4 hover:underline",
+			},
+			size: {
+				default: "h-10 px-4 py-2",
+				sm: "h-9 rounded-md px-3",
+				lg: "h-11 rounded-md px-8",
+				icon: "h-10 w-10",
+			},
 		},
-		size: {
-			sm: "w-fit px-3 py-1 text-sm [--button-gap:0.25rem] [&_svg]:size-4",
-			md: "w-fit px-4 py-2 text-base [--button-gap:0.5rem] [&_svg]:size-6",
-			lg: "w-fit px-5 py-2.5 text-lg [--button-gap:0.75rem] [&_svg]:size-7",
-			"icon-sm": "h-[30px] w-[30px] p-1 [--button-gap:0.25rem] [&_svg]:size-4",
-			"icon-md": "h-[42px] w-[42px] p-2 [--button-gap:0.5rem] [&_svg]:size-6",
-			"icon-lg":
-				"h-[50px] w-[50px] p-2.5 [--button-gap:0.75rem] [&_svg]:size-7",
+		defaultVariants: {
+			variant: "default",
+			size: "default",
 		},
 	},
-	defaultVariants: {
-		variant: "secondary",
-		size: "md",
+);
+
+export interface ButtonProps
+	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+		VariantProps<typeof buttonVariants> {
+	asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+	({ className, variant, size, asChild = false, ...props }, ref) => {
+		const Comp = asChild ? Slot : "button";
+		return (
+			<Comp
+				className={cn(buttonVariants({ variant, size, className }))}
+				ref={ref}
+				{...props}
+			/>
+		);
 	},
-});
+);
+Button.displayName = "Button";
 
-export const Button = forwardRef<
-	HTMLButtonElement,
-	React.ComponentPropsWithoutRef<"button"> & {
-		variants?: VariantProps<typeof buttonVariants>;
-	}
->(function Button(
-	{ variants, className, style, onMouseMove, children, ...rest },
-	ref,
-) {
-	return (
-		<button
-			className={cn(buttonVariants({ ...variants, className }))}
-			type="button"
-			{...rest}
-			{...useHoverBackground({ style, onMouseMove })}
-			ref={ref}
-		>
-			{children}
-		</button>
-	);
-});
-
-export const LinkButton = forwardRef<
-	HTMLAnchorElement,
-	React.ComponentPropsWithoutRef<typeof Link> & {
-		variants?: VariantProps<typeof buttonVariants>;
-	}
->(function LinkButton(
-	{ variants, href, className, style, onMouseMove, children, ...rest },
-	ref,
-) {
-	return (
-		<Link
-			unstyled
-			className={cn(buttonVariants({ ...variants, className }))}
-			href={href}
-			{...rest}
-			{...useHoverBackground({ style, onMouseMove })}
-			ref={ref}
-		>
-			{children}
-		</Link>
-	);
-});
+export { Button, buttonVariants };

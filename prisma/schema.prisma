@@ -20,8 +20,7 @@ model User {
 }
 
 model Image {
-  name          String   @id
-  dockerImage   String   @unique
+  dockerImage   String   @id @unique
   friendlyName  String
   supportedArch Arch[]
   category      String[]

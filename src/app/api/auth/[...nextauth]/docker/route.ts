@@ -1,29 +1,25 @@
-import Dockerode from "dockerode";
+import type Dockerode from "dockerode";
+import docker from "@/lib/docker";
+import prisma from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import fetchConfig from "@/lib/fetchConfig";
 
-const docker = new Dockerode({
-	port: process.env.DOCKER_PORT,
-	protocol: "http",
-	host: process.env.DOCKER_HOST,
-});
-async function checkRequest(
-	header: string | null,
-	container: string,
-): Promise<boolean> {
-	const config = await fetchConfig(header);
-	const images: Image[] = await config.images;
-	const containerData = await docker.getContainer(container).inspect();
-	return images.find((img) => img.dockerImage === containerData.Config.Image)
-		? true
-		: false;
+async function checkRequest(container: string): Promise<boolean> {
+	const containerImage = (await docker.getContainer(container).inspect()).Config
+		.Image;
+	const images = await prisma.image.findMany({
+		select: {
+			dockerImage: true,
+		},
+	});
+	const check = images.find((image) => image.dockerImage === containerImage);
+	return !!check;
 }
 export async function POST(req: NextRequest) {
 	const { id } = await req.json();
 	try {
 		const container = docker.getContainer(id);
 		const data = await container.inspect();
-		const check = await checkRequest(req.headers.get("host"), id);
+		const check = await checkRequest(id);
 		if (!check) {
 			return Response.json(
 				{
@@ -41,8 +37,11 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-	const config = await fetchConfig(req.headers.get("host"));
-	const configImages: Image[] = await config.images;
+	const configImages = await prisma.image.findMany({
+		select: {
+			dockerImage: true,
+		},
+	});
 	const { image } = await req.json();
 	const check = configImages.find((img) => img.dockerImage === image);
 	if (!check) {
@@ -85,7 +84,7 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
 	const { id } = await req.json();
 	const container = docker.getContainer(id);
-	const check = await checkRequest(req.headers.get("host"), id);
+	const check = await checkRequest(id);
 	if (!check) {
 		return Response.json(
 			{ error: "Action not allowed; nice try", success: false },
@@ -103,7 +102,7 @@ export async function PATCH(req: NextRequest) {
 	const { id, action }: { id: string; action: keyof Dockerode.Container } =
 		await req.json();
 	const container = docker.getContainer(id);
-	const check = await checkRequest(req.headers.get("host"), id);
+	const check = await checkRequest(id);
 	if (!check) {
 		return Response.json(
 			{ error: "Action not allowed; nice try", success: false },

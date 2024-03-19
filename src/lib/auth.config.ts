@@ -9,36 +9,36 @@ const config: NextAuthOptions = {
 		signOut: "/auth/logout",
 		error: "/auth/error",
 	},
-	// callbacks: {
-	// 	signIn: async ({ profile }) => {
-	// 		const { email, name, sub: id } = profile || {};
-	// 		const userExists = await prisma.user.findFirst({
-	// 			where: {
-	// 				id,
-	// 			},
-	// 		});
-	// 		if (!userExists && id && email) {
-	// 			await prisma.user.create({
-	// 				data: {
-	// 					email,
-	// 					id,
-	// 					name,
-	// 				},
-	// 			});
-	// 		} else {
-	// 			await prisma.user.update({
-	// 				where: {
-	// 					id,
-	// 				},
-	// 				data: {
-	// 					email,
-	// 					name,
-	// 				},
-	// 			});
-	// 		}
-	// 		return true;
-	// 	},
-	// },
+	callbacks: {
+		signIn: async ({ profile }) => {
+			const { email, name, sub: id } = profile || {};
+			const userExists = await prisma.user.findFirst({
+				where: {
+					id,
+				},
+			});
+			if (!userExists && id && email) {
+				await prisma.user.create({
+					data: {
+						email,
+						id,
+						name,
+					},
+				});
+			} else {
+				await prisma.user.update({
+					where: {
+						id,
+					},
+					data: {
+						email,
+						name,
+					},
+				});
+			}
+			return true;
+		},
+	},
 	providers: [
 		Discord({
 			clientId: process.env.DISCORD_ID!,

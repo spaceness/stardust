@@ -1,92 +1,80 @@
-import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
-import animate from "tailwindcss-animate";
-import defaultTheme from "tailwindcss/defaultTheme";
-import color from "tailwindcss/colors";
-const config: Config = {
-	future: { hoverOnlyWhenSupported: true },
+
+const config = {
+	darkMode: ["class"],
 	content: [
-		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+		"./pages/**/*.{ts,tsx}",
+		"./components/**/*.{ts,tsx}",
+		"./app/**/*.{ts,tsx}",
+		"./src/**/*.{ts,tsx}",
 	],
+	prefix: "",
 	theme: {
-		borderRadius: { DEFAULT: "1.25rem", full: "2rem", none: "0" },
-		backdropBlur: { DEFAULT: "12px", lg: "24px" },
-		container: { center: true, padding: "1.5rem" },
-		colors: {
-			text: {
-				primary: "var(--text-primary)",
-				prose: "var(--text-prose)",
-				secondary: "var(--text-secondary)",
-				tertiary: "var(--text-tertiary)",
+		container: {
+			center: true,
+			padding: "2rem",
+			screens: {
+				"2xl": "1400px",
 			},
-			bg: {
-				idle: "var(--bg-idle)",
-				darker: "var(--bg-darker)",
-				hover: "var(--bg-hover)",
-				"darker-hover": "var(--bg-darker-hover)",
-				active: "var(--bg-active)",
-				disabled: "var(--bg-disabled)",
-				default:
-					"linear-gradient(201deg, rgba(0,212,255,1) 1%, rgba(2,0,36,1) 94%);",
-			},
-			separator: "var(--separator)",
-			black: "black",
-			white: "white",
-			transparent: "transparent",
-			current: "currentColor",
-			red: "var(--red)",
-			orange: "var(--orange)",
-			yellow: "var(--yellow)",
-			green: "var(--green)",
-			mint: "var(--mint)",
-			cyan: "var(--cyan)",
-			blue: "var(--blue)",
-			"tw-indigo": color.indigo,
-			"tw-blue": color.blue,
 		},
-		fontFamily: {
-			sans: ["var(--sans)", ...defaultTheme.fontFamily.sans],
-			mono: ["var(--mono)", ...defaultTheme.fontFamily.mono],
-		},
-		transitionDuration: { DEFAULT: "300ms", 600: "600ms" },
 		extend: {
-			spacing: {
-				18: "4.5rem",
-			},
-			typography: {
-				DEFAULT: {
-					css: {
-						"--tw-prose-body": "var(--text-prose)",
-						"--tw-prose-headings": "var(--text-primary)",
-						"--tw-prose-lead": "var(--text-secondary)",
-						"--tw-prose-links": "var(--text-primary)",
-						"--tw-prose-bold": "var(--text-primary)",
-						"--tw-prose-counters": "var(--text-secondary)",
-						"--tw-prose-bullets": "var(--text-secondary)",
-						"--tw-prose-hr": "var(--separator)",
-						"--tw-prose-quotes": "var(--text-primary)",
-						"--tw-prose-quote-borders": "var(--bg-idle)",
-						"--tw-prose-captions": "var(--text-secondary)",
-						"--tw-prose-kbd": "var(--text-primary)",
-						"--tw-prose-kbd-shadows": "var(--bg-idle)",
-						"--tw-prose-code": "var(--text-primary)",
-						"--tw-prose-pre-code": "var(--text-primary)",
-						"--tw-prose-pre-bg": "var(--bg-darker)",
-						"--tw-prose-th-borders": "var(--separator)",
-						"--tw-prose-td-borders": "var(--separator)",
-					},
+			colors: {
+				border: "hsl(var(--border))",
+				input: "hsl(var(--input))",
+				ring: "hsl(var(--ring))",
+				background: "hsl(var(--background))",
+				foreground: "hsl(var(--foreground))",
+				primary: {
+					DEFAULT: "hsl(var(--primary))",
+					foreground: "hsl(var(--primary-foreground))",
+				},
+				secondary: {
+					DEFAULT: "hsl(var(--secondary))",
+					foreground: "hsl(var(--secondary-foreground))",
+				},
+				destructive: {
+					DEFAULT: "hsl(var(--destructive))",
+					foreground: "hsl(var(--destructive-foreground))",
+				},
+				muted: {
+					DEFAULT: "hsl(var(--muted))",
+					foreground: "hsl(var(--muted-foreground))",
+				},
+				accent: {
+					DEFAULT: "hsl(var(--accent))",
+					foreground: "hsl(var(--accent-foreground))",
+				},
+				popover: {
+					DEFAULT: "hsl(var(--popover))",
+					foreground: "hsl(var(--popover-foreground))",
+				},
+				card: {
+					DEFAULT: "hsl(var(--card))",
+					foreground: "hsl(var(--card-foreground))",
 				},
 			},
-			screens: {
-				"blog-lg": "1150px",
+			borderRadius: {
+				lg: "var(--radius)",
+				md: "calc(var(--radius) - 2px)",
+				sm: "calc(var(--radius) - 4px)",
 			},
-			maxWidth: {
-				prose: "700px", // avoid this being influenced by text size
+			keyframes: {
+				"accordion-down": {
+					from: { height: "0" },
+					to: { height: "var(--radix-accordion-content-height)" },
+				},
+				"accordion-up": {
+					from: { height: "var(--radix-accordion-content-height)" },
+					to: { height: "0" },
+				},
+			},
+			animation: {
+				"accordion-down": "accordion-down 0.2s ease-out",
+				"accordion-up": "accordion-up 0.2s ease-out",
 			},
 		},
 	},
-	plugins: [animate, typography],
-};
+	plugins: [require("tailwindcss-animate")],
+} satisfies Config;
 
 export default config;

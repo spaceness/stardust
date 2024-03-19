@@ -1,45 +1,64 @@
 "use client";
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Card } from "@/components/ui/card";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Discord, GitHub } from "@/components/icons";
-
+import { Loader2, Sparkles } from "lucide-react";
 export default function Login() {
-	const loginProviders = [
+	const searchParams = useSearchParams();
+	const [loading, setLoading] = useState(false);
+	const error = searchParams.get("error");
+	const signinProviders: {
+		name: string;
+		icon: JSX.Element;
+		signin: () => void;
+	}[] = [
 		{
-			id: "github",
 			name: "GitHub",
-			signIn: () => signIn("github"),
-			icon: <GitHub className="h-6 w-6" />,
+			icon: <GitHub className="mr-2 size-5" />,
+			signin: () => signIn("github"),
 		},
 		{
-			id: "discord",
 			name: "Discord",
-			signIn: () => signIn("discord"),
-			icon: <Discord className="h-6 w-6" />,
+			icon: <Discord className="mr-2 size-5" />,
+			signin: () => signIn("discord"),
 		},
 	];
 	return (
-		<main className="mx-auto flex min-h-screen items-center justify-center">
-			<Card className="mx-auto flex h-[48rem] w-96 flex-col items-center justify-center p-0">
-				<h2 className="text-3xl font-bold text-text-primary">
-					Login to your account
-				</h2>
-				<section className="flex flex-col items-center justify-center gap-4 p-6">
-					{loginProviders.map((provider) => (
+		<Card className="mx-auto flex h-[28rem] w-96 flex-col items-center justify-center">
+			<CardTitle className="mb-4 flex items-center justify-center text-left text-2xl font-bold">
+				<Sparkles />
+				<span className="ml-2 text-2xl font-bold">Stardust</span>
+			</CardTitle>
+			<CardContent className="m-2 w-full flex-col">
+				{error && (
+					<div className="text-md m-2 rounded-md bg-destructive p-3">
+						There was an error: {error}
+					</div>
+				)}
+				<div className="mx-auto mt-4 flex w-full flex-col items-center justify-center gap-2">
+					{signinProviders.map((provider) => (
 						<Button
-							key={provider.id}
-							onClick={provider.signIn}
-							className="w-full"
+							disabled={loading}
+							key={provider.name}
+							className="my-1 w-full"
+							onClick={() => {
+								setLoading(true);
+								provider.signin();
+							}}
 						>
-							<div className="flex items-center justify-center gap-4">
-								{provider.icon}
-								<span>{provider.name}</span>
-							</div>
+							{loading ? (
+								<Loader2 className="mr-2 h-5 w-5 animate-spin" />
+							) : (
+								provider.icon
+							)}
+							{provider.name}
 						</Button>
 					))}
-				</section>
-			</Card>
-		</main>
+				</div>
+			</CardContent>
+		</Card>
 	);
 }
