@@ -5,9 +5,9 @@ export default function LoginLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<main className="min-h-screen bg-gradient-to-b from-background to-muted">
+		<main className="min-h-screen bg-background bg-dotted-spacing-5 bg-dotted-secondary">
 			<section className="flex min-h-screen items-center justify-center">
-				<Card className="mx-auto flex min-h-72 w-96 flex-col items-center justify-center py-12">
+				<Card className="mx-auto flex min-h-72 w-96 flex-col items-center justify-center bg-foreground/10 py-12 backdrop-blur-md">
 					<CardTitle className="mb-4 flex items-center justify-center text-left text-2xl font-bold">
 						<Sparkles />
 						<span className="ml-2 text-2xl font-bold">Stardust</span>
@@ -15,8 +15,8 @@ export default function LoginLayout({
 					{children}
 				</Card>
 			</section>
-			<div className="fixed bottom-2 right-2">
-				<ModeToggle />
+			<div>
+				<ModeToggle className="fixed bottom-2 right-2 bg-foreground/10 backdrop-blur-md" />
 			</div>
 		</main>
 	);

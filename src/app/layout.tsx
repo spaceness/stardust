@@ -29,7 +29,7 @@ export default async function RootLayout({
 	const session = await getServerSession(authConfig);
 
 	return (
-		<html lang="en" className="dark">
+		<html lang="en" suppressHydrationWarning>
 			<body className={inter.className}>
 				<Session session={session}>
 					<ThemeProvider
