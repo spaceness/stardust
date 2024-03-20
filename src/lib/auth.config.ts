@@ -1,7 +1,6 @@
-import Discord from "next-auth/providers/discord";
 import prisma from "@/lib/prisma";
 import type { NextAuthOptions } from "next-auth";
-import Github from "next-auth/providers/github";
+import Auth0 from "next-auth/providers/auth0";
 const config: NextAuthOptions = {
 	pages: {
 		signIn: "/auth/login",
@@ -12,16 +11,16 @@ const config: NextAuthOptions = {
 	callbacks: {
 		signIn: async ({ profile }) => {
 			const { email, name, sub: id } = profile || {};
-			const userExists = await prisma.user.findFirst({
+			const userExists = await prisma.user.findUnique({
 				where: {
 					id,
 				},
 			});
-			if (!userExists && id && email) {
+			if (!userExists && email && id) {
 				await prisma.user.create({
 					data: {
-						email,
 						id,
+						email,
 						name,
 					},
 				});
@@ -31,8 +30,8 @@ const config: NextAuthOptions = {
 						id,
 					},
 					data: {
-						email,
 						name,
+						email,
 					},
 				});
 			}
@@ -40,13 +39,10 @@ const config: NextAuthOptions = {
 		},
 	},
 	providers: [
-		Discord({
-			clientId: process.env.DISCORD_ID!,
-			clientSecret: process.env.DISCORD_SECRET!,
-		}),
-		Github({
-			clientId: process.env.GITHUB_ID!,
-			clientSecret: process.env.GITHUB_SECRET!,
+		Auth0({
+			clientId: process.env.AUTH0_ID!,
+			clientSecret: process.env.AUTH0_SECRET!,
+			issuer: process.env.AUTH0_ISSUER,
 		}),
 	],
 };
