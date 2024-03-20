@@ -34,7 +34,7 @@ export default function Navigation() {
 		},
 		{
 			label: "Admin",
-			href: "/Dashboard",
+			href: "/dashboard",
 			icon: <Settings />,
 		},
 	];

@@ -2,10 +2,9 @@
 import { useState } from "react";
 import { useSearchParams, redirect } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { CardContent } from "@/components/ui/card";
+import { CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Auth0 } from "@/components/icons";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 export default function Login() {
 	const searchParams = useSearchParams();
 	const [loading, setLoading] = useState(false);
@@ -14,17 +13,6 @@ export default function Login() {
 	if (session) {
 		redirect("/");
 	}
-	const signinProviders: {
-		name: string;
-		icon: JSX.Element;
-		signin: () => void;
-	}[] = [
-		{
-			name: "Auth0",
-			icon: <Auth0 className="mr-2 size-5" />,
-			signin: () => signIn("auth0"),
-		},
-	];
 	return (
 		<CardContent className="m-2 w-full flex-col">
 			{error && (
@@ -33,24 +21,21 @@ export default function Login() {
 				</div>
 			)}
 			<div className="mx-auto mt-4 flex w-full flex-col items-center justify-center gap-2">
-				{signinProviders.map((provider) => (
-					<Button
-						disabled={loading}
-						key={provider.name}
-						className="my-1 w-full"
-						onClick={() => {
-							setLoading(true);
-							provider.signin();
-						}}
-					>
-						{loading ? (
-							<Loader2 className="mr-2 h-5 w-5 animate-spin" />
-						) : (
-							provider.icon
-						)}
-						{provider.name}
-					</Button>
-				))}
+				<Button
+					disabled={loading}
+					className="my-1 w-full"
+					onClick={() => {
+						setLoading(true);
+						signIn("auth0");
+					}}
+				>
+					{loading ? (
+						<Loader2 className="mr-2 h-5 w-5 animate-spin" />
+					) : (
+						<LogIn className="mr-2 size-4" />
+					)}
+					{loading ? "Logging in" : "Log in with Auth0"}
+				</Button>
 			</div>
 		</CardContent>
 	);
