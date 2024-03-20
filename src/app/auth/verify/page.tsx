@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Card, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { getServerSession } from "next-auth";
 import config from "@/lib/auth.config";
 import { Mail } from "lucide-react";
@@ -9,9 +9,9 @@ export default async function EmailVerify() {
 		redirect("/");
 	}
 	return (
-		<Card className="mx-auto flex h-[28rem] w-96 flex-col items-center justify-center">
+		<>
 			<CardTitle className="mx-auto mb-2 flex flex-col items-center justify-center">
-				<Mail className="h-12 w-12" />
+				<Mail className="mb-10 h-12 w-12" />
 				Verify your email
 			</CardTitle>
 			<CardContent>
@@ -21,11 +21,10 @@ export default async function EmailVerify() {
 				</p>
 			</CardContent>
 			<CardFooter>
-				<p className="text-center text-sm">
-					If you haven&apos;t received the email, please check your spam folder
-					or click the button below to resend the email.
+				<p className="text-center text-sm text-muted-foreground">
+					If you haven&apos;t received the email, please check your spam folder.
 				</p>
 			</CardFooter>
-		</Card>
+		</>
 	);
 }
