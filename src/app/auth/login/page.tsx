@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { useSearchParams, redirect } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { CardContent, CardHeader } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, LogIn } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, LogIn, AlertCircle } from "lucide-react";
 export default function Login() {
 	const searchParams = useSearchParams();
 	const [loading, setLoading] = useState(false);
@@ -16,9 +17,11 @@ export default function Login() {
 	return (
 		<CardContent className="m-2 w-full flex-col">
 			{error && (
-				<div className="text-md rounded-md bg-destructive p-3 text-destructive-foreground">
-					There was an error: {error}
-				</div>
+				<Alert variant="destructive" className="w-full text-destructive">
+					<AlertCircle className="h-4 w-4" />
+					<AlertTitle>Error logging in:</AlertTitle>
+					<AlertDescription>{error}</AlertDescription>
+				</Alert>
 			)}
 			<div className="mx-auto mt-4 flex w-full flex-col items-center justify-center gap-2">
 				<Button

@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@novnc/novnc':
+    specifier: ^1.4.0
+    version: 1.4.0
   '@prisma/client':
     specifier: 5.11.0
     version: 5.11.0(prisma@5.11.0)
@@ -68,6 +71,9 @@ dependencies:
   react-dom:
     specifier: ^18.2.0
     version: 18.2.0(react@18.2.0)
+  server-only:
+    specifier: ^0.0.1
+    version: 0.0.1
   tailwind-merge:
     specifier: ^2.2.2
     version: 2.2.2
@@ -79,6 +85,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.11.30
     version: 20.11.30
+  '@types/novnc__novnc':
+    specifier: ^1.3.4
+    version: 1.3.4
   '@types/react':
     specifier: ^18.2.67
     version: 18.2.67
@@ -364,6 +373,10 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.17.1
+
+  /@novnc/novnc@1.4.0:
+    resolution: {integrity: sha512-kW6ALMc5BuH08e/ond/I1naYcfjc19JYMN1EdtmgjjjzPGCjW8fMtVM3MwM6q7YLRjPlQ3orEvoKMgSS7RkEVQ==}
+    dev: false
 
   /@panva/hkdf@1.1.1:
     resolution: {integrity: sha512-dhPeilub1NuIG0X5Kvhh9lH4iW3ZsHlnzwgwbOlgwQ2wG1IqFzsgHqmKPk3WzsdWAeaxKJxgM0+W433RmN45GA==}
@@ -1076,6 +1089,10 @@ packages:
     resolution: {integrity: sha512-dHM6ZxwlmuZaRmUPfv1p+KrdD1Dci04FbdEm/9wEMouFqxYoFl5aMkt0VMAUtYRQDyYvD41WJLukhq/ha3YuTw==}
     dependencies:
       undici-types: 5.26.5
+
+  /@types/novnc__novnc@1.3.4:
+    resolution: {integrity: sha512-JseVFIc9bm6IV2TkHi/oL4tr3anYeOw2BXX44HgqdRnRCaimz/nfZDWCyylK/OsJIfLzcchLLf2pxevYMNXFbQ==}
+    dev: true
 
   /@types/prop-types@15.7.11:
     resolution: {integrity: sha512-ga8y9v9uyeiLdpKddhxYQkxNDrfvuPrlFb0N1qnZZByvcElJaXthF1UhvCh9TLWJBEHeNtdnbysW7Y6Uq8CVng==}
@@ -3783,6 +3800,10 @@ packages:
     resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
     dependencies:
       randombytes: 2.1.0
+    dev: false
+
+  /server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
     dev: false
 
   /set-function-length@1.2.2:

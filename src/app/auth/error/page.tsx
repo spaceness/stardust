@@ -14,7 +14,7 @@ export default function AuthError() {
 				{error && (
 					<span>
 						<br />
-						<span className="font-bold text-red-400">{error}</span>
+						<span className="font-bold text-destructive">{error}</span>
 					</span>
 				)}
 			</CardHeader>

@@ -12,7 +12,7 @@ export default async function Dashboard() {
 				<section className="flex flex-wrap justify-center gap-1">
 					<Suspense
 						fallback={
-							<Skeleton className="m-2 flex h-48 w-[24rem] items-center gap-2 bg-secondary p-2 md:w-[96rem]" />
+							<Skeleton className="m-2 flex h-56 w-[96rem] flex-col items-center justify-start gap-2 md:w-56 md:flex-row" />
 						}
 					>
 						{images.map((image, key) => (
