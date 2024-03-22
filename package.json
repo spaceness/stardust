@@ -3,16 +3,15 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"postinstall": "prisma generate",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"drizzle-kit": "drizzle-kit"
 	},
 	"dependencies": {
 		"@novnc/novnc": "^1.4.0",
-		"@prisma/client": "5.11.0",
 		"@radix-ui/react-avatar": "^1.0.4",
 		"@radix-ui/react-dropdown-menu": "^2.0.6",
 		"@radix-ui/react-navigation-menu": "^1.1.4",
@@ -22,15 +21,19 @@
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.0",
 		"dockerode": "^4.0.2",
+		"dotenv": "^16.4.5",
+		"drizzle-orm": "^0.30.4",
 		"lucide-react": "^0.358.0",
 		"next": "14.1.4",
-		"next-auth": "^4.24.7",
+		"next-auth": "4.24.7",
 		"next-themes": "^0.3.0",
 		"node-loader": "^2.0.0",
+		"pg": "^8.11.3",
+		"pg-native": "^3.0.1",
+		"postgres": "^3.4.4",
 		"prettier": "^3.2.5",
 		"prettier-plugin-prisma": "^5.0.0",
 		"prettier-plugin-tailwindcss": "^0.5.12",
-		"prisma": "^5.11.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"server-only": "^0.0.1",
@@ -40,14 +43,16 @@
 	"devDependencies": {
 		"@types/node": "^20.11.30",
 		"@types/novnc__novnc": "^1.3.4",
+		"@types/pg": "^8.11.4",
 		"@types/react": "^18.2.67",
 		"@types/react-dom": "^18.2.22",
-		"autoprefixer": "^10.4.18",
+		"autoprefixer": "^10.4.19",
+		"drizzle-kit": "^0.20.14",
 		"eslint": "^8.57.0",
 		"eslint-config-next": "14.1.4",
-		"postcss": "^8.4.37",
+		"postcss": "^8.4.38",
 		"tailwindcss": "^3.4.1",
 		"tailwindcss-dotted-background": "^1.1.0",
-		"typescript": "^5.4.2"
+		"typescript": "^5.4.3"
 	}
 }

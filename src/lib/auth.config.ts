@@ -1,7 +1,8 @@
-import prisma from "@/lib/prisma";
-import type { NextAuthOptions } from "next-auth";
+import { db } from "@/lib/drizzle/db";
+import { user } from "@/lib/drizzle/schema";
+import { NextAuthOptions } from "next-auth";
 import Auth0 from "next-auth/providers/auth0";
-const config: NextAuthOptions = {
+const authConfig: NextAuthOptions = {
 	pages: {
 		signIn: "/auth/login",
 		verifyRequest: "/auth/verify",
@@ -11,29 +12,11 @@ const config: NextAuthOptions = {
 	callbacks: {
 		signIn: async ({ profile }) => {
 			const { email, name, sub: id } = profile || {};
-			const userExists = await prisma.user.findUnique({
-				where: {
-					id,
-				},
-			});
-			if (!userExists && email && id) {
-				await prisma.user.create({
-					data: {
-						id,
-						email,
-						name,
-					},
-				});
-			} else {
-				await prisma.user.update({
-					where: {
-						id,
-					},
-					data: {
-						name,
-						email,
-					},
-				});
+			if (email && id) {
+				await db
+					.insert(user)
+					.values({ id, email, name })
+					.onConflictDoUpdate({ target: user.id, set: { name, email } });
 			}
 			return true;
 		},
@@ -46,4 +29,4 @@ const config: NextAuthOptions = {
 		}),
 	],
 };
-export default config;
+export default authConfig;

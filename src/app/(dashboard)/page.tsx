@@ -1,11 +1,12 @@
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle/db";
+import { image } from "@/lib/drizzle/schema";
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 export default async function Dashboard() {
-	const images = await prisma.image.findMany();
+	const images = await db.select().from(image);
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<div className="m-auto flex w-full max-w-5xl flex-col">

@@ -1,7 +1,11 @@
 import { withAuth } from "next-auth/middleware";
-import authConfig from "@/lib/auth.config";
 export default withAuth({
-	pages: authConfig.pages,
+	pages: {
+		signIn: "/auth/login",
+		verifyRequest: "/auth/verify",
+		signOut: "/auth/logout",
+		error: "/auth/error",
+	},
 });
 export const config = {
 	matcher: [
