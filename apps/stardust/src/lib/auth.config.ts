@@ -1,5 +1,5 @@
-import { db } from "stardust-drizzle";
-import { user } from "stardust-drizzle";
+import { db } from "@repo/drizzle";
+import { user } from "@repo/drizzle";
 import { NextAuthOptions } from "next-auth";
 import Auth0 from "next-auth/providers/auth0";
 const authConfig: NextAuthOptions = {

@@ -1,5 +1,5 @@
-import { db } from "stardust-drizzle";
-import { image } from "stardust-drizzle";
+import { db } from "@repo/drizzle";
+import { image } from "@repo/drizzle";
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
