@@ -91,9 +91,6 @@ importers:
       '@radix-ui/react-toast':
         specifier: ^1.1.5
         version: 1.1.5(@types/react-dom@18.2.22)(@types/react@18.2.70)(react-dom@18.2.0)(react@18.2.0)
-      '@repo/drizzle':
-        specifier: workspace:*
-        version: link:../../packages/drizzle
       '@types/dockerode':
         specifier: ^3.3.26
         version: 3.3.26
@@ -139,6 +136,9 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
+      stardust-drizzle:
+        specifier: workspace:drizzle
+        version: link:../../packages/drizzle
       tailwind-merge:
         specifier: ^2.2.2
         version: 2.2.2
