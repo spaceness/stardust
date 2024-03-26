@@ -3,6 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
+	"postinstall": "pnpm dlx next-ws-cli@latest patch",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
@@ -27,6 +28,7 @@
 		"next": "14.1.4",
 		"next-auth": "4.24.7",
 		"next-themes": "^0.3.0",
+		"next-ws": "^1.0.1",
 		"node-loader": "^2.0.0",
 		"pg": "^8.11.3",
 		"pg-native": "^3.0.1",
@@ -38,7 +40,8 @@
 		"react-dom": "^18.2.0",
 		"server-only": "^0.0.1",
 		"tailwind-merge": "^2.2.2",
-		"tailwindcss-animate": "^1.0.7"
+		"tailwindcss-animate": "^1.0.7",
+		"ws": "^8.16.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20.11.30",

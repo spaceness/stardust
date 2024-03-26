@@ -1,4 +1,5 @@
 // @ts-check
+import("next-ws/server/index.js").then(({ verifyPatch }) => verifyPatch());
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
