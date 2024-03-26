@@ -3,13 +3,14 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-	"postinstall": "pnpm dlx next-ws-cli@latest patch",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
 		"format": "prettier --write .",
-		"drizzle-kit": "drizzle-kit"
+		"drizzle-kit": "drizzle-kit",
+		"db:push": "drizzle-kit push:pg",
+		"postinstall": "pnpm dlx next-ws-cli@latest patch"
 	},
 	"dependencies": {
 		"@novnc/novnc": "^1.4.0",
@@ -49,6 +50,7 @@
 		"@types/pg": "^8.11.4",
 		"@types/react": "^18.2.67",
 		"@types/react-dom": "^18.2.22",
+		"@types/ws": "^8.5.10",
 		"autoprefixer": "^10.4.19",
 		"drizzle-kit": "^0.20.14",
 		"eslint": "^8.57.0",

@@ -4,6 +4,7 @@ import {
 	text,
 	boolean,
 	timestamp,
+	integer,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable(
@@ -24,6 +25,7 @@ export const user = pgTable(
 export const session = pgTable("Session", {
 	id: text("id").primaryKey().notNull(),
 	dockerImage: text("dockerImage").notNull(),
+	vncPort: integer("vncPort").notNull(),
 	createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
 		.defaultNow()
 		.notNull(),

@@ -16,6 +16,6 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - icon.svg (favicon file)
 		 */
-		"/((?!_next/static|_next/image|icon.svg).*)",
+		"/((?!_next/static|_next/image|icon.svg|api/websockify).*)",
 	],
 };

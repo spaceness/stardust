@@ -124,18 +124,6 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 		onCapabilities,
 	} = props;
 
-	const logger = {
-		log: (...args: any[]) => {
-			if (debug) console.log(...args);
-		},
-		info: (...args: any[]) => {
-			if (debug) console.info(...args);
-		},
-		error: (...args: any[]) => {
-			if (debug) console.error(...args);
-		},
-	};
-
 	const getRfb = () => {
 		return rfb.current;
 	};
@@ -160,7 +148,7 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 			return;
 		}
 
-		logger.info("Connected to remote VNC.");
+		console.log("Connected to remote VNC.");
 		setLoading(false);
 	};
 
@@ -174,13 +162,13 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 
 		const connected = getConnected();
 		if (connected) {
-			logger.info(
+			console.log(
 				`Unexpectedly disconnected from remote VNC, retrying in ${retryDuration / 1000} seconds.`,
 			);
 
 			timeouts.current.push(setTimeout(connect, retryDuration));
 		} else {
-			logger.info(`Disconnected from remote VNC.`);
+			console.log(`Disconnected from remote VNC.`);
 		}
 		setLoading(true);
 	};
@@ -209,7 +197,7 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 			return;
 		}
 
-		logger.info(`Desktop name is ${e.detail.name}`);
+		console.log(`Desktop name is ${e.detail.name}`);
 	};
 
 	const disconnect = () => {
@@ -242,7 +230,7 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 			// event is not fired.
 			_onDisconnect();
 		} catch (err) {
-			logger.error(err);
+			console.error(err);
 			setRfb(null);
 			setConnected(false);
 		}
