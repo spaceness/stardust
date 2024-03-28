@@ -5,7 +5,7 @@ import { CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, ChevronLeft } from "lucide-react";
 export default function SignOut() {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
@@ -33,6 +33,15 @@ export default function SignOut() {
 					<Loader2 className="mr-2 h-5 w-5 animate-spin" />
 				)}
 				{loading ? "Logging out" : "Log out"}
+			</Button>
+			<Button
+				disabled={loading}
+				variant="outline"
+				className="mt-4 w-full bg-background/50 transition-all duration-200 hover:bg-background/65"
+				onClick={() => router.back()}
+			>
+				<ChevronLeft className="mr-2 size-4" />
+				Go back
 			</Button>
 		</CardContent>
 	);

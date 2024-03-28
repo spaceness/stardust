@@ -6,17 +6,17 @@ const VncScreen = dynamic(() => import("@/components/vnc-screen"), {
 });
 export default function View() {
 	return (
-		<div className="flex h-full w-full items-center justify-center">
+		<div className="flex items-center justify-center">
 			<VncScreen
-				url={`ws://localhost:3001/api/websockify/jrbfru}`}
+				url={`wss://tgtair.tail5e492.ts.net/api/websockify/jrbfru}`}
+				className="scale-25 [&>*]:scale-25 mt-36 [&>*]:mt-36"
 				rfbOptions={{
 					credentials: {
-						password: "stardustVnc123",
+						password: "vncpassword",
 						username: "",
 						target: "",
 					},
 				}}
-				className="mt-36 flex h-full w-full items-center justify-center"
 			/>
 		</div>
 	);

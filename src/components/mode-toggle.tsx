@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { SwatchBook } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -10,32 +10,42 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
+	DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 export default function ModeToggle({
 	className,
 }: Readonly<{ className?: string }>) {
-	const { setTheme } = useTheme();
+	const { themes, setTheme } = useTheme();
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger asChild className={className}>
-				<Button variant="outline" size="icon">
-					<Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-					<Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-					<span className="sr-only">Toggle theme</span>
-				</Button>
-			</DropdownMenuTrigger>
+			<TooltipProvider>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<DropdownMenuTrigger asChild className={className}>
+							<Button variant="outline" size="icon">
+								<SwatchBook className="h-[1.2rem] w-[1.2rem] transition-all" />
+								<span className="sr-only">Toggle theme</span>
+							</Button>
+						</DropdownMenuTrigger>
+					</TooltipTrigger>
+					<TooltipContent>Themes</TooltipContent>
+				</Tooltip>
+			</TooltipProvider>
+
 			<DropdownMenuContent align="end">
-				<DropdownMenuItem onClick={() => setTheme("light")}>
-					Light
-				</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme("dark")}>
-					Dark
-				</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme("system")}>
-					System
-				</DropdownMenuItem>
+				<DropdownMenuLabel>Themes</DropdownMenuLabel>
+				{themes.map((theme) => (
+					<DropdownMenuItem key={theme} onClick={() => setTheme(theme)}>
+						{theme.charAt(0).toUpperCase() + theme.slice(1)}
+					</DropdownMenuItem>
+				))}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

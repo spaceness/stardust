@@ -1,17 +1,26 @@
 import net from "net";
-export function GET() {
-	return Response.json({ message: "Hello, World!" });
+import type { WebSocket, WebSocketServer } from "ws";
+import { getSession } from "next-auth/react";
+import { IncomingMessage } from "http";
+export async function GET() {
+	return new Response("Hello World");
 }
-export function SOCKET(
-	ws: import("ws").WebSocket,
-	_request: import("http").IncomingMessage,
-	_server: import("ws").WebSocketServer,
+export async function SOCKET(
+	ws: WebSocket,
+	request: IncomingMessage,
+	_server: WebSocketServer,
 ) {
+	const session = await getSession({
+		req: request,
+	});
+	if (!session) {
+		ws.close();
+		return;
+	}
 	const tcpSocket = net.connect(5901, "localhost");
 	ws.on("message", (message: Uint8Array) => {
 		tcpSocket.write(message);
 	});
-
 	ws.on("close", (code, reason) => {
 		console.log(`Connection closed due to ${reason} with code ${code}`);
 		tcpSocket.end();

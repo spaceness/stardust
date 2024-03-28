@@ -1,30 +1,27 @@
 "use client";
-import React, {
+import {
 	forwardRef,
 	useEffect,
 	useImperativeHandle,
 	useRef,
 	useState,
+	ForwardRefRenderFunction,
+	ReactNode,
 } from "react";
-import RFB, { NoVncOptions } from "@novnc/novnc/core/rfb";
+import RFB, {
+	NoVncOptions,
+	NoVncCredentials,
+	NoVncEvents,
+} from "@novnc/novnc/core/rfb";
 
-export interface RFBOptions {
-	shared: boolean;
-	credentials: {
-		username: string;
-		password: string;
-		target: string;
-	};
-	repeaterID: string;
-	wsProtocols: string | string[];
-}
+export type rfbOptions = Partial<NoVncOptions>;
 
-export interface Props {
+export type VncViewerProps = {
 	url: string;
 	style?: object;
 	className?: string;
 	viewOnly?: boolean;
-	rfbOptions?: NoVncOptions;
+	rfbOptions?: rfbOptions;
 	focusOnClick?: boolean;
 	clipViewport?: boolean;
 	dragViewport?: boolean;
@@ -37,7 +34,7 @@ export interface Props {
 	autoConnect?: boolean;
 	retryDuration?: number;
 	debug?: boolean;
-	loadingUI?: React.ReactNode;
+	loader?: ReactNode;
 	onConnect?: (rfb?: RFB) => void;
 	onDisconnect?: (rfb?: RFB) => void;
 	onCredentialsRequired?: (rfb?: RFB) => void;
@@ -50,28 +47,13 @@ export interface Props {
 	onCapabilities?: (e?: {
 		detail: { capabilities: RFB["capabilities"] };
 	}) => void;
-}
-
-export enum Events {
-	connect,
-	disconnect,
-	credentialsrequired,
-	securityfailure,
-	clipboard,
-	bell,
-	desktopname,
-	capabilities,
-}
-
-export type EventListeners = {
-	-readonly [key in keyof typeof Events]?: (e?: any) => void;
 };
 
-export type VncScreenHandle = {
+export type VncViewerHandle = {
 	connect: () => void;
 	disconnect: () => void;
 	connected: boolean;
-	sendCredentials: (credentials: RFBOptions["credentials"]) => void;
+	sendCredentials: (credentials: NoVncCredentials) => void;
 	sendKey: (keysym: number, code: string, down?: boolean) => void;
 	sendCtrlAltDel: () => void;
 	focus: () => void;
@@ -84,18 +66,22 @@ export type VncScreenHandle = {
 	eventListeners: EventListeners;
 };
 
-const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
-	props,
-	ref,
-) => {
-	const rfb = useRef<RFB | null>(null);
-	const connected = useRef<boolean>(props.autoConnect ?? true);
-	const timeouts = useRef<Array<NodeJS.Timeout>>([]);
-	const eventListeners = useRef<EventListeners>({});
-	const screen = useRef<HTMLDivElement>(null);
-	const [loading, setLoading] = useState<boolean>(true);
+export type EventListeners = {
+	-readonly [key in keyof typeof Events]?: (e?: any) => void;
+};
 
-	const {
+export enum Events {
+	connect,
+	disconnect,
+	credentialsrequired,
+	securityfailure,
+	clipboard,
+	bell,
+	desktopname,
+	capabilities,
+}
+const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
+	{
 		url,
 		style,
 		className,
@@ -113,7 +99,7 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 		autoConnect = true,
 		retryDuration = 3000,
 		debug = false,
-		loadingUI,
+		loader,
 		onConnect,
 		onDisconnect,
 		onCredentialsRequired,
@@ -122,115 +108,118 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 		onBell,
 		onDesktopName,
 		onCapabilities,
-	} = props;
+	},
+	ref,
+) => {
+	const rfb = useRef<RFB | null>(null);
+	const connected = useRef<boolean>(autoConnect);
+	const timeouts = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+	const eventListeners = useRef<EventListeners>({});
+	const screen = useRef<HTMLDivElement>(null);
+	const [loading, setLoading] = useState<boolean>(true);
 
-	const getRfb = () => {
-		return rfb.current;
+	const logger = {
+		log: (...args: any[]) => {
+			if (debug) console.log(...args);
+		},
+		info: (...args: any[]) => {
+			if (debug) console.info(...args);
+		},
+		error: (...args: any[]) => {
+			if (debug) console.error(...args);
+		},
 	};
 
-	const setRfb = (_rfb: RFB | null) => {
-		rfb.current = _rfb;
-	};
+	const getRfb = () => rfb.current;
 
-	const getConnected = () => {
-		return connected.current;
-	};
+	const setRfb = (_rfb: RFB | null) => (rfb.current = _rfb);
 
-	const setConnected = (state: boolean) => {
-		connected.current = state;
-	};
+	const getConnected = () => connected.current;
+
+	const setConnected = (state: boolean) => (connected.current = state);
 
 	const _onConnect = () => {
 		const rfb = getRfb();
+
 		if (onConnect) {
 			onConnect(rfb ?? undefined);
 			setLoading(false);
-			return;
 		}
 
-		console.log("Connected to remote VNC.");
+		logger.info("Connected to remote VNC.");
 		setLoading(false);
 	};
 
 	const _onDisconnect = () => {
 		const rfb = getRfb();
+
 		if (onDisconnect) {
 			onDisconnect(rfb ?? undefined);
 			setLoading(true);
-			return;
 		}
 
 		const connected = getConnected();
+
 		if (connected) {
-			console.log(
+			logger.info(
 				`Unexpectedly disconnected from remote VNC, retrying in ${retryDuration / 1000} seconds.`,
 			);
 
 			timeouts.current.push(setTimeout(connect, retryDuration));
 		} else {
-			console.log(`Disconnected from remote VNC.`);
+			logger.info("Disconnected from remote VNC.");
 		}
+
 		setLoading(true);
 	};
 
 	const _onCredentialsRequired = () => {
 		const rfb = getRfb();
-		if (onCredentialsRequired) {
-			onCredentialsRequired(rfb ?? undefined);
-			return;
-		}
-		const username =
-			rfbOptions?.credentials?.username ?? prompt("Username Required:");
+
+		if (onCredentialsRequired) onCredentialsRequired(rfb ?? undefined);
+
 		const password =
 			rfbOptions?.credentials?.password ?? prompt("Password Required:");
-		const target = rfbOptions?.credentials?.target;
-		rfb?.sendCredentials({
-			password: password!,
-			username: username!,
-			target: target!,
-		});
+
+		if (password)
+			rfb?.sendCredentials({ password: password } as NoVncCredentials);
 	};
 
 	const _onDesktopName = (e: { detail: { name: string } }) => {
-		if (onDesktopName) {
-			onDesktopName(e);
-			return;
-		}
+		if (onDesktopName) onDesktopName(e);
 
-		console.log(`Desktop name is ${e.detail.name}`);
+		logger.info(`Desktop name is ${e.detail.name}`);
 	};
 
 	const disconnect = () => {
-		const rfb = getRfb();
-		try {
-			if (!rfb) {
-				return;
-			}
+		let rfb = getRfb();
 
-			timeouts.current.forEach(clearTimeout);
-			(Object.keys(eventListeners.current) as (keyof typeof Events)[]).forEach(
-				(event) => {
+		try {
+			if (rfb) {
+				timeouts.current.forEach((id) => clearTimeout(id));
+				(
+					Object.keys(eventListeners.current) as (keyof typeof Events)[]
+				).forEach((event) => {
 					if (eventListeners.current[event]) {
-						rfb.removeEventListener(
+						rfb?.removeEventListener(
 							event,
-							eventListeners.current[event] as (
-								event: CustomEvent<any>,
-							) => void,
+							eventListeners.current[event] as any,
 						);
 						eventListeners.current[event] = undefined;
 					}
-				},
-			);
-			rfb.disconnect();
-			setRfb(null);
-			setConnected(false);
+				});
+				rfb.disconnect();
+				rfb = null;
+				setRfb(null);
+				setConnected(false);
 
-			// NOTE(roerohan): This needs to be called since the event listener is removed.
-			// Even if the event listener is removed after rfb.disconnect(), the disconnect
-			// event is not fired.
-			_onDisconnect();
-		} catch (err) {
-			console.error(err);
+				// NOTE: This needs to be called since the event listener is removed.
+				// Even if the event listener is removed after rfb.disconnect(), the disconnect
+				// event is not fired.
+				_onDisconnect();
+			}
+		} catch (error) {
+			logger.error(error);
 			setRfb(null);
 			setConnected(false);
 		}
@@ -238,59 +227,52 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 
 	const connect = () => {
 		try {
-			if (connected && !!rfb) {
-				disconnect();
-			}
+			if (connected && !!rfb) disconnect();
 
-			if (!screen.current) {
-				return;
-			}
+			if (screen.current) {
+				screen.current.innerHTML = "";
 
-			screen.current.innerHTML = "";
+				const _rfb = new RFB(screen.current, url, rfbOptions);
 
-			const _rfb = new RFB(screen.current, url, rfbOptions);
+				_rfb.viewOnly = viewOnly ?? false;
+				_rfb.focusOnClick = focusOnClick ?? false;
+				_rfb.clipViewport = clipViewport ?? false;
+				_rfb.dragViewport = dragViewport ?? false;
+				_rfb.resizeSession = resizeSession ?? false;
+				_rfb.scaleViewport = scaleViewport ?? false;
+				_rfb.showDotCursor = showDotCursor ?? false;
+				_rfb.background = background ?? "";
+				_rfb.qualityLevel = qualityLevel ?? 6;
+				_rfb.compressionLevel = compressionLevel ?? 2;
+				setRfb(_rfb);
 
-			_rfb.viewOnly = viewOnly ?? false;
-			_rfb.focusOnClick = focusOnClick ?? false;
-			_rfb.clipViewport = clipViewport ?? false;
-			_rfb.dragViewport = dragViewport ?? false;
-			_rfb.resizeSession = resizeSession ?? false;
-			_rfb.scaleViewport = scaleViewport ?? false;
-			_rfb.showDotCursor = showDotCursor ?? false;
-			_rfb.background = background ?? "";
-			_rfb.qualityLevel = qualityLevel ?? 6;
-			_rfb.compressionLevel = compressionLevel ?? 2;
-			setRfb(_rfb);
-
-			eventListeners.current.connect = _onConnect;
-			eventListeners.current.disconnect = _onDisconnect;
-			eventListeners.current.credentialsrequired = _onCredentialsRequired;
-			eventListeners.current.securityfailure = onSecurityFailure;
-			eventListeners.current.clipboard = onClipboard;
-			eventListeners.current.bell = onBell;
-			eventListeners.current.desktopname = _onDesktopName;
-			eventListeners.current.capabilities = onCapabilities;
-
-			(Object.keys(eventListeners.current) as (keyof typeof Events)[]).forEach(
-				(event) => {
+				eventListeners.current.connect = _onConnect;
+				eventListeners.current.disconnect = _onDisconnect;
+				eventListeners.current.credentialsrequired = _onCredentialsRequired;
+				eventListeners.current.securityfailure = onSecurityFailure;
+				eventListeners.current.clipboard = onClipboard;
+				eventListeners.current.bell = onBell;
+				eventListeners.current.desktopname = _onDesktopName;
+				eventListeners.current.capabilities = onCapabilities;
+				(
+					Object.keys(eventListeners.current) as (keyof typeof Events)[]
+				).forEach((event) => {
 					if (eventListeners.current[event]) {
 						_rfb.addEventListener(
-							event,
-							eventListeners.current[event] as (
-								event: CustomEvent<any>,
-							) => void,
+							event as keyof NoVncEvents,
+							eventListeners.current[event] as any,
 						);
 					}
-				},
-			);
+				});
 
-			setConnected(true);
-		} catch (err) {
-			logger.error(err);
+				setConnected(true);
+			}
+		} catch (error) {
+			logger.error(error);
 		}
 	};
 
-	const sendCredentials = (credentials: RFBOptions["credentials"]) => {
+	const sendCredentials = (credentials: NoVncCredentials) => {
 		const rfb = getRfb();
 		rfb?.sendCredentials(credentials);
 	};
@@ -353,9 +335,7 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 	}));
 
 	useEffect(() => {
-		if (autoConnect) {
-			connect();
-		}
+		if (autoConnect) connect();
 
 		return disconnect;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -363,46 +343,37 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (
 
 	const handleClick = () => {
 		const rfb = getRfb();
-		if (!rfb) return;
 
-		rfb.focus();
+		if (rfb) rfb.focus();
 	};
 
 	const handleMouseEnter = () => {
-		if (
-			document.activeElement &&
-			document.activeElement instanceof HTMLElement
-		) {
+		if (document.activeElement && document.activeElement instanceof HTMLElement)
 			document.activeElement.blur();
-		}
 
 		handleClick();
 	};
 
 	const handleMouseLeave = () => {
 		const rfb = getRfb();
-		if (!rfb) {
-			return;
-		}
 
-		rfb.blur();
+		if (rfb) rfb.blur();
 	};
 
 	return (
 		<>
-			<div
-				style={style}
-				className={className}
-				ref={screen}
-				onMouseEnter={handleMouseEnter}
-				onMouseLeave={handleMouseLeave}
-			/>
-			{loading &&
-				(loadingUI ?? (
-					<div className="loading text-foreground">Loading...</div>
-				))}
+			{(loading || !url) && (loader ?? <p>Loading...</p>)}
+			{url && (
+				<div
+					style={style}
+					className={className}
+					ref={screen}
+					onMouseEnter={handleMouseEnter}
+					onMouseLeave={handleMouseLeave}
+				/>
+			)}
 		</>
 	);
 };
 
-export default forwardRef(VncScreen);
+export default forwardRef(VncViewer);
