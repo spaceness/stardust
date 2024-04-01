@@ -8,15 +8,8 @@ export default function View() {
 	return (
 		<div className="flex items-center justify-center">
 			<VncScreen
-				url={`wss://tgtair.tail5e492.ts.net/api/websockify/jrbfru}`}
+				url={`ws://localhost:3000/api/websockify/jrbfru}`}
 				className="scale-25 [&>*]:scale-25 mt-36 [&>*]:mt-36"
-				rfbOptions={{
-					credentials: {
-						password: "vncpassword",
-						username: "",
-						target: "",
-					},
-				}}
 			/>
 		</div>
 	);

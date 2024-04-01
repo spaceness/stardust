@@ -17,7 +17,7 @@ export async function SOCKET(
 		ws.close();
 		return;
 	}
-	const tcpSocket = net.connect(5901, "localhost");
+	const tcpSocket = net.connect(5900, "localhost");
 	ws.on("message", (message: Uint8Array) => {
 		tcpSocket.write(message);
 	});
