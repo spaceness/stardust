@@ -3,7 +3,6 @@ import {
 	uniqueIndex,
 	text,
 	boolean,
-	timestamp,
 	integer,
 } from "drizzle-orm/pg-core";
 
@@ -26,10 +25,8 @@ export const session = pgTable("Session", {
 	id: text("id").primaryKey().notNull(),
 	dockerImage: text("dockerImage").notNull(),
 	vncPort: integer("vncPort").notNull(),
-	createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
-		.defaultNow()
-		.notNull(),
-	expiresAt: timestamp("expiresAt", { precision: 3, mode: "string" }).notNull(),
+	createdAt: text("createdAt").notNull(),
+	expiresAt: text("expiresAt").notNull(),
 	userId: text("userId")
 		.notNull()
 		.references(() => user.id, { onDelete: "restrict", onUpdate: "cascade" }),

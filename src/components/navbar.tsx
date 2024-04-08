@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ModeToggle from "./mode-toggle";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ComputerIcon, Settings, Sparkles } from "lucide-react";
 export default function Navigation() {
@@ -39,7 +40,7 @@ export default function Navigation() {
 		},
 	];
 	return (
-		<div className="fixed flex h-16 min-w-full items-center justify-between border-b bg-background/90 px-6 backdrop-blur-md">
+		<div className="fixed mb-16 flex h-16 min-w-full items-center justify-between border-b bg-background/90 px-6 backdrop-blur-md">
 			<div className="flex items-center justify-start">
 				<Sparkles />
 				<span className="ml-2 mr-4 text-2xl font-bold">Stardust</span>
@@ -49,7 +50,10 @@ export default function Navigation() {
 							<NavigationMenuItem key={index}>
 								<Link href={item.href} legacyBehavior passHref>
 									<NavigationMenuLink
-										className={navigationMenuTriggerStyle() + " bg-transparent"}
+										className={cn(
+											navigationMenuTriggerStyle(),
+											"bg-transparent",
+										)}
 									>
 										<span className="mr-2 flex size-4 items-center justify-center">
 											{item.icon}

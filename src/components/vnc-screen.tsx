@@ -232,7 +232,11 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 			if (screen.current) {
 				screen.current.innerHTML = "";
 
-				const _rfb = new RFB(screen.current, url, rfbOptions);
+				const _rfb = new RFB(
+					screen.current,
+					`${window.location.protocol.replace("http", "ws")}//${window.location.host}${url}`,
+					rfbOptions,
+				);
 
 				_rfb.viewOnly = viewOnly ?? false;
 				_rfb.focusOnClick = focusOnClick ?? false;

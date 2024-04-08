@@ -10,7 +10,7 @@ const authConfig: NextAuthOptions = {
 		error: "/auth/error",
 	},
 	callbacks: {
-		signIn: async ({ profile }) => {
+		async signIn({ profile }) {
 			const { email, name, sub: id } = profile || {};
 			if (email && id) {
 				await db

@@ -1,5 +1,6 @@
 // @ts-check
-import("next-ws/server/index.js").then(({ verifyPatch }) => verifyPatch());
+import { verifyPatch } from "next-ws/server/index.js";
+verifyPatch();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
@@ -12,7 +13,7 @@ const nextConfig = {
 			},
 		],
 	},
-	redirects: async () => {
+	async redirects() {
 		return [
 			{
 				source: "/api/auth/error",
@@ -21,7 +22,7 @@ const nextConfig = {
 			},
 		];
 	},
-	webpack: (config) => {
+	webpack(config) {
 		config.module.rules.push({
 			test: /\.node$/,
 			loader: "node-loader",
