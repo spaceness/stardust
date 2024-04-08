@@ -1,8 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import Image from "next/image";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
 export default function NotFound() {
 	return (
 		<div className="flex h-screen flex-col items-center justify-center">

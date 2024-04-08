@@ -1,4 +1,5 @@
 import Dockerode, { DockerOptions } from "dockerode";
+
 const docker = new Dockerode(
 	((): DockerOptions => {
 		const connectionType = process.env.DOCKER_TYPE;

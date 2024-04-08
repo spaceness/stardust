@@ -1,7 +1,8 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { ShieldX } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function AuthError() {
 	const searchParams = useSearchParams();

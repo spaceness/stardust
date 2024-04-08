@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation";
+import { ChevronLeft, Loader2, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { LogOut, Loader2, ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 export default function SignOut() {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();

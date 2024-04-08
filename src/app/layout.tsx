@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
-import { Session } from "./providers";
-import { getServerSession } from "next-auth";
-import authConfig from "@/lib/auth.config";
-
 import { Toaster } from "@/components/ui/toaster";
-
+import authConfig from "@/lib/auth.config";
+import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
+import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Session } from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 

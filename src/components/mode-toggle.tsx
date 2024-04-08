@@ -1,16 +1,12 @@
 "use client";
 
-import * as React from "react";
-import { SwatchBook } from "lucide-react";
-import { useTheme } from "next-themes";
-
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuTrigger,
 	DropdownMenuLabel,
+	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
 	Tooltip,
@@ -18,6 +14,9 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SwatchBook } from "lucide-react";
+import { useTheme } from "next-themes";
+
 export default function ModeToggle({
 	className,
 }: Readonly<{ className?: string }>) {

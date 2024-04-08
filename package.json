@@ -2,6 +2,7 @@
 	"name": "stardust",
 	"version": "0.1.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
@@ -36,7 +37,7 @@
 		"pg-native": "^3.0.1",
 		"postgres": "^3.4.4",
 		"prettier": "^3.2.5",
-		"prettier-plugin-prisma": "^5.0.0",
+		"prettier-plugin-organize-imports": "^3.2.4",
 		"prettier-plugin-tailwindcss": "^0.5.12",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",

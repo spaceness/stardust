@@ -1,12 +1,6 @@
 "use client";
-import { useSession } from "next-auth/react";
-import {
-	NavigationMenu,
-	NavigationMenuItem,
-	NavigationMenuList,
-	NavigationMenuLink,
-	navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -15,11 +9,19 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ModeToggle from "./mode-toggle";
+import {
+	NavigationMenu,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { ComputerIcon, Settings, Sparkles } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import ModeToggle from "./mode-toggle";
+
 export default function Navigation() {
 	const { data: session } = useSession();
 	const { name, email, image } = session?.user || {};

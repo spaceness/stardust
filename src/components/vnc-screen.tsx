@@ -1,18 +1,19 @@
 "use client";
+
+import RFB, {
+	NoVncCredentials,
+	NoVncEvents,
+	NoVncOptions,
+} from "@novnc/novnc/core/rfb";
 import {
+	ForwardRefRenderFunction,
+	ReactNode,
 	forwardRef,
 	useEffect,
 	useImperativeHandle,
 	useRef,
 	useState,
-	ForwardRefRenderFunction,
-	ReactNode,
 } from "react";
-import RFB, {
-	NoVncOptions,
-	NoVncCredentials,
-	NoVncEvents,
-} from "@novnc/novnc/core/rfb";
 
 export type rfbOptions = Partial<NoVncOptions>;
 

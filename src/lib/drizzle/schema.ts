@@ -1,9 +1,10 @@
+import { relations } from "drizzle-orm";
 import {
-	pgTable,
-	uniqueIndex,
-	text,
 	boolean,
 	integer,
+	pgTable,
+	text,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable(
@@ -20,18 +21,9 @@ export const user = pgTable(
 		};
 	},
 );
-
-export const session = pgTable("Session", {
-	id: text("id").primaryKey().notNull(),
-	dockerImage: text("dockerImage").notNull(),
-	vncPort: integer("vncPort").notNull(),
-	createdAt: text("createdAt").notNull(),
-	expiresAt: text("expiresAt").notNull(),
-	userId: text("userId")
-		.notNull()
-		.references(() => user.id, { onDelete: "restrict", onUpdate: "cascade" }),
-});
-
+export const userRelations = relations(user, ({ many }) => ({
+	session: many(session),
+}));
 export const image = pgTable(
 	"Image",
 	{
@@ -50,3 +42,26 @@ export const image = pgTable(
 		};
 	},
 );
+export const imageRelations = relations(image, ({ many }) => ({
+	session: many(session),
+}));
+export const session = pgTable("Session", {
+	id: text("id").primaryKey().notNull(),
+	dockerImage: text("dockerImage").notNull(),
+	createdAt: text("createdAt").notNull(),
+	expiresAt: text("expiresAt").notNull(),
+	userId: text("userId")
+		.notNull()
+		.references(() => user.id),
+	vncPort: integer("vncPort").notNull(),
+});
+export const sessionRelations = relations(session, ({ one }) => ({
+	user: one(user, {
+		fields: [session.userId],
+		references: [user.id],
+	}),
+	image: one(image, {
+		fields: [session.dockerImage],
+		references: [image.dockerImage],
+	}),
+}));

@@ -1,6 +1,7 @@
 import ModeToggle from "@/components/mode-toggle";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
+
 export default function LoginLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {

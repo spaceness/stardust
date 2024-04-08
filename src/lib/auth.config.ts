@@ -2,6 +2,7 @@ import { db } from "@/lib/drizzle/db";
 import { user } from "@/lib/drizzle/schema";
 import { NextAuthOptions } from "next-auth";
 import Auth0 from "next-auth/providers/auth0";
+
 const authConfig: NextAuthOptions = {
 	pages: {
 		signIn: "/auth/login",

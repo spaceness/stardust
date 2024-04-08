@@ -1,8 +1,9 @@
 import docker from "@/lib/docker";
 import { db } from "@/lib/drizzle/db";
 import { session, user } from "@/lib/drizzle/schema";
-import { Session } from "next-auth";
 import { eq } from "drizzle-orm";
+import { Session } from "next-auth";
+
 async function createSession(Image: string, userSession: Session) {
 	console.log(`Creating session with image ${Image}`);
 	try {
@@ -53,13 +54,12 @@ async function createSession(Image: string, userSession: Session) {
 		return await db
 			.insert(session)
 			.values({
-				// @ts-expect-error shut for now
-				vncPort: vncPort,
-				userId,
-				dockerImage: Image,
-				createdAt: Date.now(),
-				expiresAt: Date.now() + 1000 * 60 * 60 * 24,
 				id: container.id,
+				dockerImage: Image,
+				createdAt: Date.now().toString(),
+				expiresAt: (Date.now() + 1000 * 60 * 60 * 24).toString(),
+				userId,
+				vncPort,
 			})
 			.returning();
 	} catch (error) {

@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
-import { useSearchParams, redirect } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
-import { CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, LogIn, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CardContent } from "@/components/ui/card";
+import { AlertCircle, Loader2, LogIn } from "lucide-react";
+import { signIn, useSession } from "next-auth/react";
+import { redirect, useSearchParams } from "next/navigation";
+import { useState } from "react";
+
 export default function Login() {
 	const searchParams = useSearchParams();
 	const [loading, setLoading] = useState(false);

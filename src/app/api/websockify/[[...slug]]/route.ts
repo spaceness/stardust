@@ -1,12 +1,47 @@
-import net from "net";
-import type { WebSocket, WebSocketServer } from "ws";
-import { getSession } from "next-auth/react";
-import { IncomingMessage } from "http";
+import authConfig from "@/lib/auth.config";
 import { db } from "@/lib/drizzle/db";
 import { session, user } from "@/lib/drizzle/schema";
 import { and, eq } from "drizzle-orm";
-export async function GET() {
-	return new Response("This is stardust's websockify thing", { status: 426 });
+import { IncomingMessage } from "http";
+import net from "net";
+import { getServerSession } from "next-auth";
+import { getSession } from "next-auth/react";
+import { NextRequest } from "next/server";
+import type { WebSocket, WebSocketServer } from "ws";
+
+export async function GET(
+	_req: NextRequest,
+	{ params }: { params: { slug?: string } },
+) {
+	const userSession = await getServerSession(authConfig);
+	if (!userSession || !userSession.user) {
+		return Response.json({ error: "Unauthorized" }, { status: 401 });
+	}
+	if (!params.slug) {
+		return Response.json({ error: "Bad Request" }, { status: 400 });
+	}
+	const containerId = params.slug[0];
+	const { userId } = (
+		await db
+			.select({
+				userId: user.id,
+			})
+			.from(user)
+			.where(eq(user.email, userSession.user.email as string))
+	)[0];
+	const containerSession = (
+		await db
+			.select()
+			.from(session)
+			.where(and(eq(session.id, containerId), eq(session.userId, userId)))
+	)[0];
+	if (!containerSession) {
+		return Response.json(
+			{ exists: false, error: "Container not found" },
+			{ status: 404 },
+		);
+	}
+	return Response.json({ exists: true });
 }
 export async function SOCKET(
 	ws: WebSocket,

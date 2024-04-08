@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
-import { CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { getServerSession } from "next-auth";
+import { CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import config from "@/lib/auth.config";
 import { Mail } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+
 export default async function EmailVerify() {
 	const session = await getServerSession(config);
 	if (session) {
