@@ -2,16 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import { ChevronLeft, Loader2, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SignOut() {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-	const { toast } = useToast();
 
 	return (
 		<CardContent>
@@ -22,10 +21,7 @@ export default function SignOut() {
 				onClick={async () => {
 					setLoading(true);
 					await signOut();
-					toast({
-						title: "Logged out",
-						description: "You have been logged out",
-					});
+					toast("You have been logged out");
 					router.push("/auth/login");
 				}}
 			>

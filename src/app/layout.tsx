@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import authConfig from "@/lib/auth.config";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
