@@ -1,7 +1,7 @@
 import docker from "@/lib/docker";
 import { db } from "@/lib/drizzle/db";
 import { session, user } from "@/lib/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Session } from "next-auth";
 
 async function createSession(Image: string, userSession: Session) {
@@ -66,4 +66,28 @@ async function createSession(Image: string, userSession: Session) {
 		console.error(error);
 	}
 }
-export { createSession };
+async function deleteSession(id: string, userSession: Session) {
+	if (!userSession || !userSession.user) throw new Error("User not found");
+	const { userId } = (
+		await db
+			.select({
+				userId: user.id,
+			})
+			.from(user)
+			.where(eq(user.email, userSession.user.email as string))
+	)[0];
+	try {
+		const containerSession = await db
+			.select()
+			.from(session)
+			.where(and(eq(session.id, id), eq(session.userId, userId)));
+		if (!containerSession.length) throw new Error("Session not found");
+		const container = docker.getContainer(id);
+		await container.stop();
+		await container.remove();
+		await db.delete(session).where(eq(session.id, id));
+	} catch (error) {
+		console.error(error);
+	}
+}
+export { createSession, deleteSession };

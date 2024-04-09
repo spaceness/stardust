@@ -118,7 +118,6 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 	const eventListeners = useRef<EventListeners>({});
 	const screen = useRef<HTMLDivElement>(null);
 	const [loading, setLoading] = useState<boolean>(true);
-
 	const logger = {
 		log: (...args: any[]) => {
 			if (debug) console.log(...args);

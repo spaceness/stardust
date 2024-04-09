@@ -1,9 +1,16 @@
 import { Card } from "@/components/ui/card";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import authConfig from "@/lib/auth.config";
 import { db } from "@/lib/drizzle/db";
 import { image, user } from "@/lib/drizzle/schema";
-import { createSession } from "@/lib/util/session";
+import { createSession, deleteSession } from "@/lib/util/session";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
@@ -78,26 +85,63 @@ export default async function Dashboard() {
 						))}
 					</Suspense>
 				</section>
-				<section className="flex flex-wrap justify-center gap-1 fixed bottom-6 right-1/2 left-1/2">
+				<section className="mt-12 flex flex-col flex-wrap items-center justify-center gap-2">
+					{sessions ? (
+						<h1 className="text-nowrap text-xl font-medium">Your Sessions</h1>
+					) : null}
 					{sessions
 						? sessions.map((session) => {
-							const expiresAt = new Date(Number(session.expiresAt));
-							return (
-								<Link key={session.id} href={`/view/${session.id}`}>
-									<Card className="flex items-center justify-center bg-foreground/10 p-4 gap-2 backdrop-blur-md hover:bg-muted duration-150 flex-col w-56 h-24">
-										<Image
-											src={session.image.icon}
-											alt={session.image.friendlyName}
-											width={72}
-											height={72}
-											className="size-12"
-										/>
-										<p className="text-center text-xs text-muted-foreground">
-										Expires at {`${expiresAt.toLocaleTimeString()} on ${expiresAt.getMonth()}/${expiresAt.getDate()}/${expiresAt.getFullYear()}`}
-										</p>
-									</Card>
-								</Link>
-							)})
+								const expiresAt = new Date(Number(session.expiresAt));
+								return (
+									// <Link key={session.id} href={`/view/${session.id}`}>
+									<ContextMenu key={session.id}>
+										<ContextMenuTrigger asChild>
+											<Card className="flex h-24 w-56 flex-row items-center justify-center gap-2 bg-foreground/10 p-4 backdrop-blur-md duration-150 hover:bg-muted">
+												<section>
+													<Image
+														src={session.image.icon}
+														alt={session.image.friendlyName}
+														width={72}
+														height={72}
+														className="size-12"
+													/>
+												</section>
+												<span className="flex-col text-center">
+													<div className="text-md text-ellipsis font-bold">
+														{session.image.friendlyName}
+														<p className="rounded-sm bg-muted p-[2px] font-mono text-xs text-muted-foreground">
+															{session.id.slice(0, 6)}
+														</p>
+													</div>
+													<p className="text-center text-xs text-muted-foreground">
+														Expires at{" "}
+														{`${expiresAt.toLocaleTimeString()} on ${expiresAt.getMonth()}/${expiresAt.getDate()}/${expiresAt.getFullYear()}`}
+													</p>
+												</span>
+											</Card>
+										</ContextMenuTrigger>
+										<ContextMenuContent>
+											<ContextMenuItem asChild>
+												<Link href={`/view/${session.id}`}>View</Link>
+											</ContextMenuItem>
+											<ContextMenuItem asChild>
+												<form
+													action={async () => {
+														"use server";
+														if (!userSession) return;
+														await deleteSession(session.id, userSession)
+															.catch(console.error)
+															.then(() => redirect("/"));
+													}}
+												>
+													<button type="submit">Delete</button>
+												</form>
+											</ContextMenuItem>
+										</ContextMenuContent>
+									</ContextMenu>
+									// </Link>
+								);
+							})
 						: null}
 				</section>
 			</div>

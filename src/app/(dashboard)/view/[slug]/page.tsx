@@ -21,7 +21,7 @@ export default function View({ params }: { params: { slug: string } }) {
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.exists) {
-					setSession({ exists: true, url: params.slug });
+					setSession({ exists: true, url: `/api/websockify/${params.slug}` });
 				} else {
 					setSession({ exists: false, url: null });
 				}
@@ -29,25 +29,29 @@ export default function View({ params }: { params: { slug: string } }) {
 	}, [params.slug]);
 	return (
 		<div className="flex h-screen items-center justify-center">
-			{session && session.exists ? (
-				session.url ? (
-					<VncScreen
-						url={session.url}
-						className="scale-25 [&>*]:scale-25"
-						loader={
-							<Loader2 className="animate-spin items-center justify-center" />
-						}
-						rfbOptions={{
-							credentials: {
-								username: "",
-								password: "stardustVnc123",
-								target: "",
-							},
-						}}
-					/>
-				) : null
+			{session ? (
+				session.exists ? (
+					session.url ? (
+						<VncScreen
+							url={session.url}
+							className="scale-25 [&>*]:scale-25"
+							loader={
+								<Loader2 className="animate-spin items-center justify-center" />
+							}
+							rfbOptions={{
+								credentials: {
+									username: "",
+									password: "stardustVnc123",
+									target: "",
+								},
+							}}
+						/>
+					) : null
+				) : (
+					notFound()
+				)
 			) : (
-				notFound()
+				<Loader2 className="animate-spin items-center justify-center" />
 			)}
 		</div>
 	);
