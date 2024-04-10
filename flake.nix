@@ -17,16 +17,14 @@
         };
       in
       {
-        devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            nodePackages_latest.nodejs
-            nodePackages_latest.node-gyp
-            python3
-            pkgs.nodePackages_latest.pnpm
-            postgresql_13 # needed for some DB service commands
-            docker
-          ];
-        };
+        devShells.default = pkgs.mkShell
+          {
+            packages = with pkgs; [
+              nodePackages_latest.nodejs
+              nodePackages_latest.node-gyp
+              pkgs.nodePackages_latest.pnpm
+            ];
+          };
       }
     );
 }
