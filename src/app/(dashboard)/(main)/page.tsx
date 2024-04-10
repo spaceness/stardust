@@ -53,7 +53,7 @@ export default async function Dashboard() {
 				<section className="flex flex-wrap justify-center gap-1">
 					<Suspense
 						fallback={
-							<Skeleton className="m-2 flex h-24 w-[24rem] flex-col items-center justify-start gap-2 bg-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-[56rem] md:flex-row" />
+							<Skeleton className="m-2 flex h-24 w-[24rem] flex-col items-center justify-start gap-2 bg-foreground/10 p-2 md:w-[56rem]" />
 						}
 					>
 						{images.map((image, key) => (
@@ -61,7 +61,7 @@ export default async function Dashboard() {
 								<DialogTrigger asChild>
 									<Card
 										key={key}
-										className="m-2 flex h-24 w-24 flex-col items-center justify-start gap-2 bg-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-56 md:flex-row cursor-pointer"
+										className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 bg-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-56 md:flex-row"
 									>
 										<Image
 											priority={true}
@@ -121,7 +121,7 @@ export default async function Dashboard() {
 						<section className="flex flex-wrap justify-center gap-1">
 							<Suspense
 								fallback={
-									<Skeleton className="m-2 flex h-24 w-[24rem] flex-col items-center justify-start gap-2 bg-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-[56rem] md:flex-row" />
+									<Skeleton className="m-2 flex h-24 w-[24rem] flex-col items-center justify-start gap-2 bg-foreground/10 p-2 md:w-[56rem]" />
 								}
 							>
 								{sessions

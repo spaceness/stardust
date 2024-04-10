@@ -42,7 +42,7 @@ export default function Navigation() {
 		},
 	];
 	return (
-		<div className="fixed mb-16 flex h-16 min-w-full items-center justify-between border-b bg-background/90 px-6 backdrop-blur-md">
+		<div className="fixed flex h-16 min-w-full items-center justify-between border-b bg-background/90 px-4 backdrop-blur-md">
 			<div className="flex items-center justify-start">
 				<Sparkles />
 				<span className="ml-2 mr-4 text-2xl font-bold">Stardust</span>
