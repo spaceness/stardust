@@ -118,7 +118,7 @@ export default async function Dashboard() {
 				{sessions.length ? (
 					<div className="mt-16 flex flex-col items-center justify-center gap-2">
 						<h1 className="text-nowrap text-xl font-bold">Your Sessions</h1>
-						<section className="flex flex-wrap justify-center gap-1">
+						<section className="flex flex-wrap justify-center gap-5">
 							<Suspense
 								fallback={
 									<Skeleton className="m-2 flex h-24 w-[24rem] flex-col items-center justify-start gap-2 bg-foreground/10 p-2 md:w-[56rem]" />
