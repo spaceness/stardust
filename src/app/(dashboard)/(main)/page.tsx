@@ -130,7 +130,7 @@ export default async function Dashboard() {
 											return (
 												<Popover key={session.id}>
 													<PopoverTrigger>
-														<Card className="flex h-24 w-56 flex-row items-center justify-center gap-2 bg-foreground/10 p-4 backdrop-blur-md duration-150 hover:bg-muted">
+														<Card className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 bg-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-56 md:flex-row">
 															<section>
 																<Image
 																	src={session.image.icon}
@@ -143,7 +143,7 @@ export default async function Dashboard() {
 															<span className="flex-col text-center">
 																<div className="text-md text-ellipsis font-bold">
 																	{session.image.friendlyName}
-																	<p className="rounded-sm bg-muted p-[2px] font-mono text-xs text-muted-foreground">
+																	<p className="rounded-sm font-mono text-xs text-primary">
 																		{session.id.slice(0, 6)}
 																	</p>
 																</div>

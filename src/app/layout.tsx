@@ -24,12 +24,10 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const session = await getServerSession(authConfig);
-
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={inter.className}>
-				<Session session={session}>
+				<Session session={await getServerSession(authConfig)}>
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="system"
