@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import { bigint, boolean, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const user = pgTable(
 	"User",
@@ -39,8 +39,8 @@ export const imageRelations = relations(image, ({ many }) => ({
 export const session = pgTable("Session", {
 	id: text("id").primaryKey().notNull(),
 	dockerImage: text("dockerImage").notNull(),
-	createdAt: integer("createdAt").notNull(),
-	expiresAt: integer("expiresAt").notNull(),
+	createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+	expiresAt: bigint("expiresAt", { mode: "number" }).notNull(),
 	userId: text("userId")
 		.notNull()
 		.references(() => user.id),
