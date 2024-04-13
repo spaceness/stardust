@@ -20,9 +20,7 @@ export default function AuthError() {
 				)}
 			</CardHeader>
 			<CardContent>
-				<p className="text-center">
-					Please try again. If the problem persists, please contact support.
-				</p>
+				<p className="text-center">Please try again. If the problem persists, please contact support.</p>
 			</CardContent>
 		</>
 	);

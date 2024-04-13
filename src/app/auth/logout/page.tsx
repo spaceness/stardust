@@ -25,11 +25,7 @@ export default function SignOut() {
 					router.push("/auth/login");
 				}}
 			>
-				{!loading ? (
-					<LogOut className="mr-2 size-4" />
-				) : (
-					<Loader2 className="mr-2 h-5 w-5 animate-spin" />
-				)}
+				{!loading ? <LogOut className="mr-2 size-4" /> : <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
 				{loading ? "Logging out" : "Log out"}
 			</Button>
 			<Button

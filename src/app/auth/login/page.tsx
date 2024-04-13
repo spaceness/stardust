@@ -34,11 +34,7 @@ export default function Login() {
 						signIn("auth0");
 					}}
 				>
-					{loading ? (
-						<Loader2 className="mr-2 h-5 w-5 animate-spin" />
-					) : (
-						<LogIn className="mr-2 size-4" />
-					)}
+					{loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <LogIn className="mr-2 size-4" />}
 					{loading ? "Logging in" : "Log in with Auth0"}
 				</Button>
 			</div>

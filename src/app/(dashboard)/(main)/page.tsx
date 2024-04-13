@@ -12,24 +12,20 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import authConfig from "@/lib/auth.config";
-import { db } from "@/lib/drizzle/db";
-import { image, user } from "@/lib/drizzle/schema";
-import { createSession, deleteSession } from "@/lib/util/session";
+import docker from "@/lib/docker";
+import { db, image, user } from "@/lib/drizzle/db";
+import { createSession, deleteSession, manageSession } from "@/lib/util/session";
 import { eq } from "drizzle-orm";
+import { Pause, Play, TrashIcon } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-
 export default async function Dashboard() {
 	const userSession = await getServerSession(authConfig);
 	const images = await db.select().from(image);
@@ -47,6 +43,10 @@ export default async function Dashboard() {
 		},
 		where: (users, { eq }) => eq(users.userId, userId),
 	});
+	async function getContainerState(id: string) {
+		const container = docker.getContainer(id);
+		return (await container.inspect()).State;
+	}
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<div className="m-auto flex w-full max-w-5xl flex-col">
@@ -72,12 +72,8 @@ export default async function Dashboard() {
 											className="h-12 w-12 md:mx-4"
 										/>
 										<div className="hidden flex-col justify-center md:flex">
-											<p className="text-md text-ellipsis font-bold">
-												{image.friendlyName}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												{image.category}
-											</p>
+											<p className="text-md text-ellipsis font-bold">{image.friendlyName}</p>
+											<p className="text-xs text-muted-foreground">{image.category}</p>
 										</div>
 									</Card>
 								</DialogTrigger>
@@ -87,19 +83,14 @@ export default async function Dashboard() {
 										action={async () => {
 											"use server";
 											if (!userSession) return;
-											const containerSession = await createSession(
-												image.dockerImage,
-												userSession,
-											).catch(console.error);
+											const containerSession = await createSession(image.dockerImage, userSession).catch(console.error);
 											if (!containerSession) return;
 											redirect(`/view/${containerSession[0].id}`);
 										}}
 									>
 										<DialogHeader>
 											<DialogTitle>{image.friendlyName}</DialogTitle>
-											<DialogDescription>
-												Launch a new {image.friendlyName} Session.
-											</DialogDescription>
+											<DialogDescription>Launch a new {image.friendlyName} Session.</DialogDescription>
 										</DialogHeader>
 										<DialogFooter>
 											<DialogClose asChild>
@@ -125,7 +116,8 @@ export default async function Dashboard() {
 								}
 							>
 								{sessions
-									? sessions.map((session) => {
+									? sessions.map(async (session) => {
+											const state = await getContainerState(session.id);
 											const expiresAt = new Date(Number(session.expiresAt));
 											return (
 												<Popover key={session.id}>
@@ -143,9 +135,7 @@ export default async function Dashboard() {
 															<span className="flex-col text-center">
 																<div className="text-md text-ellipsis font-bold">
 																	{session.image.friendlyName}
-																	<p className="rounded-sm font-mono text-xs text-primary">
-																		{session.id.slice(0, 6)}
-																	</p>
+																	<p className="rounded-sm font-mono text-xs text-primary">{session.id.slice(0, 6)}</p>
 																</div>
 																<p className="text-center text-xs text-muted-foreground">
 																	Expires at{" "}
@@ -156,22 +146,51 @@ export default async function Dashboard() {
 													</PopoverTrigger>
 													<PopoverContent className="w-56 p-1">
 														<div className="flex w-full flex-row items-center justify-center gap-2 p-4">
-															<Button asChild>
-																<Link href={`/view/${session.id}`}>View</Link>
-															</Button>
+															{!state.Paused ? (
+																<>
+																	<Button asChild size="icon">
+																		<Link href={`/view/${session.id}`}>
+																			<Play />
+																		</Link>
+																	</Button>
+																	<form
+																		action={async () => {
+																			"use server";
+																			if (!userSession) return;
+																			await manageSession(session.id, "pause", userSession).catch(console.error);
+																			revalidatePath("/");
+																		}}
+																	>
+																		<StyledSubmit variant="destructive" size="icon">
+																			<Pause />
+																		</StyledSubmit>
+																	</form>
+																</>
+															) : (
+																<form
+																	action={async () => {
+																		"use server";
+																		if (!userSession) return;
+																		await manageSession(session.id, "unpause", userSession).catch(console.error);
+																		redirect(`/view/${session.id}`);
+																	}}
+																>
+																	<StyledSubmit size="icon">
+																		<Play />
+																	</StyledSubmit>
+																</form>
+															)}
+
 															<form
 																action={async () => {
 																	"use server";
 																	if (!userSession) return;
-																	await deleteSession(
-																		session.id,
-																		userSession,
-																	).catch(console.error);
+																	await deleteSession(session.id, userSession).catch(console.error);
 																	revalidatePath("/");
 																}}
 															>
-																<StyledSubmit variant="destructive">
-																	Delete
+																<StyledSubmit variant="destructive" size="icon">
+																	<TrashIcon />
 																</StyledSubmit>
 															</form>
 														</div>

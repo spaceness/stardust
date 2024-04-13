@@ -17,8 +17,8 @@ export default async function EmailVerify() {
 			</CardTitle>
 			<CardContent>
 				<p className="text-center">
-					We have sent a verification email to your email address. Please check
-					your inbox and click on the link to verify your email.
+					We have sent a verification email to your email address. Please check your inbox and click on the link to
+					verify your email.
 				</p>
 			</CardContent>
 			<CardFooter>

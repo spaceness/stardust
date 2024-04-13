@@ -1,12 +1,7 @@
 "use client";
 
-import RFB, {
-	NoVncCredentials,
-	NoVncEvents,
-	NoVncOptions,
-} from "@novnc/novnc/core/rfb";
+import RFB, { NoVncCredentials, NoVncEvents, NoVncOptions } from "@novnc/novnc/core/rfb";
 import {
-	ForwardRefRenderFunction,
 	ReactNode,
 	forwardRef,
 	useEffect,
@@ -39,15 +34,11 @@ export type VncViewerProps = {
 	onConnect?: (rfb?: RFB) => void;
 	onDisconnect?: (rfb?: RFB) => void;
 	onCredentialsRequired?: (rfb?: RFB) => void;
-	onSecurityFailure?: (e?: {
-		detail: { status: number; reason: string };
-	}) => void;
+	onSecurityFailure?: (e?: { detail: { status: number; reason: string } }) => void;
 	onClipboard?: (e?: { detail: { text: string } }) => void;
 	onBell?: () => void;
 	onDesktopName?: (e?: { detail: { name: string } }) => void;
-	onCapabilities?: (e?: {
-		detail: { capabilities: RFB["capabilities"] };
-	}) => void;
+	onCapabilities?: (e?: { detail: { capabilities: RFB["capabilities"] } }) => void;
 };
 
 export type VncViewerHandle = {
@@ -81,7 +72,7 @@ export enum Events {
 	desktopname,
 	capabilities,
 }
-const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
+const VncScreen = forwardRef<VncViewerHandle, VncViewerProps>((
 	{
 		url,
 		style,
@@ -161,9 +152,7 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 		const connected = getConnected();
 
 		if (connected) {
-			logger.info(
-				`Unexpectedly disconnected from remote VNC, retrying in ${retryDuration / 1000} seconds.`,
-			);
+			logger.info(`Unexpectedly disconnected from remote VNC, retrying in ${retryDuration / 1000} seconds.`);
 
 			timeouts.current.push(setTimeout(connect, retryDuration));
 		} else {
@@ -178,11 +167,9 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 
 		if (onCredentialsRequired) onCredentialsRequired(rfb ?? undefined);
 
-		const password =
-			rfbOptions?.credentials?.password ?? prompt("Password Required:");
+		const password = rfbOptions?.credentials?.password ?? prompt("Password Required:");
 
-		if (password)
-			rfb?.sendCredentials({ password: password } as NoVncCredentials);
+		if (password) rfb?.sendCredentials({ password: password } as NoVncCredentials);
 	};
 
 	const _onDesktopName = (e: { detail: { name: string } }) => {
@@ -197,14 +184,9 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 		try {
 			if (rfb) {
 				timeouts.current.forEach((id) => clearTimeout(id));
-				(
-					Object.keys(eventListeners.current) as (keyof typeof Events)[]
-				).forEach((event) => {
+				(Object.keys(eventListeners.current) as (keyof typeof Events)[]).forEach((event) => {
 					if (eventListeners.current[event]) {
-						rfb?.removeEventListener(
-							event,
-							eventListeners.current[event] as any,
-						);
+						rfb?.removeEventListener(event, eventListeners.current[event] as any);
 						eventListeners.current[event] = undefined;
 					}
 				});
@@ -258,14 +240,9 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 				eventListeners.current.bell = onBell;
 				eventListeners.current.desktopname = _onDesktopName;
 				eventListeners.current.capabilities = onCapabilities;
-				(
-					Object.keys(eventListeners.current) as (keyof typeof Events)[]
-				).forEach((event) => {
+				(Object.keys(eventListeners.current) as (keyof typeof Events)[]).forEach((event) => {
 					if (eventListeners.current[event]) {
-						_rfb.addEventListener(
-							event as keyof NoVncEvents,
-							eventListeners.current[event] as any,
-						);
+						_rfb.addEventListener(event as keyof NoVncEvents, eventListeners.current[event] as any);
 					}
 				});
 
@@ -344,7 +321,6 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 		return disconnect;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
 	const handleClick = () => {
 		const rfb = getRfb();
 
@@ -352,8 +328,7 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 	};
 
 	const handleMouseEnter = () => {
-		if (document.activeElement && document.activeElement instanceof HTMLElement)
-			document.activeElement.blur();
+		if (document.activeElement && document.activeElement instanceof HTMLElement) document.activeElement.blur();
 
 		handleClick();
 	};
@@ -363,7 +338,6 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 
 		if (rfb) rfb.blur();
 	};
-
 	return (
 		<>
 			{(loading || !url) && (loader ?? <p>Loading...</p>)}
@@ -378,6 +352,6 @@ const VncViewer: ForwardRefRenderFunction<VncViewerHandle, VncViewerProps> = (
 			)}
 		</>
 	);
-};
-
-export default forwardRef(VncViewer);
+});
+VncScreen.displayName = "VncScreen";
+export default VncScreen;

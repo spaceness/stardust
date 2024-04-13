@@ -2,9 +2,7 @@ import ModeToggle from "@/components/mode-toggle";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
 
-export default function LoginLayout({
-	children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function LoginLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<main className="min-h-screen bg-background bg-dotted-spacing-5 bg-dotted-secondary">
 			<section className="flex min-h-screen items-center justify-center">

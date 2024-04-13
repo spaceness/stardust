@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-	boolean,
-	integer,
-	pgTable,
-	text,
-	uniqueIndex,
-} from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const user = pgTable(
 	"User",
@@ -31,14 +25,11 @@ export const image = pgTable(
 		friendlyName: text("friendlyName").notNull(),
 		category: text("category").array(),
 		icon: text("icon").notNull(),
-		pulled: boolean("pulled").default(false),
 		supportedArch: text("supportedArch").array(),
 	},
 	(table) => {
 		return {
-			dockerImageKey: uniqueIndex("Image_dockerImage_key").on(
-				table.dockerImage,
-			),
+			dockerImageKey: uniqueIndex("Image_dockerImage_key").on(table.dockerImage),
 		};
 	},
 );
@@ -48,8 +39,8 @@ export const imageRelations = relations(image, ({ many }) => ({
 export const session = pgTable("Session", {
 	id: text("id").primaryKey().notNull(),
 	dockerImage: text("dockerImage").notNull(),
-	createdAt: text("createdAt").notNull(),
-	expiresAt: text("expiresAt").notNull(),
+	createdAt: integer("createdAt").notNull(),
+	expiresAt: integer("expiresAt").notNull(),
 	userId: text("userId")
 		.notNull()
 		.references(() => user.id),

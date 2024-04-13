@@ -51,16 +51,8 @@ export default function Navigation() {
 						{navigationItems.map((item, index) => (
 							<NavigationMenuItem key={index}>
 								<Link href={item.href} legacyBehavior passHref>
-									<NavigationMenuLink
-										className={cn(
-											navigationMenuTriggerStyle(),
-											"bg-transparent",
-										)}
-									>
-										<span className="mr-2 flex size-4 items-center justify-center">
-											{item.icon}
-										</span>{" "}
-										{item.label}
+									<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
+										<span className="mr-2 flex size-4 items-center justify-center">{item.icon}</span> {item.label}
 									</NavigationMenuLink>
 								</Link>
 							</NavigationMenuItem>
@@ -74,17 +66,13 @@ export default function Navigation() {
 					<DropdownMenuTrigger>
 						<Avatar>
 							<AvatarImage src={image || ""} />
-							<AvatarFallback>
-								{name ? name?.charAt(0) : email?.charAt(0)}
-							</AvatarFallback>
+							<AvatarFallback>{name ? name?.charAt(0) : email?.charAt(0)}</AvatarFallback>
 						</Avatar>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="mr-4 mt-4 w-48">
 						<DropdownMenuLabel>
 							<p>{name || email}</p>
-							<p className="text-xs font-light text-muted-foreground">
-								{name ? email : name}
-							</p>
+							<p className="text-xs font-light text-muted-foreground">{name ? email : name}</p>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem>Profile</DropdownMenuItem>

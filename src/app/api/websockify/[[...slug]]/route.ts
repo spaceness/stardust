@@ -1,6 +1,7 @@
 import authConfig from "@/lib/auth.config";
-import { db } from "@/lib/drizzle/db";
-import { session, user } from "@/lib/drizzle/schema";
+import docker from "@/lib/docker";
+import { db, session, user } from "@/lib/drizzle/db";
+import { getSession as getContainerSession } from "@/lib/util/get-session";
 import { and, eq } from "drizzle-orm";
 import { IncomingMessage } from "http";
 import net from "net";
@@ -9,10 +10,7 @@ import { getSession } from "next-auth/react";
 import { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
 
-export async function GET(
-	_req: NextRequest,
-	{ params }: { params: { slug?: string } },
-) {
+export async function GET(_req: NextRequest, { params }: { params: { slug?: string } }) {
 	const userSession = await getServerSession(authConfig);
 	if (!userSession || !userSession.user) {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,33 +19,18 @@ export async function GET(
 		return Response.json({ error: "Bad Request" }, { status: 400 });
 	}
 	const containerId = params.slug[0];
-	const { userId } = (
-		await db
-			.select({
-				userId: user.id,
-			})
-			.from(user)
-			.where(eq(user.email, userSession.user.email as string))
-	)[0];
-	const containerSession = (
-		await db
-			.select()
-			.from(session)
-			.where(and(eq(session.id, containerId), eq(session.userId, userId)))
-	)[0];
+	const containerSession = await getContainerSession(containerId, userSession);
 	if (!containerSession) {
-		return Response.json(
-			{ exists: false, error: "Container not found" },
-			{ status: 404 },
-		);
+		return Response.json({ exists: false, error: "Container not found" }, { status: 404 });
 	}
-	return Response.json({ exists: true });
+	const container = docker.getContainer(containerSession.id);
+	const containerIsPaused = (await container.inspect()).State.Paused;
+	if (!containerSession) {
+		return Response.json({ exists: false, error: "Container not found" }, { status: 404 });
+	}
+	return Response.json({ exists: true, paused: containerIsPaused });
 }
-export async function SOCKET(
-	ws: WebSocket,
-	req: IncomingMessage,
-	_server: WebSocketServer,
-) {
+export async function SOCKET(ws: WebSocket, req: IncomingMessage, _server: WebSocketServer) {
 	const containerId = req.url?.split("/")[3];
 	if (!containerId) {
 		ws.close();
@@ -76,7 +59,7 @@ export async function SOCKET(
 		ws.close();
 		return;
 	}
-	const tcpSocket = net.connect(containerSession.vncPort, "localhost");
+	const tcpSocket = net.connect(containerSession.vncPort, process.env.CONTAINER_HOST!);
 	ws.on("message", (message: Uint8Array) => {
 		tcpSocket.write(message);
 	});
