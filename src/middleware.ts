@@ -9,5 +9,5 @@ export default withAuth({
 	},
 });
 export const config = {
-	matcher: ["/((?!_next/static|_next/image|icon.svg|api/websockify).*)"],
+	matcher: ["/((?!_next/static|_next/image|icon.svg|api/vnc).*)"],
 };

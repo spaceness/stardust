@@ -4,10 +4,10 @@ import { bigint, boolean, integer, pgTable, text, uniqueIndex } from "drizzle-or
 export const user = pgTable(
 	"User",
 	{
-		email: text("email").notNull(),
+		email: text("email").notNull().unique(),
 		name: text("name"),
 		isAdmin: boolean("isAdmin").default(false).notNull(),
-		id: text("id").primaryKey().notNull(),
+		id: text("id").primaryKey().notNull().unique(),
 	},
 	(table) => {
 		return {
@@ -15,6 +15,7 @@ export const user = pgTable(
 		};
 	},
 );
+export type SelectUser = typeof user.$inferSelect;
 export const userRelations = relations(user, ({ many }) => ({
 	session: many(session),
 }));
@@ -25,7 +26,7 @@ export const image = pgTable(
 		friendlyName: text("friendlyName").notNull(),
 		category: text("category").array(),
 		icon: text("icon").notNull(),
-		supportedArch: text("supportedArch").array(),
+		pulled: boolean("pulled").default(false).notNull(),
 	},
 	(table) => {
 		return {
@@ -45,6 +46,7 @@ export const session = pgTable("Session", {
 		.notNull()
 		.references(() => user.id),
 	vncPort: integer("vncPort").notNull(),
+	imagePreview: text("imagePreview"),
 });
 export const sessionRelations = relations(session, ({ one }) => ({
 	user: one(user, {

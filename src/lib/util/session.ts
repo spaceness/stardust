@@ -18,7 +18,9 @@ async function createSession(Image: string, userSession: Session) {
 		while (portInUse.includes(vncPort)) {
 			vncPort = Math.floor(Math.random() * (portsRange[1] - portsRange[0] + 1)) + portsRange[0];
 		}
-		await docker.pull(Image).catch(console.error);
+		await docker.pull(Image).catch(() => {
+			throw new Error("Image not found");
+		});
 		const container = await docker
 			.createContainer({
 				name: `session-${Date.now()}-${userSession.user.email?.split("@")[0]}`,
@@ -31,7 +33,10 @@ async function createSession(Image: string, userSession: Session) {
 			})
 			.catch(console.error);
 		if (!container) throw new Error("Container not created");
-		await container.start();
+		await container.start().catch(() => {
+			container.remove({ force: true });
+			throw new Error("Container not started");
+		});
 		const { userId } = (
 			await db
 				.select({

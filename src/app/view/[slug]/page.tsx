@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteSession, manageSession } from "@/actions/session";
+import ModeToggle from "@/components/mode-toggle";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -14,8 +15,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
+import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VncViewerHandle } from "@/components/vnc-screen";
@@ -30,24 +35,49 @@ const Loading = () => (
 );
 const VncScreen = lazy(() => import("@/components/vnc-screen"));
 export default function View({ params }: { params: { slug: string } }) {
-	const vncRef = useRef<VncViewerHandle>(null);
+	const vncRef = useRef<
+		VncViewerHandle & {
+			rfb: {
+				toDataURL: () => string;
+			};
+		}
+	>(null);
 	const [session, setSession] = useState<{
 		exists: boolean;
 		url: string | null;
 		paused?: boolean;
 	} | null>(null);
-	const [clipboard, setClipboard] = useState<string | undefined>();
+	const [clipboard, setClipboard] = useState<string>("");
+	const [viewOnly, setViewOnly] = useState(false);
+	const [qualityLevel, setQualityLevel] = useState(6);
+	const [compressionLevel, setCompressionLevel] = useState(2);
 	useEffect(() => {
-		fetch(`/api/websockify/${params.slug}`)
+		fetch(`/api/vnc/${params.slug}`)
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.exists) {
-					setSession({ exists: true, url: `/api/websockify/${params.slug}`, paused: data.paused ?? false });
+					setSession({ exists: true, url: `/api/vnc/${params.slug}`, paused: data.paused ?? false });
 				} else {
 					setSession({ exists: false, url: null });
 				}
 			});
 	}, [params.slug]);
+	useEffect(() => {
+		if (session?.exists && vncRef.current?.rfb) {
+			vncRef.current.rfb.viewOnly = viewOnly;
+			vncRef.current.rfb.qualityLevel = qualityLevel;
+			vncRef.current.rfb.compressionLevel = compressionLevel;
+		}
+	}, [session?.exists, viewOnly, qualityLevel, compressionLevel, params.slug]);
+	useEffect(() => {
+		if (session?.exists && vncRef.current?.rfb) {
+			fetch("/api/session/preview", {
+				method: "POST",
+
+				body: JSON.stringify({ imagePreview: vncRef.current.rfb?.toDataURL(), containerId: params.slug }),
+			});
+		}
+	});
 	return (
 		<div className="flex h-screen w-full flex-grow justify-center">
 			{session?.exists ? (
@@ -74,11 +104,39 @@ export default function View({ params }: { params: { slug: string } }) {
 								value={clipboard}
 								onChange={(e) => {
 									if (!vncRef.current?.rfb) throw new Error("RFB not initialized");
-									vncRef.current.rfb.clipboardPasteFrom(e.target.value);
 									setClipboard(e.target.value);
+									vncRef.current.clipboardPaste(clipboard);
 								}}
 							/>
+							<section className="flex flex-col gap-4">
+								<h1 className="text-xl font-bold">VNC Options</h1>
+								<div className="flex items-center gap-2">
+									<Label htmlFor="viewonly">View Only</Label>
+									<Switch id="viewonly" checked={viewOnly} onCheckedChange={setViewOnly} />
+								</div>
+								<div className="flex items-center gap-2">
+									<Label htmlFor="quality">Quality</Label>
+									<Slider
+										id="quality"
+										value={[qualityLevel]}
+										onValueChange={(v) => setQualityLevel(v[0])}
+										min={0}
+										max={9}
+									/>
+								</div>
+								<div className="flex items-center gap-2">
+									<Label htmlFor="compression">Compression</Label>
+									<Slider
+										id="compression"
+										value={[compressionLevel]}
+										onValueChange={(v) => setCompressionLevel(v[0])}
+										min={0}
+										max={9}
+									/>
+								</div>
+							</section>
 						</div>
+						<Separator className="my-2" />
 						<section className="flex gap-2">
 							<TooltipProvider>
 								<Tooltip>
@@ -148,6 +206,7 @@ export default function View({ params }: { params: { slug: string } }) {
 									<TooltipContent>Log Out</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
+							<ModeToggle />
 						</section>
 					</SheetContent>
 				</Sheet>
@@ -160,7 +219,9 @@ export default function View({ params }: { params: { slug: string } }) {
 								<VncScreen
 									url={session.url}
 									loader={<Loading />}
-									onClipboard={(e) => setClipboard(e?.detail?.text)}
+									onClipboard={(e) => {
+										if (e?.detail.text) setClipboard(e.detail.text);
+									}}
 									ref={vncRef}
 									rfbOptions={{
 										credentials: {

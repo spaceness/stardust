@@ -2,11 +2,15 @@
 import { Loader2 } from "lucide-react";
 import { useFormStatus } from "react-dom";
 import { Button, ButtonProps } from "./ui/button";
-export function StyledSubmit({ ...props }: ButtonProps) {
+export function StyledSubmit({
+	pendingText = "Loading...",
+	pendingSpinner = false,
+	...props
+}: ButtonProps & { pendingText?: string; pendingSpinner?: boolean }) {
 	const { pending } = useFormStatus();
 	return (
 		<Button type="submit" disabled={pending} {...props}>
-			{pending ? props.size === "icon" ? <Loader2 className="animate-spin" /> : "Loading..." : props.children}
+			{pending ? pendingSpinner ? <Loader2 className="animate-spin" /> : pendingText : props.children}
 		</Button>
 	);
 }

@@ -10,11 +10,11 @@ import { Session } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "stardust",
-	description: "Open source kasm alternative powered by spaceness",
+	title: "Stardust",
+	description: "Stardust is the platform for streaming isolated desktop containers.",
 	openGraph: {
-		title: "stardust",
-		description: "Open source kasm alternative powered by spaceness",
+		title: "Stardust",
+		description: "Stardust is the platform for streaming isolated desktop containers.",
 		type: "website",
 		url: "https://stardust.spaceness.one", // probably going to be a personal website for stardust,
 	},
