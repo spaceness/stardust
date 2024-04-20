@@ -214,7 +214,7 @@ const VncScreen = forwardRef<VncViewerHandle, VncViewerProps>(
 					);
 
 					_rfb.viewOnly = viewOnly ?? false;
-					_rfb.focusOnClick = focusOnClick ?? false;
+					_rfb.focusOnClick = focusOnClick ?? true;
 					_rfb.clipViewport = clipViewport ?? false;
 					_rfb.dragViewport = dragViewport ?? false;
 					_rfb.resizeSession = resizeSession ?? false;
@@ -333,8 +333,8 @@ const VncScreen = forwardRef<VncViewerHandle, VncViewerProps>(
 		};
 		return (
 			<>
-				{(loading || !url) && (loader ?? <p>Loading...</p>)}
-				{url && (
+				{loading || !url ? loader ?? <p>Loading...</p> : null}
+				{url ? (
 					<div
 						style={style}
 						className={className}
@@ -342,7 +342,7 @@ const VncScreen = forwardRef<VncViewerHandle, VncViewerProps>(
 						onMouseEnter={handleMouseEnter}
 						onMouseLeave={handleMouseLeave}
 					/>
-				)}
+				) : null}
 			</>
 		);
 	},

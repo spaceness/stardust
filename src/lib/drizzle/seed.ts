@@ -17,7 +17,6 @@ const db = drizzle(connection, { schema });
 				friendlyName: "Debian",
 				category: ["Desktop"],
 				icon: "/images/workspaces/debian.svg",
-				supportedArch: ["AMD64", "ARM64"],
 			},
 		])
 		.returning();

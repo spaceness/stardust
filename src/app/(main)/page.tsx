@@ -17,7 +17,7 @@ import docker from "@/lib/docker";
 import { db, image, user } from "@/lib/drizzle/db";
 import { createSession, deleteSession, manageSession } from "@/lib/util/session";
 import { eq } from "drizzle-orm";
-import { Loader2, Pause, Play, TrashIcon } from "lucide-react";
+import { Container, Loader2, Pause, Play, Square, TrashIcon } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
@@ -51,13 +51,13 @@ export default async function Dashboard() {
 		<div className="flex min-h-screen items-center justify-center">
 			<div className="m-auto flex w-full max-w-5xl flex-col">
 				<section className="flex flex-wrap justify-center gap-1">
-					<Suspense fallback={<Loader2 size={64} />}>
+					<Suspense fallback={<Loader2 size={64} className="animate-spin" />}>
 						{images.map((image, key) => (
 							<Dialog key={key}>
 								<DialogTrigger asChild>
 									<Card
 										key={key}
-										className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 bg-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-56 md:flex-row"
+										className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 bg-muted-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted/50 md:w-56 md:flex-row"
 									>
 										<Image
 											priority={true}
@@ -79,7 +79,9 @@ export default async function Dashboard() {
 										action={async () => {
 											"use server";
 											if (!userSession) return;
-											const containerSession = await createSession(image.dockerImage, userSession).catch(errorCatcher);
+											const containerSession = await createSession(image.dockerImage, userSession).catch((e) => {
+												throw new Error(e);
+											});
 											if (!containerSession) return;
 											redirect(`/view/${containerSession[0].id}`);
 										}}
@@ -104,12 +106,11 @@ export default async function Dashboard() {
 				</section>
 				{sessions.length ? (
 					<div className="mt-16 flex flex-col items-center justify-center gap-2">
-						<h1 className="text-nowrap text-xl font-bold">Your Sessions</h1>
 						<section className="flex flex-wrap justify-center gap-5">
 							<Suspense fallback={<Loader2 size={64} className="animate-spin" />}>
 								{sessions
 									? sessions.map(async (session) => {
-											const state = (await docker.getContainer(session.id).inspect()).State;
+											const { State } = await docker.getContainer(session.id).inspect();
 											const expiresAt = new Date(session.expiresAt);
 											return (
 												<Card
@@ -138,29 +139,33 @@ export default async function Dashboard() {
 													</section>
 													{session.imagePreview ? (
 														<Image src={session.imagePreview} width={500} height={300} alt="" className="rounded-sm" />
-													) : null}
+													) : (
+														<div className="flex h-[6.5rem] w-[13rem] items-center justify-center rounded-sm bg-muted-foreground/40">
+															<Container size={64} className="text-muted" />
+														</div>
+													)}
 													<div className="flex w-full flex-row items-center justify-center gap-x-2">
-														{!state.Paused ? (
-															<>
-																<Button asChild size="sm" variant="ghost" className="border">
-																	<Link href={`/view/${session.id}`}>
-																		<Play />
-																	</Link>
-																</Button>
-																<form
-																	action={async () => {
-																		"use server";
-																		if (!userSession) return;
-																		await manageSession(session.id, "pause", userSession).catch(errorCatcher);
-																		revalidatePath("/");
-																	}}
-																>
-																	<StyledSubmit variant="ghost" className="border" size="sm" pendingSpinner>
-																		<Pause />
-																	</StyledSubmit>
-																</form>
-															</>
-														) : (
+														{!State.Paused && State.Running ? (
+															<StyledSubmit variant="ghost" className="border" size="icon" asChild>
+																<Link href={`/view/${session.id}`}>
+																	<Play />
+																</Link>
+															</StyledSubmit>
+														) : null}
+														{!State.Paused && State.Running ? (
+															<form
+																action={async () => {
+																	"use server";
+																	if (!userSession) return;
+																	await manageSession(session.id, "pause", userSession).catch(errorCatcher);
+																	revalidatePath("/");
+																}}
+															>
+																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
+																	<Pause />
+																</StyledSubmit>
+															</form>
+														) : State.Paused ? (
 															<form
 																action={async () => {
 																	"use server";
@@ -169,12 +174,38 @@ export default async function Dashboard() {
 																	redirect(`/view/${session.id}`);
 																}}
 															>
-																<StyledSubmit size="sm" pendingSpinner>
+																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
 																	<Play />
 																</StyledSubmit>
 															</form>
-														)}
-
+														) : null}
+														{!State.Running ? (
+															<form
+																action={async () => {
+																	"use server";
+																	if (!userSession) return;
+																	await manageSession(session.id, "start", userSession).catch(errorCatcher);
+																	redirect(`/view/${session.id}`);
+																}}
+															>
+																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
+																	<Play />
+																</StyledSubmit>
+															</form>
+														) : State.Running ? (
+															<form
+																action={async () => {
+																	"use server";
+																	if (!userSession) return;
+																	await manageSession(session.id, "stop", userSession).catch(errorCatcher);
+																	revalidatePath("/");
+																}}
+															>
+																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
+																	<Square className="text-destructive" />
+																</StyledSubmit>
+															</form>
+														) : null}
 														<form
 															action={async () => {
 																"use server";
@@ -183,7 +214,7 @@ export default async function Dashboard() {
 																revalidatePath("/");
 															}}
 														>
-															<StyledSubmit variant="ghost" className="border" size="sm" pendingSpinner>
+															<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
 																<TrashIcon className="text-destructive" />
 															</StyledSubmit>
 														</form>

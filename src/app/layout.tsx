@@ -35,7 +35,7 @@ export default async function RootLayout({
 						enableSystem
 						disableTransitionOnChange
 					>
-						<Toaster />
+						<Toaster richColors theme="dark" position="top-right" />
 						{children}
 					</ThemeProvider>
 				</Session>

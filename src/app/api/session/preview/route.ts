@@ -14,16 +14,16 @@ export async function POST(req: NextRequest) {
 	}
 	const containerSession = await getSession(containerId, userSession);
 	if (!containerSession) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
+		return Response.json({ error: "Not Found" }, { status: 404 });
 	}
 	await db
 		.update(session)
 		.set({ imagePreview })
-		.where(eq(session.id, containerId))
-		.catch(() => {
-			console.error("Update failed");
+		.where(eq(session.id, containerSession.id))
+		.catch((e) => {
+			console.error("Update failed: %e", e);
 			return Response.json({ error: "Update failed" }, { status: 500 });
 		});
-	revalidatePath("/")
+	revalidatePath("/");
 	return Response.json({ success: true });
 }
