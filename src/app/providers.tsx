@@ -1,5 +1,5 @@
-"use client";
+"use client"
 
-import { SessionProvider, SessionProviderProps } from "next-auth/react";
+import { SessionProvider, type SessionProviderProps } from "next-auth/react"
 
-export const Session = ({ ...props }: SessionProviderProps) => <SessionProvider {...props} />;
+export const Session = ({ ...props }: SessionProviderProps) => <SessionProvider {...props} />

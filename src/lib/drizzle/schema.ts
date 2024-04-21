@@ -1,5 +1,5 @@
-import { relations } from "drizzle-orm";
-import { bigint, boolean, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm"
+import { bigint, boolean, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core"
 
 export const user = pgTable(
 	"User",
@@ -12,13 +12,13 @@ export const user = pgTable(
 	(table) => {
 		return {
 			emailKey: uniqueIndex("User_email_key").on(table.email),
-		};
+		}
 	},
-);
-export type SelectUser = typeof user.$inferSelect;
+)
+export type SelectUser = typeof user.$inferSelect
 export const userRelations = relations(user, ({ many }) => ({
 	session: many(session),
-}));
+}))
 export const image = pgTable(
 	"Image",
 	{
@@ -31,12 +31,12 @@ export const image = pgTable(
 	(table) => {
 		return {
 			dockerImageKey: uniqueIndex("Image_dockerImage_key").on(table.dockerImage),
-		};
+		}
 	},
-);
+)
 export const imageRelations = relations(image, ({ many }) => ({
 	session: many(session),
-}));
+}))
 export const session = pgTable("Session", {
 	id: text("id").primaryKey().notNull(),
 	dockerImage: text("dockerImage").notNull(),
@@ -47,7 +47,7 @@ export const session = pgTable("Session", {
 		.references(() => user.id),
 	vncPort: integer("vncPort").notNull(),
 	imagePreview: text("imagePreview"),
-});
+})
 export const sessionRelations = relations(session, ({ one }) => ({
 	user: one(user, {
 		fields: [session.userId],
@@ -57,4 +57,4 @@ export const sessionRelations = relations(session, ({ one }) => ({
 		fields: [session.dockerImage],
 		references: [image.dockerImage],
 	}),
-}));
+}))

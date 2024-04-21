@@ -1,13 +1,12 @@
-import { CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import config from "@/lib/auth.config";
-import { Mail } from "lucide-react";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+import { CardContent, CardFooter, CardTitle } from "@/components/ui/card"
+import { getAuthSession } from "@/lib/auth"
+import { Mail } from "lucide-react"
+import { redirect } from "next/navigation"
 
 export default async function EmailVerify() {
-	const session = await getServerSession(config);
+	const session = await getAuthSession()
 	if (session) {
-		redirect("/");
+		redirect("/")
 	}
 	return (
 		<>
@@ -27,5 +26,5 @@ export default async function EmailVerify() {
 				</p>
 			</CardFooter>
 		</>
-	);
+	)
 }

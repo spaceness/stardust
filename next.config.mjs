@@ -1,7 +1,7 @@
 // @ts-check
-import { verifyPatch } from "next-ws/server/index.js";
+import { verifyPatch } from "next-ws/server/index.js"
 
-verifyPatch();
+verifyPatch()
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
@@ -32,15 +32,15 @@ const nextConfig = {
 				destination: "/auth/error",
 				permanent: true,
 			},
-		];
+		]
 	},
 	webpack(config) {
 		config.module.rules.push({
 			test: /\.node$/,
 			loader: "node-loader",
-		});
-		return config;
+		})
+		return config
 	},
-};
+}
 
-export default nextConfig;
+export default nextConfig

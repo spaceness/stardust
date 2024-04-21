@@ -6,5 +6,5 @@ export default function NotFound() {
 				<p className="text-lg text-muted-foreground">Session not found</p>
 			</div>
 		</div>
-	);
+	)
 }

@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
-
+import { Button } from "@/components/ui/button"
+import { Sparkles } from "lucide-react"
+// biome-ignore lint:
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
 	return (
 		<div className="flex h-screen flex-col items-center justify-center">
@@ -26,5 +26,5 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 				</div>
 			</div>
 		</div>
-	);
+	)
 }

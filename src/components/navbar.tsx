@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -8,28 +8,28 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
 	NavigationMenu,
 	NavigationMenuItem,
 	NavigationMenuLink,
 	NavigationMenuList,
 	navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { type SelectUser } from "@/lib/drizzle/schema";
-import { cn } from "@/lib/utils";
-import { ComputerIcon, Settings, Sparkles } from "lucide-react";
-import { Session } from "next-auth";
-import Link from "next/link";
-import ModeToggle from "./mode-toggle";
+} from "@/components/ui/navigation-menu"
+import type { SelectUser } from "@/lib/drizzle/schema"
+import { cn } from "@/lib/utils"
+import { ComputerIcon, Settings, Sparkles } from "lucide-react"
+import type { Session } from "next-auth"
+import Link from "next/link"
+import ModeToggle from "./mode-toggle"
 
 export default function Navigation({ dbUser, session }: { dbUser: SelectUser; session: Session | null }) {
-	const { name, email, image } = session?.user || {};
+	const { name, email, image } = session?.user || {}
 	const navigationItems: {
-		icon: React.ReactNode;
-		label: string;
-		href: string;
-		adminOnly: boolean;
+		icon: React.ReactNode
+		label: string
+		href: string
+		adminOnly: boolean
 	}[] = [
 		{
 			icon: <ComputerIcon />,
@@ -43,17 +43,18 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 			icon: <Settings />,
 			adminOnly: true,
 		},
-	];
+	]
 	return (
-		<div className="fixed flex h-16 min-w-full items-center justify-between bg-background/90 px-6 backdrop-blur-md">
+		<div className="flex h-16 min-w-full items-center justify-between bg-transparent px-6">
 			<div className="flex items-center justify-start">
 				<Sparkles />
 				<span className="ml-2 mr-4 text-2xl font-bold">Stardust</span>
 				<NavigationMenu className="flex items-center justify-start">
 					<NavigationMenuList>
-						{navigationItems.map((item, index) =>
+						{navigationItems.map((item) =>
+							// biome-ignore lint: lint/correctness/useJsxKeyInIterable
 							!item.adminOnly || (item.adminOnly && dbUser.isAdmin) ? (
-								<NavigationMenuItem key={index}>
+								<NavigationMenuItem key={item.href}>
 									<Link href={item.href} legacyBehavior passHref>
 										<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
 											<span className="mr-2 flex size-4 items-center justify-center">{item.icon}</span> {item.label}
@@ -66,7 +67,7 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 				</NavigationMenu>
 			</div>
 			<div className="flex justify-end gap-4">
-				<ModeToggle />
+				<ModeToggle className="bg-background/75" />
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<Avatar>
@@ -95,5 +96,5 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 				</DropdownMenu>
 			</div>
 		</div>
-	);
+	)
 }

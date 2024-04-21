@@ -1,13 +1,12 @@
-import { Toaster } from "@/components/ui/sonner";
-import authConfig from "@/lib/auth.config";
-import type { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { ThemeProvider } from "next-themes";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { Session } from "./providers";
-
-const inter = Inter({ subsets: ["latin"] });
+import { Toaster } from "@/components/ui/sonner"
+import { getAuthSession } from "@/lib/auth"
+import { readFileSync } from "node:fs"
+import type { Metadata } from "next"
+import { ThemeProvider } from "next-themes"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { Session } from "./providers"
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
 	title: "Stardust",
@@ -18,16 +17,22 @@ export const metadata: Metadata = {
 		type: "website",
 		url: "https://stardust.spaceness.one", // probably going to be a personal website for stardust,
 	},
-};
+}
 export default async function RootLayout({
 	children,
 }: Readonly<{
-	children: React.ReactNode;
+	children: React.ReactNode
 }>) {
+	const config = JSON.parse(readFileSync(`${process.cwd()}/config.json`, "utf-8"))
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={inter.className}>
-				<Session session={await getServerSession(authConfig)}>
+			<body
+				className={`${inter.className} bg-cover bg-fixed`}
+				style={{
+					backgroundImage: `url(${config.style.backgroundImage})`,
+				}}
+			>
+				<Session session={await getAuthSession()}>
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="system"
@@ -35,11 +40,11 @@ export default async function RootLayout({
 						enableSystem
 						disableTransitionOnChange
 					>
-						<Toaster richColors theme="dark" position="top-right" />
+						<Toaster richColors theme="dark" position="top-center" />
 						{children}
 					</ThemeProvider>
 				</Session>
 			</body>
 		</html>
-	);
+	)
 }

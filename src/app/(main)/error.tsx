@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
-
+import { Button } from "@/components/ui/button"
+import { Sparkles } from "lucide-react"
+// biome-ignore lint: lint/suspicious/noShadowRestrictedNames
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
 	return (
-		<div className="flex h-screen flex-col items-center justify-center">
+		<div className="flex h-full flex-col items-center justify-center backdrop-blur-sm backdrop-brightness-75">
 			<div className="flex h-[32rem] w-96 flex-col items-center justify-center gap-4">
 				<div className="mb-4 flex items-center justify-center text-left text-2xl font-bold">
 					<Sparkles />
@@ -27,5 +27,5 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 				</div>
 			</div>
 		</div>
-	);
+	)
 }

@@ -1,20 +1,19 @@
-import Navigation from "@/components/navbar";
-import authConfig from "@/lib/auth.config";
-import { db, user as userSchema } from "@/lib/drizzle/db";
-import { eq } from "drizzle-orm";
-import { getServerSession } from "next-auth";
+import Navigation from "@/components/navbar"
+import { getAuthSession } from "@/lib/auth"
+import { db, user as userSchema } from "@/lib/drizzle/db"
+import { eq } from "drizzle-orm"
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-	const userSession = await getServerSession(authConfig);
+	const userSession = await getAuthSession()
 	const dbUser = (
 		await db
 			.select()
 			.from(userSchema)
 			.where(eq(userSchema.email, userSession?.user?.email as string))
-	)[0];
+	)[0]
 	return (
-		<main>
+		<main className="h-[93vh]">
 			<Navigation dbUser={dbUser} session={userSession} />
 			{children}
 		</main>
-	);
+	)
 }

@@ -1,17 +1,16 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
-import { ChevronLeft, Loader2, LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button"
+import { CardContent } from "@/components/ui/card"
+import { ChevronLeft, Loader2, LogOut } from "lucide-react"
+import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toast } from "sonner"
 
 export default function SignOut() {
-	const [loading, setLoading] = useState(false);
-	const router = useRouter();
-
+	const [loading, setLoading] = useState(false)
+	const router = useRouter()
 	return (
 		<CardContent>
 			<p className="text-center">Are you sure you want to log out?</p>
@@ -19,10 +18,10 @@ export default function SignOut() {
 				disabled={loading}
 				className="mt-6 w-full"
 				onClick={async () => {
-					setLoading(true);
-					await signOut();
-					toast("You have been logged out");
-					router.push("/auth/login");
+					setLoading(true)
+					await signOut()
+					toast("You have been logged out")
+					router.push("/auth/login")
 				}}
 			>
 				{!loading ? <LogOut className="mr-2 size-4" /> : <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
@@ -38,5 +37,5 @@ export default function SignOut() {
 				Go back
 			</Button>
 		</CardContent>
-	);
+	)
 }

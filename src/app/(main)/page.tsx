@@ -1,4 +1,4 @@
-import { StyledSubmit } from "@/components/submit-button";
+import { StyledSubmit } from "@/components/submit-button"
 import {
 	Dialog,
 	DialogClose,
@@ -8,28 +8,27 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import authConfig from "@/lib/auth.config";
-import docker from "@/lib/docker";
-import { db, image, user } from "@/lib/drizzle/db";
-import { createSession, deleteSession, manageSession } from "@/lib/util/session";
-import { eq } from "drizzle-orm";
-import { Container, Loader2, Pause, Play, Square, TrashIcon } from "lucide-react";
-import { getServerSession } from "next-auth";
-import { revalidatePath } from "next/cache";
-import Image from "next/image";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
-const errorCatcher = (error: any) => {
-	throw new Error(error);
-};
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { getAuthSession } from "@/lib/auth"
+import docker from "@/lib/docker"
+import { db, image, user } from "@/lib/drizzle/db"
+import { createSession, deleteSession, manageSession } from "@/lib/util/session"
+import { eq } from "drizzle-orm"
+import { Container, Loader2, Pause, Play, Square, TrashIcon } from "lucide-react"
+import { revalidatePath } from "next/cache"
+import Image from "next/image"
+import Link from "next/link"
+import { redirect } from "next/navigation"
+import { Suspense } from "react"
+const errorCatcher = (error: string) => {
+	throw new Error(error)
+}
 export default async function Dashboard() {
-	const userSession = await getServerSession(authConfig);
-	const images = await db.select().from(image).catch(errorCatcher);
+	const userSession = await getAuthSession()
+	const images = await db.select().from(image).catch(errorCatcher)
 	const { userId } = (
 		await db
 			.select({
@@ -38,7 +37,7 @@ export default async function Dashboard() {
 			.from(user)
 			.where(eq(user.email, userSession?.user?.email as string))
 			.catch(errorCatcher)
-	)[0];
+	)[0]
 	const sessions = await db.query.session
 		.findMany({
 			with: {
@@ -46,18 +45,18 @@ export default async function Dashboard() {
 			},
 			where: (users, { eq }) => eq(users.userId, userId),
 		})
-		.catch(errorCatcher);
+		.catch(errorCatcher)
 	return (
-		<div className="flex min-h-screen items-center justify-center">
+		<div className="flex h-full items-center justify-center">
 			<div className="m-auto flex w-full max-w-5xl flex-col">
 				<section className="flex flex-wrap justify-center gap-1">
 					<Suspense fallback={<Loader2 size={64} className="animate-spin" />}>
-						{images.map((image, key) => (
-							<Dialog key={key}>
+						{images.map((image) => (
+							<Dialog key={image.dockerImage}>
 								<DialogTrigger asChild>
 									<Card
-										key={key}
-										className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 bg-muted-foreground/10 p-2 backdrop-blur-md duration-150 hover:bg-muted/50 md:w-56 md:flex-row"
+										key={image.dockerImage}
+										className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 bg-background/75 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-56 md:flex-row"
 									>
 										<Image
 											priority={true}
@@ -75,15 +74,14 @@ export default async function Dashboard() {
 								</DialogTrigger>
 								<DialogContent>
 									<form
-										key={key}
 										action={async () => {
-											"use server";
-											if (!userSession) return;
+											"use server"
+											if (!userSession) return
 											const containerSession = await createSession(image.dockerImage, userSession).catch((e) => {
-												throw new Error(e);
-											});
-											if (!containerSession) return;
-											redirect(`/view/${containerSession[0].id}`);
+												throw new Error(e)
+											})
+											if (!containerSession) return
+											redirect(`/view/${containerSession[0].id}?nocheck=true`)
 										}}
 									>
 										<DialogHeader>
@@ -110,11 +108,11 @@ export default async function Dashboard() {
 							<Suspense fallback={<Loader2 size={64} className="animate-spin" />}>
 								{sessions
 									? sessions.map(async (session) => {
-											const { State } = await docker.getContainer(session.id).inspect();
-											const expiresAt = new Date(session.expiresAt);
+											const { State } = await docker.getContainer(session.id).inspect()
+											const expiresAt = new Date(session.expiresAt)
 											return (
 												<Card
-													className="items-between m-2 flex h-auto w-[24rem] flex-col justify-between gap-2 bg-foreground/10 p-2 backdrop-blur-md md:w-56"
+													className="items-between m-2 flex h-auto w-[24rem] flex-col justify-between gap-2 bg-background/75 p-2 backdrop-blur-md md:w-56"
 													key={session.id}
 												>
 													<section className="flex flex-row items-center justify-between gap-6">
@@ -146,8 +144,13 @@ export default async function Dashboard() {
 													)}
 													<div className="flex w-full flex-row items-center justify-center gap-x-2">
 														{!State.Paused && State.Running ? (
-															<StyledSubmit variant="ghost" className="border" size="icon" asChild>
-																<Link href={`/view/${session.id}`}>
+															<StyledSubmit variant="ghost" size="icon" pendingSpinner>
+																<Link
+																	href={{
+																		pathname: `/view/${session.id}`,
+																		query: { nocheck: true },
+																	}}
+																>
 																	<Play />
 																</Link>
 															</StyledSubmit>
@@ -155,26 +158,26 @@ export default async function Dashboard() {
 														{!State.Paused && State.Running ? (
 															<form
 																action={async () => {
-																	"use server";
-																	if (!userSession) return;
-																	await manageSession(session.id, "pause", userSession).catch(errorCatcher);
-																	revalidatePath("/");
+																	"use server"
+																	if (!userSession) return
+																	await manageSession(session.id, "pause", userSession).catch(errorCatcher)
+																	revalidatePath("/")
 																}}
 															>
-																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
+																<StyledSubmit variant="ghost" size="icon" pendingSpinner>
 																	<Pause />
 																</StyledSubmit>
 															</form>
 														) : State.Paused ? (
 															<form
 																action={async () => {
-																	"use server";
-																	if (!userSession) return;
-																	await manageSession(session.id, "unpause", userSession).catch(errorCatcher);
-																	redirect(`/view/${session.id}`);
+																	"use server"
+																	if (!userSession) return
+																	await manageSession(session.id, "unpause", userSession).catch(errorCatcher)
+																	redirect(`/view/${session.id}?nocheck=true`)
 																}}
 															>
-																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
+																<StyledSubmit variant="ghost" size="icon" pendingSpinner>
 																	<Play />
 																</StyledSubmit>
 															</form>
@@ -182,45 +185,45 @@ export default async function Dashboard() {
 														{!State.Running ? (
 															<form
 																action={async () => {
-																	"use server";
-																	if (!userSession) return;
-																	await manageSession(session.id, "start", userSession).catch(errorCatcher);
-																	redirect(`/view/${session.id}`);
+																	"use server"
+																	if (!userSession) return
+																	await manageSession(session.id, "start", userSession).catch(errorCatcher)
+																	redirect(`/view/${session.id}?nocheck=true`)
 																}}
 															>
-																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
+																<StyledSubmit variant="ghost" size="icon" pendingSpinner>
 																	<Play />
 																</StyledSubmit>
 															</form>
 														) : State.Running ? (
 															<form
 																action={async () => {
-																	"use server";
-																	if (!userSession) return;
-																	await manageSession(session.id, "stop", userSession).catch(errorCatcher);
-																	revalidatePath("/");
+																	"use server"
+																	if (!userSession) return
+																	await manageSession(session.id, "stop", userSession).catch(errorCatcher)
+																	revalidatePath("/")
 																}}
 															>
-																<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
+																<StyledSubmit variant="ghost" size="icon" pendingSpinner>
 																	<Square className="text-destructive" />
 																</StyledSubmit>
 															</form>
 														) : null}
 														<form
 															action={async () => {
-																"use server";
-																if (!userSession) return;
-																await deleteSession(session.id, userSession).catch(errorCatcher);
-																revalidatePath("/");
+																"use server"
+																if (!userSession) return
+																await deleteSession(session.id, userSession).catch(errorCatcher)
+																revalidatePath("/")
 															}}
 														>
-															<StyledSubmit variant="ghost" className="border" size="icon" pendingSpinner>
-																<TrashIcon className="text-destructive" />
+															<StyledSubmit variant="destructive" size="icon" pendingSpinner>
+																<TrashIcon />
 															</StyledSubmit>
 														</form>
 													</div>
 												</Card>
-											);
+											)
 										})
 									: null}
 							</Suspense>
@@ -229,5 +232,5 @@ export default async function Dashboard() {
 				) : null}
 			</div>
 		</div>
-	);
+	)
 }

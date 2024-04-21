@@ -1,22 +1,22 @@
-import docker from "@/lib/docker";
-import { db, session, user } from "@/lib/drizzle/db";
-import type Dockerode from "dockerode";
-import { eq } from "drizzle-orm";
-import { Session } from "next-auth";
-import { getSession } from "./get-session";
+import docker from "@/lib/docker"
+import { db, session, user } from "@/lib/drizzle/db"
+import type Dockerode from "dockerode"
+import { eq } from "drizzle-orm"
+import type { Session } from "next-auth"
+import { getSession } from "./get-session"
 
 async function createSession(Image: string, userSession: Session) {
-	console.log(`Creating session with image ${Image}`);
+	console.log(`Creating session with image ${Image}`)
 	try {
-		if (!userSession || !userSession.user) throw new Error("User not found");
-		if (!process.env.DOCKER_PORT_RANGE) throw new Error("Docker port range not set");
-		const portsRange = process.env.DOCKER_PORT_RANGE.split("-").map(Number);
-		let vncPort: number = Math.floor(Math.random() * (portsRange[1] - portsRange[0] + 1)) + portsRange[0];
+		if (!userSession || !userSession.user) throw new Error("User not found")
+		if (!process.env.DOCKER_PORT_RANGE) throw new Error("Docker port range not set")
+		const portsRange = process.env.DOCKER_PORT_RANGE.split("-").map(Number)
+		let vncPort: number = Math.floor(Math.random() * (portsRange[1] - portsRange[0] + 1)) + portsRange[0]
 		const portInUse = await docker
 			.listContainers({ all: true })
-			.then((containers) => containers.map((container) => container.Ports?.map((port) => port.PublicPort)).flat());
+			.then((containers) => containers.flatMap((container) => container.Ports?.map((port) => port.PublicPort)))
 		while (portInUse.includes(vncPort)) {
-			vncPort = Math.floor(Math.random() * (portsRange[1] - portsRange[0] + 1)) + portsRange[0];
+			vncPort = Math.floor(Math.random() * (portsRange[1] - portsRange[0] + 1)) + portsRange[0]
 		}
 		const container = await docker
 			.createContainer({
@@ -29,12 +29,12 @@ async function createSession(Image: string, userSession: Session) {
 				},
 			})
 			.catch((error) => {
-				throw new Error("Container not created:" + error);
-			});
+				throw new Error(`Container·not·created:${error}`)
+			})
 		await container.start().catch(() => {
-			container.remove({ force: true });
-			throw new Error("Container not started");
-		});
+			container.remove({ force: true })
+			throw new Error("Container not started")
+		})
 		const { userId } = (
 			await db
 				.select({
@@ -42,7 +42,7 @@ async function createSession(Image: string, userSession: Session) {
 				})
 				.from(user)
 				.where(eq(user.email, userSession.user.email as string))
-		)[0];
+		)[0]
 		return await db
 			.insert(session)
 			.values({
@@ -53,32 +53,32 @@ async function createSession(Image: string, userSession: Session) {
 				createdAt: Date.now(),
 				expiresAt: Date.now() + 1000 * 60 * 60 * 24,
 			})
-			.returning();
+			.returning()
 	} catch (error) {
-		console.error(error);
+		console.error(error)
 	}
 }
 async function manageSession(containerId: string, action: keyof Dockerode.Container, userSession: Session) {
-	if (!userSession || !userSession.user) throw new Error("User not found");
-	const { id } = (await getSession(containerId, userSession)) || {};
-	if (!id) throw new Error("Session not found");
+	if (!userSession || !userSession.user) throw new Error("User not found")
+	const { id } = (await getSession(containerId, userSession)) || {}
+	if (!id) throw new Error("Session not found")
 	try {
-		const container = docker.getContainer(id);
-		await container[action]();
+		const container = docker.getContainer(id)
+		await container[action]()
 	} catch (error) {
-		console.error(error);
+		console.error(error)
 	}
 }
 async function deleteSession(containerId: string, userSession: Session) {
-	if (!userSession || !userSession.user) throw new Error("User not found");
-	const { id } = (await getSession(containerId, userSession)) || {};
-	if (!id) throw new Error("Session not found");
+	if (!userSession || !userSession.user) throw new Error("User not found")
+	const { id } = (await getSession(containerId, userSession)) || {}
+	if (!id) throw new Error("Session not found")
 	try {
-		const container = docker.getContainer(id);
-		await container.remove({ force: true });
-		await db.delete(session).where(eq(session.id, id));
+		const container = docker.getContainer(id)
+		await container.remove({ force: true })
+		await db.delete(session).where(eq(session.id, id))
 	} catch (error) {
-		console.error(error);
+		console.error(error)
 	}
 }
-export { createSession, deleteSession, manageSession };
+export { createSession, deleteSession, manageSession }
