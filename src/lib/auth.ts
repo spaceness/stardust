@@ -1,6 +1,6 @@
-import { db, user } from "@/lib/drizzle/db"
-import { type NextAuthOptions, getServerSession } from "next-auth"
-import Auth0 from "next-auth/providers/auth0"
+import { db, user } from "@/lib/drizzle/db";
+import { type NextAuthOptions, getServerSession } from "next-auth";
+import Auth0 from "next-auth/providers/auth0";
 
 const authConfig: NextAuthOptions = {
 	pages: {
@@ -11,11 +11,11 @@ const authConfig: NextAuthOptions = {
 	},
 	callbacks: {
 		async signIn({ profile }) {
-			const { email, name, sub: id } = profile || {}
+			const { email, name, sub: id } = profile || {};
 			if (email && id) {
-				await db.insert(user).values({ id, email, name }).onConflictDoUpdate({ target: user.id, set: { name, email } })
+				await db.insert(user).values({ id, email, name }).onConflictDoUpdate({ target: user.id, set: { name, email } });
 			}
-			return true
+			return true;
 		},
 	},
 	providers: [
@@ -25,6 +25,6 @@ const authConfig: NextAuthOptions = {
 			issuer: process.env.AUTH0_ISSUER,
 		}),
 	],
-}
-const getAuthSession = () => getServerSession(authConfig)
-export { authConfig, getAuthSession }
+};
+const getAuthSession = () => getServerSession(authConfig);
+export { authConfig, getAuthSession };

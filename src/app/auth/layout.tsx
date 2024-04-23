@@ -1,6 +1,6 @@
-import ModeToggle from "@/components/mode-toggle"
-import { Card, CardTitle } from "@/components/ui/card"
-import { Sparkles } from "lucide-react"
+import ModeToggle from "@/components/mode-toggle";
+import { Card, CardTitle } from "@/components/ui/card";
+import { Sparkles } from "lucide-react";
 
 export default function LoginLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
@@ -14,5 +14,5 @@ export default function LoginLayout({ children }: Readonly<{ children: React.Rea
 			</Card>
 			<ModeToggle className="fixed bottom-2 right-2 bg-background/75 backdrop-blur-md" />
 		</main>
-	)
+	);
 }

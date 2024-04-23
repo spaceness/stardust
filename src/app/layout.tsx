@@ -1,12 +1,13 @@
-import { Toaster } from "@/components/ui/sonner"
-import { getAuthSession } from "@/lib/auth"
-import { readFileSync } from "node:fs"
-import type { Metadata } from "next"
-import { ThemeProvider } from "next-themes"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Session } from "./providers"
-const inter = Inter({ subsets: ["latin"] })
+import { readFileSync } from "node:fs";
+import { Toaster } from "@/components/ui/sonner";
+import { getAuthSession } from "@/lib/auth";
+import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import "./globals.css";
+import { Session } from "./providers";
+const inter = Inter({ subsets: ["latin"] });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
 
 export const metadata: Metadata = {
 	title: "Stardust",
@@ -17,17 +18,17 @@ export const metadata: Metadata = {
 		type: "website",
 		url: "https://stardust.spaceness.one", // probably going to be a personal website for stardust,
 	},
-}
+};
 export default async function RootLayout({
 	children,
 }: Readonly<{
-	children: React.ReactNode
+	children: React.ReactNode;
 }>) {
-	const config = JSON.parse(readFileSync(`${process.cwd()}/config.json`, "utf-8"))
+	const config = JSON.parse(readFileSync(`${process.cwd()}/config.json`, "utf-8"));
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body
-				className={`${inter.className} bg-cover bg-fixed`}
+				className={`${inter.className} ${jetbrains.variable}  bg-center bg-fixed`}
 				style={{
 					backgroundImage: `url(${config.style.backgroundImage})`,
 				}}
@@ -36,15 +37,15 @@ export default async function RootLayout({
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="system"
-						themes={["light", "dark", "mocha", "macchiato", "frappe", "latte"]}
+						themes={["light", "dark", "blue", "mocha"]}
 						enableSystem
 						disableTransitionOnChange
 					>
-						<Toaster richColors theme="dark" position="top-center" />
+						<Toaster richColors theme="dark" position="top-right" />
 						{children}
 					</ThemeProvider>
 				</Session>
 			</body>
 		</html>
-	)
+	);
 }

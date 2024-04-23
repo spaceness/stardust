@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { SwatchBook } from "lucide-react"
-import { useTheme } from "next-themes"
+} from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SwatchBook } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function ModeToggle({ className }: Readonly<{ className?: string }>) {
-	const { themes, setTheme } = useTheme()
+	const { themes, setTheme } = useTheme();
 
 	return (
 		<DropdownMenu>
@@ -40,5 +40,5 @@ export default function ModeToggle({ className }: Readonly<{ className?: string 
 				))}
 			</DropdownMenuContent>
 		</DropdownMenu>
-	)
+	);
 }

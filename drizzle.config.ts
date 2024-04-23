@@ -1,5 +1,5 @@
-import "dotenv/config"
-import type { Config } from "drizzle-kit"
+import "dotenv/config";
+import type { Config } from "drizzle-kit";
 
 const config: Config = {
 	driver: "pg",
@@ -10,5 +10,5 @@ const config: Config = {
 	},
 	verbose: true,
 	strict: true,
-}
-export default config
+};
+export default config;

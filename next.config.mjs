@@ -1,26 +1,21 @@
 // @ts-check
-import { verifyPatch } from "next-ws/server/index.js"
+import { verifyPatch } from "next-ws/server/index.js";
 
-verifyPatch()
+verifyPatch();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "http.cat",
-				port: "",
-				pathname: "/**",
-			},
-			{
-				protocol: "https",
-				hostname: "raw.githubusercontent.com",
+				hostname: "*",
 				port: "",
 				pathname: "/**",
 			},
 		],
 	},
 	experimental: {
+		typedRoutes: true,
 		serverActions: {
 			allowedOrigins: ["localhost:3000", "*.use.devtunnels.ms"],
 		},
@@ -32,15 +27,15 @@ const nextConfig = {
 				destination: "/auth/error",
 				permanent: true,
 			},
-		]
+		];
 	},
 	webpack(config) {
 		config.module.rules.push({
 			test: /\.node$/,
 			loader: "node-loader",
-		})
-		return config
+		});
+		return config;
 	},
-}
+};
 
-export default nextConfig
+export default nextConfig;

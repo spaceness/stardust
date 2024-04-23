@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 // biome-ignore lint: lint/suspicious/noShadowRestrictedNames
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
 	return (
@@ -22,10 +22,10 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 						Reset
 					</Button>
 					<p className="text-xs text-muted-foreground">
-						More details are in the {typeof window === "undefined" ? "terminal" : "browser"} console
+						More details are in the {typeof window === "undefined" ? "server logs" : "browser console"}
 					</p>
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

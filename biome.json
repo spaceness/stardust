@@ -2,22 +2,30 @@
 	"$schema": "https://biomejs.dev/schemas/1.7.0/schema.json",
 	"formatter": {
 		"enabled": true,
-		"formatWithErrors": false,
+		"formatWithErrors": true,
 		"indentStyle": "tab",
 		"indentWidth": 2,
 		"lineEnding": "lf",
 		"lineWidth": 120,
 		"attributePosition": "auto",
-		"ignore": ["**/pnpm-lock.yaml", "**/.next/**"]
+		"ignore": ["**/pnpm-lock.yaml", "**/.next/**", "**/node_modules/**"]
 	},
-	"organizeImports": { "enabled": true },
-	"linter": { "enabled": true, "rules": { "recommended": true }, "ignore": ["**/pnpm-lock.yaml", "**/.next/**"] },
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		},
+		"ignore": ["**/pnpm-lock.yaml", "**/.next/**", "**/node_modules/**"]
+	},
 	"javascript": {
 		"formatter": {
 			"jsxQuoteStyle": "double",
 			"quoteProperties": "asNeeded",
 			"trailingComma": "all",
-			"semicolons": "asNeeded",
+			"semicolons": "always",
 			"arrowParentheses": "always",
 			"bracketSpacing": true,
 			"bracketSameLine": false,
