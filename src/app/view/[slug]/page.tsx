@@ -17,8 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -26,35 +26,36 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { VncViewerHandle } from "@/components/vnc-screen";
 import { fetcher } from "@/lib/utils";
 import {
-	Camera,
 	ChevronRight,
+	Clipboard,
 	Download,
 	File,
 	Info,
 	LogOut,
-	LucideHome,
 	Maximize,
 	Minimize,
+	MonitorUp,
 	Pause,
 	RotateCw,
+	ScreenShareOff,
 	Sparkles,
 	TrashIcon,
+	Upload,
 } from "lucide-react";
-import Link from "next/link";
-import { notFound, useSearchParams } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import useSWR, { useSWRConfig } from "swr";
+import Link from "next/link";
 type ScalingValues = "remote" | "local" | "none";
 const Loading = ({ text }: { text: string }) => (
-	<div className="flex absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 flex-col items-center justify-center gap-2 bg-background/75 rounded-full backdrop-blur-sm border-border size-72">
+	<Card className="flex absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 flex-col items-center justify-center gap-2 backdrop-blur-sm size-72 bg-background/75">
 		<Sparkles className="size-16 animate-pulse" />
 		<h1 className="text-xl font-semibold">{text}</h1>
-	</div>
+	</Card>
 );
 const VncScreen = lazy(() => import("@/components/vnc-screen"));
 export default function View({ params }: { params: { slug: string } }) {
@@ -62,11 +63,14 @@ export default function View({ params }: { params: { slug: string } }) {
 	const [session, setSession] = useState<{
 		exists: boolean;
 		url: string | null;
+		error?: string;
 		paused?: boolean;
+		password?: string;
 	} | null>(null);
 	const [connected, setConnected] = useState(false);
 	const [fullScreen, setFullScreen] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
+	const [accordionValue, setAccordionValue] = useState<string | undefined>(undefined);
 	const [workingClipboard, setWorkingClipboard] = useState(true);
 	// noVNC options start
 	const [clipboard, setClipboard] = useState("");
@@ -76,7 +80,7 @@ export default function View({ params }: { params: { slug: string } }) {
 	const [clipViewport, setClipViewport] = useState(false);
 	const [scaling, setScaling] = useState<ScalingValues>("remote");
 	// noVNC options end
-	const searchParams = useSearchParams();
+	const router = useRouter();
 	const { mutate } = useSWRConfig();
 	const {
 		data: filesList,
@@ -84,28 +88,14 @@ export default function View({ params }: { params: { slug: string } }) {
 		isLoading: filesLoading,
 	} = useSWR<string[]>(`/api/session/files/${params.slug}`, fetcher, { refreshInterval: 10000 });
 	useEffect(() => {
-		try {
-			if (searchParams.get("nocheck") === "true") {
-				setSession({ exists: true, url: `/api/vnc/${params.slug}` });
-			} else {
-				fetch(`/api/vnc/${params.slug}`)
-					.then((res) => res.json())
-					.then((data) => {
-						if (data.exists) {
-							setSession({
-								exists: true,
-								url: `/api/vnc/${params.slug}`,
-								paused: data.paused ?? false,
-							});
-						} else {
-							setSession({ exists: false, url: null });
-						}
-					});
-			}
-		} catch (error) {
-			throw new Error(error as string);
-		}
-	}, [params.slug, searchParams]);
+		if (!session)
+			fetch(`/api/vnc/${params.slug}`)
+				.then((res) => res.json())
+				.then((data) => {
+					setSession(data);
+				})
+				.catch(() => {});
+	}, [session, params.slug]);
 	useEffect(() => {
 		if (connected && vncRef.current?.rfb) {
 			vncRef.current.rfb.viewOnly = viewOnly;
@@ -136,20 +126,6 @@ export default function View({ params }: { params: { slug: string } }) {
 		return () => clearInterval(interval);
 	}, [connected, clipboard]);
 	useEffect(() => {
-		const interval = setInterval(() => {
-			if (connected && vncRef.current?.rfb) {
-				fetch("/api/session/preview", {
-					method: "POST",
-					body: JSON.stringify({
-						imagePreview: vncRef.current.rfb?.toDataURL(undefined, 0.25),
-						containerId: params.slug,
-					}),
-				});
-			}
-		}, 10000);
-		return () => clearInterval(interval);
-	}, [connected, params.slug]);
-	useEffect(() => {
 		if (document.fullscreenElement === null && fullScreen) {
 			document.documentElement.requestFullscreen();
 		} else if (document.fullscreenElement !== null && !fullScreen) {
@@ -158,8 +134,13 @@ export default function View({ params }: { params: { slug: string } }) {
 	}, [fullScreen]);
 	// biome-ignore lint:
 	useEffect(() => {
-		if (sidebarOpen) mutate(`/api/session/files/${params.slug}`);
-	}, [sidebarOpen]);
+		if (sidebarOpen) {
+			mutate(`/api/session/files/${params.slug}`);
+		}
+		if (!session) {
+			setSidebarOpen(false);
+		}
+	}, [sidebarOpen, session]);
 	return (
 		<div className="h-screen w-screen">
 			{connected ? (
@@ -178,270 +159,61 @@ export default function View({ params }: { params: { slug: string } }) {
 					side="left"
 					className="z-50 flex flex-col overflow-y-auto overflow-x-clip bg-background/75 backdrop-blur-lg"
 				>
-					<SheetTitle className="py-2 text-3xl">Settings</SheetTitle>
 					<SheetHeader>
-						<SheetTitle>Clipboard</SheetTitle>
-						<SheetDescription>Contents of the clipboard will be shared with the remote machine. </SheetDescription>
+						<SheetTitle className="py-2 text-2xl">Control Panel</SheetTitle>
+						<SheetDescription className="text-muted-foreground">
+							Manage your session with these controls
+						</SheetDescription>
 					</SheetHeader>
-					<div className="flex flex-col gap-4 pt-4">
-						<Textarea
-							className="h-32 w-full font-mono"
-							tabIndex={-20}
-							spellCheck={false}
-							autoCorrect="off"
-							autoCapitalize="off"
-							value={!workingClipboard ? clipboard : undefined}
-							disabled={workingClipboard}
-							placeholder={workingClipboard ? "Clipboard is already synced" : "Paste here to send to remote machine"}
-							onChange={(e) => {
-								if (vncRef.current?.rfb) {
-									setClipboard(e.target.value);
-									vncRef.current.clipboardPaste(e.target.value);
-								}
-							}}
-						/>
-						{workingClipboard ? null : (
+					<div className="flex flex-col gap-4">
+						<section className="grid grid-cols-2 gap-2">
 							<Button
-								type="button"
-								variant="outline"
-								className="text-start place-self-start"
+								className="w-[98%]"
 								onClick={() => {
-									navigator.clipboard
-										.readText()
-										.then((text) => {
-											setClipboard(text);
-											vncRef.current?.clipboardPaste(text);
-											setWorkingClipboard(true);
-										})
-										.catch(() => {
-											setWorkingClipboard(false);
-											toast.error("Failed to read clipboard, did you deny clipboard permissions?");
-										});
+									setSession(null);
+									vncRef.current?.rfb?.disconnect();
+									router.push("/");
 								}}
 							>
-								Click here to sync clipboard
+								<ScreenShareOff className="mr-2 size-5 flex-shrink-0" />
+								Disconnect
 							</Button>
-						)}
-						<SheetHeader>
-							<SheetTitle>Download Files</SheetTitle>
-							<SheetDescription>Files from the session's Downloads folder appear here.</SheetDescription>
-						</SheetHeader>
-						{!filesError && filesList?.length !== 0 ? (
-							!filesLoading ? (
-								filesList?.map((file) => (
-									<Card key={file} className="flex justify-between items-center p-4 h-16 w-full gap-2">
-										<File className="size-5 flex-shrink-0" />
-										<span className="text-sm">{file}</span>
-										<Button
-											size="icon"
-											className="flex-shrink-0"
-											onClick={() => {
-												toast.promise(
-													() =>
-														fetch(`/api/session/files/${params.slug}`, {
-															method: "POST",
-															body: JSON.stringify({ fileName: file }),
-														})
-															.then((res) => res.blob())
-															.then((blob) => {
-																const url = URL.createObjectURL(blob);
-																const a = document.createElement("a");
-																a.href = url;
-																a.download = file;
-																a.click();
-																URL.revokeObjectURL(url);
-															}),
-													{
-														loading: "Downloading file...",
-														success: "File downloaded",
-														error: "Failed to download file",
-													},
-												);
-											}}
-										>
-											<Download className="size-5" />
-										</Button>
-									</Card>
-								))
-							) : (
-								<Skeleton className="w-full h-16" />
-							)
-						) : (
-							<Alert>
-								<Info className="size-4" />
-								<AlertTitle>No files found</AlertTitle>
-								<AlertDescription>Is your Downloads folder empty?</AlertDescription>
-							</Alert>
-						)}
-						<SheetHeader>
-							<SheetTitle>Upload Files</SheetTitle>
-							<SheetDescription>Upload files to the session's Uploads folder.</SheetDescription>
-						</SheetHeader>
-						<Input
-							type="file"
-							onChange={(e) => {
-								const file = e.target.files?.[0];
-								if (file) {
-									file.arrayBuffer().then((buffer) => {
-										toast.promise(
-											() =>
-												fetch(`/api/session/files/${params.slug}?name=${file.name}`, {
-													method: "PUT",
-													body: buffer,
-												}),
-											{
-												loading: "Uploading file...",
-												success: "File uploaded",
-												error: "Failed to upload file",
-											},
-										);
+							<Button
+								className="w-[98%]"
+								onClick={() => {
+									vncRef.current?.rfb?.disconnect();
+									setSession(null);
+									toast.promise(() => manageSession(params.slug, "pause", true), {
+										loading: "Pausing container...",
+										success: "Session paused",
+										error: "Failed to pause container",
 									});
-								}
-							}}
-						/>
-						<SheetHeader>
-							<SheetTitle>VNC Options</SheetTitle>
-							<SheetDescription>Configure the VNC connection</SheetDescription>
-						</SheetHeader>
-						<section className="flex flex-col gap-4">
-							<div className="flex flex-col items-start gap-2">
-								<Label htmlFor="viewonly">View Only</Label>
-								<Switch id="viewonly" checked={viewOnly} onCheckedChange={setViewOnly} />
-							</div>
-							<div className="flex flex-col items-start gap-2">
-								<Label htmlFor="clipToWindow">Clip to Window</Label>
-								<Switch id="clipToWindow" checked={clipViewport} onCheckedChange={setClipViewport} />
-							</div>
-							<div className="flex flex-col items-start gap-2">
-								<Label htmlFor="quality">Quality ({qualityLevel})</Label>
-								<Slider
-									id="quality"
-									value={[qualityLevel]}
-									onValueChange={([v]) => setQualityLevel(v)}
-									min={0}
-									max={9}
-									className="my-1"
-								/>
-							</div>
-							<div className="flex flex-col items-start gap-2">
-								<Label htmlFor="compression">Compression ({compressionLevel})</Label>
-								<Slider
-									id="compression"
-									value={[compressionLevel]}
-									onValueChange={([v]) => setCompressionLevel(v)}
-									min={0}
-									max={9}
-									className="my-1"
-								/>
-							</div>
-							<div className="flex flex-col items-start gap-2">
-								<Label htmlFor="scale">Scaling</Label>
-								<Select value={scaling} onValueChange={setScaling as (v: ScalingValues) => void}>
-									<SelectTrigger id="scale">
-										<SelectValue placeholder={scaling} />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="remote">Remote Resizing</SelectItem>
-										<SelectItem value="local">Local Scaling</SelectItem>
-										<SelectItem value="none">None</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-							<Button
-								onClick={() => {
-									if (vncRef.current?.rfb)
-										vncRef.current.rfb.toBlob((blob) => {
-											const url = URL.createObjectURL(blob);
-											const link = document.createElement("a");
-											link.href = url;
-											link.download = `screenshot-${params.slug.slice(0, 7)}-${new Date(
-												Date.now(),
-											).toLocaleString()}.png`;
-											link.click();
-											URL.revokeObjectURL(url);
-										});
 								}}
 							>
-								<Camera className="mr-2 size-5" />
-								Take Screenshot
+								<Pause className="mr-2 size-5 flex-shrink-0" />
+								Pause Session
 							</Button>
-							<Button onClick={() => setFullScreen(!fullScreen)}>
-								{fullScreen ? (
-									<>
-										<Minimize className="mr-2 size-5" />
-										Exit Fullscreen
-									</>
-								) : (
-									<>
-										<Maximize className="mr-2 size-5" />
-										Enter Fullscreen
-									</>
-								)}
+							<Button
+								className="w-[98%]"
+								onClick={() => {
+									toast.promise(() => manageSession(params.slug, "restart", false), {
+										loading: "Restarting container...",
+										success: "Session restarted",
+										error: "Failed to restart container",
+									});
+								}}
+							>
+								<RotateCw className="mr-2 size-5 flex-shrink-0" />
+								Restart Session
 							</Button>
-						</section>
-					</div>
-					<Separator className="my-4" />
-					<section className="flex justify-between">
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button size="icon" asChild variant="outline">
-										<Link href="/">
-											<LucideHome className="size-5" />
-										</Link>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Home</TooltipContent>
-							</Tooltip>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										size="icon"
-										variant="outline"
-										onClick={() => {
-											vncRef.current?.rfb?.disconnect();
-											setSession(null);
-											toast.promise(() => manageSession(params.slug, "pause", true), {
-												loading: "Pausing container...",
-												success: "Session paused",
-												error: "Failed to pause container",
-											});
-										}}
-									>
-										<Pause />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Pause Session</TooltipContent>
-							</Tooltip>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										size="icon"
-										variant="outline"
-										onClick={() => {
-											toast.promise(() => manageSession(params.slug, "restart", false), {
-												loading: "Restarting container...",
-												success: "Session restarted",
-												error: "Failed to restart container",
-											});
-										}}
-									>
-										<RotateCw className="size-5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Restart</TooltipContent>
-							</Tooltip>
 							<AlertDialog>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<AlertDialogTrigger asChild>
-											<Button size="icon" variant="destructive">
-												<TrashIcon className="size-5" />
-											</Button>
-										</AlertDialogTrigger>
-									</TooltipTrigger>
-									<TooltipContent>Delete</TooltipContent>
-								</Tooltip>
+								<AlertDialogTrigger asChild>
+									<Button variant="destructive" className="w-[98%]">
+										<TrashIcon className="mr-2 size-5 flex-shrink-0" />
+										Delete Session
+									</Button>
+								</AlertDialogTrigger>
+
 								<AlertDialogContent>
 									<AlertDialogHeader>
 										<AlertDialogTitle>Confirm session deletion</AlertDialogTitle>
@@ -467,23 +239,232 @@ export default function View({ params }: { params: { slug: string } }) {
 									</AlertDialogFooter>
 								</AlertDialogContent>
 							</AlertDialog>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button size="icon" variant="destructive" asChild>
-										<Link href="/auth/logout">
-											<LogOut className="size-5" />
-										</Link>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Log Out</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</section>
+							<Button className="w-[98%]" variant="secondary" asChild>
+								<Link href="/auth/logout">
+									<LogOut className="mr-2 size-5 flex-shrink-0" />
+									Log Out
+								</Link>
+							</Button>
+							<Button className="w-[98%]" variant="secondary" onClick={() => setFullScreen(!fullScreen)}>
+								{fullScreen ? (
+									<>
+										<Minimize className="mr-2 size-5 flex-shrink-0" />
+										Exit Fullscreen
+									</>
+								) : (
+									<>
+										<Maximize className="mr-2 size-5 flex-shrink-0" />
+										Enter Fullscreen
+									</>
+								)}
+							</Button>
+						</section>
+						<Accordion
+							type="single"
+							collapsible
+							className="w-full"
+							onValueChange={setAccordionValue}
+							value={accordionValue}
+						>
+							<AccordionItem value="clipboard">
+								<AccordionTrigger>
+									<div className="p-2 rounded">
+										<Clipboard className="size-5" />
+									</div>
+									<span className="text-lg">Clipboard</span>
+								</AccordionTrigger>
+								<AccordionContent className="flex flex-col gap-4">
+									<Textarea
+										className="h-48 w-full font-mono"
+										tabIndex={-20}
+										spellCheck={false}
+										autoCorrect="off"
+										autoCapitalize="off"
+										value={!workingClipboard ? clipboard : undefined}
+										disabled={workingClipboard}
+										placeholder={
+											workingClipboard ? "Clipboard is already synced" : "Paste here to send to remote machine"
+										}
+										onChange={(e) => {
+											if (vncRef.current?.rfb) {
+												setClipboard(e.target.value);
+												vncRef.current.clipboardPaste(e.target.value);
+											}
+										}}
+									/>
+									{workingClipboard ? null : (
+										<Button
+											type="button"
+											className="text-start place-self-start"
+											onClick={() => {
+												navigator.clipboard
+													.readText()
+													.then((text) => {
+														setClipboard(text);
+														vncRef.current?.clipboardPaste(text);
+														setWorkingClipboard(true);
+													})
+													.catch(() => {
+														setWorkingClipboard(false);
+														toast.error("Failed to read clipboard, did you deny clipboard permissions?");
+													});
+											}}
+										>
+											Click here to sync clipboard
+										</Button>
+									)}
+								</AccordionContent>
+							</AccordionItem>
+							<AccordionItem value="filesDownload">
+								<AccordionTrigger>
+									<div className="p-2 rounded">
+										<Download className="size-5" />
+									</div>
+									<h2 className="text-lg">Download Files</h2>
+								</AccordionTrigger>
+								<AccordionContent className="flex flex-col gap-2">
+									<p className="text-muted-foreground">Files in the session's Downloads folder will appear here.</p>
+									{!filesError && filesList?.length !== 0 ? (
+										!filesLoading ? (
+											filesList?.map((file) => (
+												<Card key={file} className="flex justify-between items-center p-4 h-16 w-full gap-2">
+													<File className="size-5 flex-shrink-0" />
+													<span className="text-sm">{file}</span>
+													<Button
+														size="icon"
+														className="flex-shrink-0"
+														onClick={() => {
+															toast.promise(
+																() =>
+																	fetch(`/api/session/files/${params.slug}?name=${file}`, {
+																		method: "POST",
+																	})
+																		.then((res) => res.blob())
+																		.then((blob) => {
+																			const url = URL.createObjectURL(blob);
+																			const a = document.createElement("a");
+																			a.href = url;
+																			a.download = file;
+																			a.click();
+																			URL.revokeObjectURL(url);
+																		}),
+																{
+																	loading: "Downloading file...",
+																	success: "File downloaded",
+																	error: "Failed to download file",
+																},
+															);
+														}}
+													>
+														<Download className="size-5" />
+													</Button>
+												</Card>
+											))
+										) : (
+											<Skeleton className="w-full h-16" />
+										)
+									) : (
+										<Alert>
+											<Info className="size-4" />
+											<AlertTitle>No files found</AlertTitle>
+											<AlertDescription>Is your Downloads folder empty?</AlertDescription>
+										</Alert>
+									)}
+								</AccordionContent>
+							</AccordionItem>
+							<AccordionItem value="filesUpload">
+								<AccordionTrigger>
+									<div className="p-2 rounded">
+										<Upload className="size-5" />
+									</div>
+									<h2 className="text-lg">Upload Files</h2>
+								</AccordionTrigger>
+								<AccordionContent className="flex flex-col gap-2">
+									<p className="text-muted-foreground">Files will be in the session's Uploads folder.</p>
+									<Input
+										type="file"
+										onChange={(e) => {
+											const file = e.target.files?.[0];
+											if (file) {
+												file.arrayBuffer().then((buffer) => {
+													toast.promise(
+														() =>
+															fetch(`/api/session/files/${params.slug}?name=${file.name}`, {
+																method: "PUT",
+																body: buffer,
+															}),
+														{
+															loading: "Uploading file...",
+															success: "File uploaded",
+															error: "Failed to upload file",
+														},
+													);
+												});
+											}
+										}}
+									/>
+								</AccordionContent>
+							</AccordionItem>
+							<AccordionItem value="vncOptions">
+								<AccordionTrigger>
+									<div className="p-2 rounded">
+										<MonitorUp className="size-5" />
+									</div>
+									<h2 className="text-lg">VNC Options</h2>
+								</AccordionTrigger>
+								<AccordionContent className="flex flex-col gap-4">
+									<div className="flex flex-col items-start gap-2">
+										<Label htmlFor="viewonly">View Only</Label>
+										<Switch id="viewonly" checked={viewOnly} onCheckedChange={setViewOnly} />
+									</div>
+									<div className="flex flex-col items-start gap-2">
+										<Label htmlFor="clipToWindow">Clip to Window</Label>
+										<Switch id="clipToWindow" checked={clipViewport} onCheckedChange={setClipViewport} />
+									</div>
+									<div className="flex flex-col items-start gap-2">
+										<Label htmlFor="quality">Quality ({qualityLevel})</Label>
+										<Slider
+											id="quality"
+											value={[qualityLevel]}
+											onValueChange={([v]) => setQualityLevel(v)}
+											min={0}
+											max={9}
+											className="my-1"
+										/>
+									</div>
+									<div className="flex flex-col items-start gap-2">
+										<Label htmlFor="compression">Compression ({compressionLevel})</Label>
+										<Slider
+											id="compression"
+											value={[compressionLevel]}
+											onValueChange={([v]) => setCompressionLevel(v)}
+											min={0}
+											max={9}
+											className="my-1"
+										/>
+									</div>
+									<div className="flex flex-col items-start gap-2">
+										<Label htmlFor="scale">Scaling</Label>
+										<Select value={scaling} onValueChange={setScaling as (v: ScalingValues) => void}>
+											<SelectTrigger id="scale">
+												<SelectValue placeholder={scaling} />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="remote">Remote Resizing</SelectItem>
+												<SelectItem value="local">Local Scaling</SelectItem>
+												<SelectItem value="none">None</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+								</AccordionContent>
+							</AccordionItem>
+						</Accordion>
+					</div>
 				</SheetContent>
 			</Sheet>
 			{session ? (
 				session.exists ? (
-					session.url ? (
+					session.url && session.password ? (
 						!session.paused ? (
 							<Suspense fallback={<Loading text="Loading" />}>
 								<VncScreen
@@ -497,14 +478,15 @@ export default function View({ params }: { params: { slug: string } }) {
 									}}
 									onConnect={() => {
 										setConnected(true);
-										toast.success(`Connected to session ${params.slug.slice(0, 7)}`);
+										toast.success(`Connected to session ${params.slug.slice(0, 6)}`);
 									}}
 									onDisconnect={() => setConnected(false)}
+									onSecurityFailure={() => setSession(null)}
 									ref={vncRef}
 									rfbOptions={{
 										credentials: {
 											username: "",
-											password: "stardustVnc123",
+											password: session.password,
 											target: "",
 										},
 									}}

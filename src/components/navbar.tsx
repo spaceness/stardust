@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import type { SelectUser } from "@/lib/drizzle/schema";
 import { cn } from "@/lib/utils";
-import { ComputerIcon, LogOut, Settings, Sparkles, SwatchBook, User } from "lucide-react";
+import { ComputerIcon, HelpCircle, LogOut, Settings, Sparkles, SwatchBook, User } from "lucide-react";
 import type { Route } from "next";
 import type { Session } from "next-auth";
 import Link from "next/link";
@@ -52,7 +52,7 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 		},
 	];
 	return (
-		<div className="flex h-16 min-w-full items-center justify-between bg-transparent px-6">
+		<nav className="flex h-16 min-w-full items-center justify-between bg-transparent px-6">
 			<div className="flex items-center justify-start">
 				<Sparkles />
 				<span className="ml-2 mr-4 text-2xl font-bold md:block hidden">Stardust</span>
@@ -115,6 +115,12 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 							</DropdownMenuPortal>
 						</DropdownMenuSub>
 						<DropdownMenuItem asChild>
+							<a href="https://stardust.spaceness.one/docs" target="_blank" rel="noreferrer nopener">
+								<HelpCircle className="size-4 mr-2" />
+								<span>Help</span>
+							</a>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild>
 							<Link href="/auth/logout">
 								<LogOut className="size-4 mr-2" />
 
@@ -124,6 +130,6 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
-		</div>
+		</nav>
 	);
 }

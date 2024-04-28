@@ -13,7 +13,7 @@ const docker = new Dockerode(
 				return {
 					port: process.env.DOCKER_PORT,
 					protocol: "http",
-					host: process.env.DOCKER_HOST,
+					host: process.env.CONTAINER_HOST,
 				};
 			}
 			default: {

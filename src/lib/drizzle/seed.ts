@@ -18,7 +18,14 @@ const db = drizzle(connection, { schema });
 				category: ["Desktop"],
 				icon: "/images/workspaces/debian.svg",
 			},
+			{
+				dockerImage: "ghcr.io/spaceness/chromium",
+				friendlyName: "Chromium",
+				category: ["Browser"],
+				icon: "/images/workspaces/chromium.svg",
+			},
 		])
+		.onConflictDoNothing()
 		.returning();
 	console.log(insertion);
 	console.log("Seeded image");

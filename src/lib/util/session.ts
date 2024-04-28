@@ -4,19 +4,23 @@ import type Dockerode from "dockerode";
 import { eq } from "drizzle-orm";
 import type { Session } from "next-auth";
 import { getSession } from "./get-session";
-
+const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 async function createSession(Image: string, userSession: Session) {
 	console.log(`Creating session with image ${Image}`);
 	try {
 		if (!userSession || !userSession.user) throw new Error("User not found");
 		if (!process.env.DOCKER_PORT_RANGE) throw new Error("Docker port range not set");
 		const portsRange = process.env.DOCKER_PORT_RANGE.split("-").map(Number);
-		let vncPort: number = Math.floor(Math.random() * (portsRange[1] - portsRange[0] + 1)) + portsRange[0];
+		let vncPort: number = getRandomNumber(portsRange[0], portsRange[1]);
+		let agentPort: number = getRandomNumber(portsRange[0], portsRange[1]);
 		const portInUse = await docker
 			.listContainers({ all: true })
 			.then((containers) => containers.flatMap((container) => container.Ports?.map((port) => port.PublicPort)));
 		while (portInUse.includes(vncPort)) {
-			vncPort = Math.floor(Math.random() * (portsRange[1] - portsRange[0] + 1)) + portsRange[0];
+			vncPort = getRandomNumber(portsRange[0], portsRange[1]);
+		}
+		while (portInUse.includes(agentPort)) {
+			agentPort = getRandomNumber(portsRange[0], portsRange[1]);
 		}
 		const container = await docker
 			.createContainer({
@@ -24,7 +28,8 @@ async function createSession(Image: string, userSession: Session) {
 				Image,
 				HostConfig: {
 					PortBindings: {
-						"5901/tcp": [{ hostIp: "0.0.0.0" }, { HostPort: vncPort.toString() }],
+						"5901/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: vncPort.toString() }],
+						"6080/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: agentPort.toString() }],
 					},
 				},
 			})
@@ -50,6 +55,7 @@ async function createSession(Image: string, userSession: Session) {
 				dockerImage: Image,
 				userId,
 				vncPort,
+				agentPort,
 				createdAt: Date.now(),
 				expiresAt: Date.now() + 1000 * 60 * 60 * 24,
 			})

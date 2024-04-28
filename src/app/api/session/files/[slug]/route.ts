@@ -1,5 +1,3 @@
-import { execSync } from "node:child_process";
-import fs from "node:fs";
 import { getAuthSession } from "@/lib/auth";
 import { getSession } from "@/lib/util/get-session";
 import type { NextRequest } from "next/server";
@@ -7,34 +5,31 @@ import type { NextRequest } from "next/server";
 export async function GET(_req: NextRequest, { params }: { params: { slug: string } }) {
 	const userSession = await getAuthSession();
 	if (!userSession) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
+		return Response.json(["Unauthorized"], { status: 401 });
 	}
-	const { id } = (await getSession(params.slug, userSession)) || {};
+	const { id, agentPort } = (await getSession(params.slug, userSession)) || {};
 	if (!id) {
-		return Response.json({ error: "Not Found" }, { status: 404 });
+		return Response.json(["not found"], { status: 404 });
 	}
-	execSync(`docker exec ${id} mkdir -p /home/stardust/Downloads`);
-	const files = execSync(`docker exec ${id} ls /home/stardust/Downloads`).toString().split("\n").filter(Boolean);
+	const files: string[] = await fetch(`http://${process.env.CONTAINER_HOST}:${agentPort}/files/list`)
+		.then((res) => res.json())
+		.catch(() => [""]);
 	return Response.json(files);
 }
 export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
 	const userSession = await getAuthSession();
-	const { fileName } = await req.json();
+	const fileName = req.nextUrl.searchParams.get("name");
 	if (!userSession) {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
-	const { id } = (await getSession(params.slug, userSession)) || {};
+	const { id, agentPort } = (await getSession(params.slug, userSession)) || {};
 	if (!id) {
 		return Response.json({ error: "Not Found" }, { status: 404 });
 	}
 	try {
-		const dirPath = `${process.cwd()}/.assets/uploads/${id}`;
-		if (!fs.existsSync(dirPath)) {
-			fs.mkdirSync(dirPath, { recursive: true });
-		}
-		execSync(`docker cp "${id}:/home/stardust/Downloads/${fileName}" "${dirPath}/${fileName}"`);
-		const blob = new Blob([fs.readFileSync(`${dirPath}/${fileName}`)]);
-		fs.unlinkSync(`${dirPath}/${fileName}`);
+		const blob = await fetch(`http://${process.env.CONTAINER_HOST}:${agentPort}/files/download/${fileName}`).then(
+			(res) => res.blob(),
+		);
 		return new Response(blob, {
 			headers: {
 				"Content-Disposition": `attachment; filename=${fileName}`,
@@ -53,18 +48,13 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
 	if (!userSession) {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
-	const { id } = (await getSession(params.slug, userSession)) || {};
+	const { id, agentPort } = (await getSession(params.slug, userSession)) || {};
 	if (!id) {
 		return Response.json({ error: "Not Found" }, { status: 404 });
 	}
-	const dirPath = `${process.cwd()}/.assets/uploads/${id}`;
-	if (!fs.existsSync(dirPath)) {
-		fs.mkdirSync(dirPath, { recursive: true });
-	}
-	const path = `${dirPath}/${fileName}`;
-	fs.writeFileSync(path, Buffer.from(buffer));
-	execSync(`docker exec ${id} mkdir -p /home/stardust/Uploads`);
-	execSync(`docker cp "${path}" "${id}:/home/stardust/Uploads/${fileName}"`);
-	fs.unlinkSync(`${dirPath}/${fileName}`);
+	await fetch(`http://${process.env.CONTAINER_HOST}:${agentPort}/files/upload/${fileName}`, {
+		method: "PUT",
+		body: Buffer.from(buffer),
+	});
 	return Response.json({ success: true });
 }

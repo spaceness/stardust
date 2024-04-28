@@ -11,7 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 			.where(eq(userSchema.email, userSession?.user?.email as string))
 	)[0];
 	return (
-		<main className="h-[93vh]">
+		<main className="h-[90vh]">
 			<Navigation dbUser={dbUser} session={userSession} />
 			{children}
 		</main>

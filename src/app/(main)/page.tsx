@@ -13,10 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { getAuthSession } from "@/lib/auth";
 import docker from "@/lib/docker";
-import { db, image, user } from "@/lib/drizzle/db";
+import type Dockerode from "dockerode";
+import { type SelectSession, db, image, user } from "@/lib/drizzle/db";
 import { createSession, deleteSession, manageSession } from "@/lib/util/session";
 import { eq } from "drizzle-orm";
 import { Container, Loader2, Pause, Play, Square, TrashIcon } from "lucide-react";
@@ -25,9 +26,43 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { sessionRunning } from "@/lib/util/session-running";
+import type { Session } from "next-auth";
+import { SkeletionImage } from "@/components/skeleton-image";
 const errorCatcher = (error: string) => {
 	throw new Error(error);
 };
+const ManageSessionButton = ({
+	session,
+	userSession,
+	action,
+	redirectToView,
+	icon,
+}: {
+	session: SelectSession;
+	userSession: Session | null;
+	action: keyof Dockerode.Container;
+	redirectToView?: boolean;
+	icon: React.ReactNode;
+}) => (
+	<form
+		action={async () => {
+			"use server";
+			if (!userSession) return;
+			await manageSession(session.id, action, userSession).catch(errorCatcher);
+			if (redirectToView) {
+				await sessionRunning(session.agentPort);
+				redirect(`/view/${session.id}`);
+			} else {
+				revalidatePath("/");
+			}
+		}}
+	>
+		<StyledSubmit variant="ghost" size="icon" pendingSpinner>
+			{icon}
+		</StyledSubmit>
+	</form>
+);
 export default async function Dashboard() {
 	const userSession = await getAuthSession();
 	const images = await db.select().from(image).catch(errorCatcher);
@@ -89,7 +124,7 @@ export default async function Dashboard() {
 														throw new Error(e);
 													});
 													if (!containerSession) return;
-													redirect(`/view/${containerSession[0].id}?nocheck=true`);
+													redirect(`/view/${containerSession[0].id}`);
 												}}
 											>
 												<DialogHeader>
@@ -143,10 +178,10 @@ export default async function Dashboard() {
 													</p>
 												</div>
 											</section>
-											{session.imagePreview ? (
+											{!State.Paused && State.Running ? (
 												<AspectRatio ratio={16 / 9}>
-													<Image
-														src={session.imagePreview}
+													<SkeletionImage
+														src={`/api/session/preview/${session.id}`}
 														fill
 														alt=""
 														className="object-fill rounded-sm md:h-[6.5rem] md:w-[13rem] h-[3.25rem] w-[6.5rem]"
@@ -159,11 +194,10 @@ export default async function Dashboard() {
 											)}
 											<div className="flex w-full flex-row items-center justify-center gap-x-2">
 												{!State.Paused && State.Running ? (
-													<StyledSubmit variant="ghost" size="icon" pendingSpinner>
+													<StyledSubmit variant="ghost" size="icon" pendingSpinner asChild>
 														<Link
 															href={{
 																pathname: `/view/${session.id}`,
-																query: { nocheck: true },
 															}}
 														>
 															<Play />
@@ -171,59 +205,28 @@ export default async function Dashboard() {
 													</StyledSubmit>
 												) : null}
 												{!State.Paused && State.Running ? (
-													<form
-														action={async () => {
-															"use server";
-															if (!userSession) return;
-															await manageSession(session.id, "pause", userSession).catch(errorCatcher);
-															revalidatePath("/");
-														}}
-													>
-														<StyledSubmit variant="ghost" size="icon" pendingSpinner>
-															<Pause />
-														</StyledSubmit>
-													</form>
+													<ManageSessionButton
+														action="pause"
+														icon={<Pause />}
+														session={session}
+														userSession={userSession}
+													/>
 												) : State.Paused ? (
-													<form
-														action={async () => {
-															"use server";
-															if (!userSession) return;
-															await manageSession(session.id, "unpause", userSession).catch(errorCatcher);
-															redirect(`/view/${session.id}?nocheck=true`);
-														}}
-													>
-														<StyledSubmit variant="ghost" size="icon" pendingSpinner>
-															<Play />
-														</StyledSubmit>
-													</form>
+													<ManageSessionButton
+														action="unpause"
+														icon={<Play />}
+														redirectToView
+														session={session}
+														userSession={userSession}
+													/>
 												) : null}
-												{!State.Running ? (
-													<form
-														action={async () => {
-															"use server";
-															if (!userSession) return;
-															await manageSession(session.id, "start", userSession).catch(errorCatcher);
-															redirect(`/view/${session.id}?nocheck=true`);
-														}}
-													>
-														<StyledSubmit variant="ghost" size="icon" pendingSpinner>
-															<Play />
-														</StyledSubmit>
-													</form>
-												) : State.Running ? (
-													<form
-														action={async () => {
-															"use server";
-															if (!userSession) return;
-															await manageSession(session.id, "stop", userSession).catch(errorCatcher);
-															revalidatePath("/");
-														}}
-													>
-														<StyledSubmit variant="ghost" size="icon" pendingSpinner>
-															<Square className="text-destructive" />
-														</StyledSubmit>
-													</form>
-												) : null}
+												<ManageSessionButton
+													action={State.Running ? "stop" : "start"}
+													redirectToView={!State.Running}
+													icon={State.Running ? <Square className="text-destructive" /> : <Play />}
+													session={session}
+													userSession={userSession}
+												/>
 												<form
 													action={async () => {
 														"use server";
@@ -241,10 +244,10 @@ export default async function Dashboard() {
 									);
 								})
 							) : (
-								<div className="flex items-center justify-center flex-col w-full h-full bg-background/75 backdrop-blur-md p-24 rounded-md">
-									<p className="text-lg text-foreground">No sessions found</p>
+								<Card className="flex items-center justify-center flex-col w-full h-full bg-background/75 backdrop-blur-md p-24">
+									<CardTitle className="text-lg text-foreground">No sessions found</CardTitle>
 									<p className="text-xs text-muted-foreground">Start a new session to see it here</p>
-								</div>
+								</Card>
 							)}
 						</Suspense>
 					</TabsContent>

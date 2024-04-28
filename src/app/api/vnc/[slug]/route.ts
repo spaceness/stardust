@@ -6,11 +6,12 @@ import net from "node:net";
 import { getSession } from "next-auth/react";
 import type { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
+import { sessionRunning } from "@/lib/util/session-running";
 
 export async function GET(_req: NextRequest, { params }: { params: { slug: string } }) {
 	const userSession = await getAuthSession();
 	if (!userSession || !userSession.user) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
+		return Response.json({ error: "Unauthorized", exists: false }, { status: 401 });
 	}
 	const containerSession = await getContainerSession(params.slug, userSession);
 	if (!containerSession) {
@@ -21,7 +22,11 @@ export async function GET(_req: NextRequest, { params }: { params: { slug: strin
 	if (!State.Running) {
 		await container.start();
 	}
-	return Response.json({ exists: true, paused: State.Paused });
+	await sessionRunning(containerSession.agentPort);
+	const password = await fetch(`http://${process.env.CONTAINER_HOST}:${containerSession.agentPort}/password`).then(
+		(res) => res.text(),
+	);
+	return Response.json({ exists: true, paused: State.Paused, password, url: `/api/vnc/${containerSession.id}` });
 }
 
 export async function SOCKET(ws: WebSocket, req: IncomingMessage, _server: WebSocketServer) {
