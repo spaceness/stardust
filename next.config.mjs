@@ -1,7 +1,6 @@
 // @ts-check
-import { verifyPatch } from "next-ws/server/index.js";
-
-verifyPatch();
+import { execSync } from "node:child_process";
+await import("next-ws/server/index.js").then((m) => m.verifyPatch());
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
@@ -14,8 +13,13 @@ const nextConfig = {
 			},
 		],
 	},
+	env: {
+		GIT_COMMIT: execSync("git rev-parse HEAD").toString().trim(),
+		BUILD_DATE: Date.now().toString(),
+	},
 	experimental: {
 		typedRoutes: true,
+		instrumentationHook: true,
 		serverActions: {
 			allowedOrigins: ["localhost:3000", "*.use.devtunnels.ms"],
 		},

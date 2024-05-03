@@ -52,10 +52,10 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 		},
 	];
 	return (
-		<nav className="flex h-16 min-w-full items-center justify-between bg-transparent px-6">
-			<div className="flex items-center justify-start">
+		<nav className="flex h-16 min-w-full items-center justify-between bg-transparent p-4">
+			<div className="flex items-center justify-start gap-2">
 				<Sparkles />
-				<span className="ml-2 mr-4 text-2xl font-bold md:block hidden">Stardust</span>
+				<span className="text-2xl font-bold md:block hidden mr-2">Stardust</span>
 				<NavigationMenu className="flex items-center justify-start">
 					<NavigationMenuList>
 						{navigationItems.map((item) => (
@@ -74,7 +74,7 @@ export default function Navigation({ dbUser, session }: { dbUser: SelectUser; se
 					</NavigationMenuList>
 				</NavigationMenu>
 			</div>
-			<div className="flex justify-end gap-4">
+			<div className="flex justify-end">
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<Avatar>

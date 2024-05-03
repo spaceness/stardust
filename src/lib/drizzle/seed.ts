@@ -28,7 +28,7 @@ const db = drizzle(connection, { schema });
 		.onConflictDoNothing()
 		.returning();
 	console.log(insertion);
-	console.log("Seeded image");
+	console.log("✨ Stardust INFO: Seeded image");
 	connection.end();
 	process.exit();
 })();

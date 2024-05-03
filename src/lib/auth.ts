@@ -1,5 +1,6 @@
 import { db, user } from "@/lib/drizzle/db";
-import { type NextAuthOptions, getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
+import type { NextAuthOptions, Session } from "next-auth";
 import Auth0 from "next-auth/providers/auth0";
 
 const authConfig: NextAuthOptions = {
@@ -26,5 +27,5 @@ const authConfig: NextAuthOptions = {
 		}),
 	],
 };
-const getAuthSession = () => getServerSession(authConfig);
+const getAuthSession = () => getServerSession(authConfig) as Promise<Session>;
 export { authConfig, getAuthSession };

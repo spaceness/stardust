@@ -1,18 +1,15 @@
 import { getAuthSession } from "@/lib/auth";
 import docker from "@/lib/docker";
-import { getSession as getContainerSession } from "@/lib/util/get-session";
+import { getSession as getContainerSession } from "@/lib/session/get-session";
 import type { IncomingMessage } from "node:http";
 import net from "node:net";
 import { getSession } from "next-auth/react";
 import type { NextRequest } from "next/server";
 import type { WebSocket, WebSocketServer } from "ws";
-import { sessionRunning } from "@/lib/util/session-running";
+import { sessionRunning } from "@/lib/session/session-running";
 
 export async function GET(_req: NextRequest, { params }: { params: { slug: string } }) {
 	const userSession = await getAuthSession();
-	if (!userSession || !userSession.user) {
-		return Response.json({ error: "Unauthorized", exists: false }, { status: 401 });
-	}
 	const containerSession = await getContainerSession(params.slug, userSession);
 	if (!containerSession) {
 		return Response.json({ exists: false, error: "Container not found" }, { status: 404 });
@@ -50,7 +47,7 @@ export async function SOCKET(ws: WebSocket, req: IncomingMessage, _server: WebSo
 		tcpSocket.write(message);
 	});
 	ws.on("close", (code, reason) => {
-		console.log(`Connection closed due to ${reason} with code ${code}`);
+		console.log(`✨ Stardust INFO: Connection closed due to ${reason} with code ${code}`);
 		tcpSocket.end();
 	});
 

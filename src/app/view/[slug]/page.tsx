@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteSession, manageSession } from "@/actions/client-session";
+import { deleteSession, manageSession } from "@/lib/session";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	AlertDialog,
@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { VncViewerHandle } from "@/components/vnc-screen";
 import { fetcher } from "@/lib/utils";
 import {
+	AlertCircle,
 	ChevronRight,
 	Clipboard,
 	Download,
@@ -52,7 +53,7 @@ import useSWR, { useSWRConfig } from "swr";
 import Link from "next/link";
 type ScalingValues = "remote" | "local" | "none";
 const Loading = ({ text }: { text: string }) => (
-	<Card className="flex absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 flex-col items-center justify-center gap-2 backdrop-blur-sm size-72 bg-background/75">
+	<Card className="flex absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 flex-col items-center justify-center gap-2 size-72">
 		<Sparkles className="size-16 animate-pulse" />
 		<h1 className="text-xl font-semibold">{text}</h1>
 	</Card>
@@ -86,7 +87,7 @@ export default function View({ params }: { params: { slug: string } }) {
 		data: filesList,
 		error: filesError,
 		isLoading: filesLoading,
-	} = useSWR<string[]>(`/api/session/files/${params.slug}`, fetcher, { refreshInterval: 10000 });
+	} = useSWR<string[]>(`/api/session/${params.slug}/files`, fetcher, { refreshInterval: 10000 });
 	useEffect(() => {
 		if (!session)
 			fetch(`/api/vnc/${params.slug}`)
@@ -126,35 +127,37 @@ export default function View({ params }: { params: { slug: string } }) {
 		return () => clearInterval(interval);
 	}, [connected, clipboard]);
 	useEffect(() => {
+		const interval = setInterval(() => {
+			if (connected && document.hasFocus()) fetch(`/api/session/${params.slug}/keepalive`, { method: "POST" });
+		}, 10000);
+		return () => clearInterval(interval);
+	});
+	useEffect(() => {
 		if (document.fullscreenElement === null && fullScreen) {
 			document.documentElement.requestFullscreen();
 		} else if (document.fullscreenElement !== null && !fullScreen) {
 			document.exitFullscreen();
 		}
 	}, [fullScreen]);
-	// biome-ignore lint:
-	useEffect(() => {
-		if (sidebarOpen) {
-			mutate(`/api/session/files/${params.slug}`);
-		}
-		if (!session) {
-			setSidebarOpen(false);
-		}
-	}, [sidebarOpen, session]);
 	return (
 		<div className="h-screen w-screen">
 			{connected ? (
 				<Button
 					size="icon"
-					className={`absolute left-0 right-2 top-1/2 z-40 h-16 w-8 rounded-l-none border-l-0 bg-primary/70 backdrop-blur-md ${
-						sidebarOpen && "hidden"
-					}`}
+					hidden={sidebarOpen}
+					className="absolute left-0 right-2 top-1/2 z-40 h-16 w-8 rounded-l-none border-l-0 bg-primary/70 backdrop-blur-md"
 					onClick={() => setSidebarOpen((prev) => !prev)}
 				>
 					<ChevronRight />
 				</Button>
 			) : null}
-			<Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+			<Sheet
+				open={sidebarOpen}
+				onOpenChange={(value) => {
+					setSidebarOpen(value);
+					mutate(`/api/session/${params.slug}/files`);
+				}}
+			>
 				<SheetContent
 					side="left"
 					className="z-50 flex flex-col overflow-y-auto overflow-x-clip bg-background/75 backdrop-blur-lg"
@@ -166,11 +169,11 @@ export default function View({ params }: { params: { slug: string } }) {
 						</SheetDescription>
 					</SheetHeader>
 					<div className="flex flex-col gap-4">
-						<section className="grid grid-cols-2 gap-2">
+						<section className="grid sm:grid-cols-2 gap-2 grid-cols-1">
 							<Button
 								className="w-[98%]"
 								onClick={() => {
-									setSession(null);
+									setSidebarOpen(false);
 									vncRef.current?.rfb?.disconnect();
 									router.push("/");
 								}}
@@ -182,8 +185,7 @@ export default function View({ params }: { params: { slug: string } }) {
 								className="w-[98%]"
 								onClick={() => {
 									vncRef.current?.rfb?.disconnect();
-									setSession(null);
-									toast.promise(() => manageSession(params.slug, "pause", true), {
+									toast.promise(() => manageSession(params.slug, "pause").then(() => router.push("/")), {
 										loading: "Pausing container...",
 										success: "Session paused",
 										error: "Failed to pause container",
@@ -196,7 +198,7 @@ export default function View({ params }: { params: { slug: string } }) {
 							<Button
 								className="w-[98%]"
 								onClick={() => {
-									toast.promise(() => manageSession(params.slug, "restart", false), {
+									toast.promise(() => manageSession(params.slug, "restart"), {
 										loading: "Restarting container...",
 										success: "Session restarted",
 										error: "Failed to restart container",
@@ -226,8 +228,8 @@ export default function View({ params }: { params: { slug: string } }) {
 										<AlertDialogAction
 											asChild
 											onClick={() => {
-												setSession(null);
-												toast.promise(() => deleteSession(params.slug), {
+												vncRef.current?.rfb?.disconnect();
+												toast.promise(() => deleteSession(params.slug).then(() => router.push("/")), {
 													loading: "Deleting session...",
 													success: "Session deleted",
 													error: "Failed to delete session",
@@ -324,50 +326,45 @@ export default function View({ params }: { params: { slug: string } }) {
 								</AccordionTrigger>
 								<AccordionContent className="flex flex-col gap-2">
 									<p className="text-muted-foreground">Files in the session's Downloads folder will appear here.</p>
-									{!filesError && filesList?.length !== 0 ? (
+									{!filesError ? (
 										!filesLoading ? (
-											filesList?.map((file) => (
-												<Card key={file} className="flex justify-between items-center p-4 h-16 w-full gap-2">
-													<File className="size-5 flex-shrink-0" />
-													<span className="text-sm">{file}</span>
-													<Button
-														size="icon"
-														className="flex-shrink-0"
-														onClick={() => {
-															toast.promise(
-																() =>
-																	fetch(`/api/session/files/${params.slug}?name=${file}`, {
-																		method: "POST",
-																	})
-																		.then((res) => res.blob())
-																		.then((blob) => {
-																			const url = URL.createObjectURL(blob);
-																			const a = document.createElement("a");
-																			a.href = url;
-																			a.download = file;
-																			a.click();
-																			URL.revokeObjectURL(url);
-																		}),
-																{
-																	loading: "Downloading file...",
-																	success: "File downloaded",
-																	error: "Failed to download file",
-																},
-															);
-														}}
-													>
-														<Download className="size-5" />
-													</Button>
-												</Card>
-											))
+											filesList && filesList?.length > 0 ? (
+												filesList.map((file) => (
+													<Card key={file} className="flex justify-between items-center p-4 h-16 w-full gap-2">
+														<File className="size-5 flex-shrink-0" />
+														<span className="text-sm truncate overflow-x-scroll">{file}</span>
+														<Button size="icon" className="flex-shrink-0" asChild>
+															<Link
+																download={file}
+																href={{
+																	pathname: `/api/session/${params.slug}/files`,
+																	query: { name: file },
+																}}
+															>
+																<Download />
+															</Link>
+														</Button>
+													</Card>
+												))
+											) : (
+												<Alert>
+													<Info className="size-4" />
+													<AlertTitle>No files found</AlertTitle>
+													<AlertDescription>Is your Downloads folder empty?</AlertDescription>
+												</Alert>
+											)
 										) : (
-											<Skeleton className="w-full h-16" />
+											<Skeleton className="h-16 w-full" />
 										)
 									) : (
-										<Alert>
-											<Info className="size-4" />
-											<AlertTitle>No files found</AlertTitle>
-											<AlertDescription>Is your Downloads folder empty?</AlertDescription>
+										<Alert variant="destructive">
+											<AlertCircle className="size-4" />
+											<AlertTitle>Error</AlertTitle>
+											<AlertDescription>
+												Failed to fetch files:
+												<br />
+												<code className="font-mono font-semibold">{filesError.message}</code>
+											</AlertDescription>
 										</Alert>
 									)}
 								</AccordionContent>
@@ -384,12 +381,12 @@ export default function View({ params }: { params: { slug: string } }) {
 									<Input
 										type="file"
 										onChange={(e) => {
-											const file = e.target.files?.[0];
-											if (file) {
+											const [file] = e.target.files || [];
+											if (file)
 												file.arrayBuffer().then((buffer) => {
 													toast.promise(
 														() =>
-															fetch(`/api/session/files/${params.slug}?name=${file.name}`, {
+															fetch(`/api/session/${params.slug}/files?name=${file.name}`, {
 																method: "PUT",
 																body: buffer,
 															}),
@@ -400,7 +397,6 @@ export default function View({ params }: { params: { slug: string } }) {
 														},
 													);
 												});
-											}
 										}}
 									/>
 								</AccordionContent>
@@ -480,8 +476,14 @@ export default function View({ params }: { params: { slug: string } }) {
 										setConnected(true);
 										toast.success(`Connected to session ${params.slug.slice(0, 6)}`);
 									}}
-									onDisconnect={() => setConnected(false)}
-									onSecurityFailure={() => setSession(null)}
+									onDisconnect={() => {
+										setConnected(false);
+										setSidebarOpen(false);
+									}}
+									onSecurityFailure={() => {
+										setSession(null);
+										setSidebarOpen(false);
+									}}
 									ref={vncRef}
 									rfbOptions={{
 										credentials: {
@@ -502,7 +504,7 @@ export default function View({ params }: { params: { slug: string } }) {
 									<Button
 										onClick={() => {
 											setSession({ ...session, paused: false });
-											manageSession(params.slug, "unpause", false);
+											manageSession(params.slug, "unpause");
 											toast.info("Session unpaused");
 										}}
 									>

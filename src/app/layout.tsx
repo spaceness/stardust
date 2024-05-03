@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { Toaster } from "@/components/ui/sonner";
 import { getAuthSession } from "@/lib/auth";
 import type { Metadata } from "next";
@@ -27,15 +26,9 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const config = JSON.parse(readFileSync(`${process.cwd()}/config.json`, "utf-8"));
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body
-				className={`${inter.className} ${jetbrains.variable}  bg-center bg-fixed bg-cover`}
-				style={{
-					backgroundImage: `url(${config.style.backgroundImage})`,
-				}}
-			>
+			<body className={`${inter.className} ${jetbrains.variable}`}>
 				<Session session={await getAuthSession()}>
 					<ThemeProvider
 						attribute="class"

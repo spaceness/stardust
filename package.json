@@ -1,6 +1,6 @@
 {
 	"name": "stardust",
-	"version": "0.1.0",
+	"version": "0.5.0-alpha",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -39,7 +39,7 @@
 		"dotenv": "^16.4.5",
 		"drizzle-orm": "^0.30.4",
 		"lucide-react": "^0.358.0",
-		"next": "14.2.2",
+		"next": "14.2.3",
 		"next-auth": "4.24.7",
 		"next-themes": "^0.3.0",
 		"next-ws": "^1.0.1",

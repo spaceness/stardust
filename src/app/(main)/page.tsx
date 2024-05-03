@@ -18,29 +18,25 @@ import { getAuthSession } from "@/lib/auth";
 import docker from "@/lib/docker";
 import type Dockerode from "dockerode";
 import { type SelectSession, db, image, user } from "@/lib/drizzle/db";
-import { createSession, deleteSession, manageSession } from "@/lib/util/session";
+import { createSession, deleteSession, manageSession } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { Container, Loader2, Pause, Play, Square, TrashIcon } from "lucide-react";
-import { revalidatePath } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { sessionRunning } from "@/lib/util/session-running";
-import type { Session } from "next-auth";
 import { SkeletionImage } from "@/components/skeleton-image";
+import { CreateSessionButton } from "@/components/create-session-button";
 const errorCatcher = (error: string) => {
 	throw new Error(error);
 };
 const ManageSessionButton = ({
 	session,
-	userSession,
 	action,
 	redirectToView,
 	icon,
 }: {
 	session: SelectSession;
-	userSession: Session | null;
 	action: keyof Dockerode.Container;
 	redirectToView?: boolean;
 	icon: React.ReactNode;
@@ -48,14 +44,8 @@ const ManageSessionButton = ({
 	<form
 		action={async () => {
 			"use server";
-			if (!userSession) return;
-			await manageSession(session.id, action, userSession).catch(errorCatcher);
-			if (redirectToView) {
-				await sessionRunning(session.agentPort);
-				redirect(`/view/${session.id}`);
-			} else {
-				revalidatePath("/");
-			}
+			await manageSession(session.id, action).catch(errorCatcher);
+			if (redirectToView) redirect(`/view/${session.id}`);
 		}}
 	>
 		<StyledSubmit variant="ghost" size="icon" pendingSpinner>
@@ -99,7 +89,7 @@ export default async function Dashboard() {
 										<DialogTrigger asChild>
 											<Card
 												key={image.dockerImage}
-												className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 bg-background/75 p-2 backdrop-blur-md duration-150 hover:bg-muted md:w-56 md:flex-row"
+												className="m-2 flex h-24 w-24 cursor-pointer flex-col items-center justify-start gap-2 p-2 duration-150 hover:bg-muted md:w-56 md:flex-row"
 											>
 												<Image
 													priority={true}
@@ -116,31 +106,18 @@ export default async function Dashboard() {
 											</Card>
 										</DialogTrigger>
 										<DialogContent className="flex md:flex-col flex-row justify-center gap-2">
-											<form
-												action={async () => {
-													"use server";
-													if (!userSession) return;
-													const containerSession = await createSession(image.dockerImage, userSession).catch((e) => {
-														throw new Error(e);
-													});
-													if (!containerSession) return;
-													redirect(`/view/${containerSession[0].id}`);
-												}}
-											>
-												<DialogHeader>
-													<DialogTitle>Launch session</DialogTitle>
-													<DialogDescription>Start a new {image.friendlyName} session?</DialogDescription>
-												</DialogHeader>
-												<DialogFooter>
-													<DialogClose asChild>
-														<Button type="button" variant="secondary" className="hidden md:block">
-															Close
-														</Button>
-													</DialogClose>
-
-													<StyledSubmit>Launch</StyledSubmit>
-												</DialogFooter>
-											</form>
+											<DialogHeader>
+												<DialogTitle>Launch session</DialogTitle>
+												<DialogDescription>Start a new {image.friendlyName} session?</DialogDescription>
+											</DialogHeader>
+											<DialogFooter>
+												<DialogClose asChild>
+													<Button type="button" variant="secondary" className="hidden md:block">
+														Close
+													</Button>
+												</DialogClose>
+												<CreateSessionButton image={image.dockerImage} />
+											</DialogFooter>
 										</DialogContent>
 									</Dialog>
 								))}
@@ -155,7 +132,7 @@ export default async function Dashboard() {
 									const expiresAt = new Date(session.expiresAt);
 									return (
 										<Card
-											className="items-between m-2 flex h-auto w-[16rem] flex-col justify-between gap-2 bg-background/75 p-2 backdrop-blur-md md:w-56"
+											className="items-between m-2 flex h-auto w-[16rem] flex-col justify-between gap-2 p-2 md:w-56"
 											key={session.id}
 										>
 											<section className="flex flex-row items-center justify-between gap-6">
@@ -181,7 +158,7 @@ export default async function Dashboard() {
 											{!State.Paused && State.Running ? (
 												<AspectRatio ratio={16 / 9}>
 													<SkeletionImage
-														src={`/api/session/preview/${session.id}`}
+														src={`/api/session/${session.id}/preview`}
 														fill
 														alt=""
 														className="object-fill rounded-sm md:h-[6.5rem] md:w-[13rem] h-[3.25rem] w-[6.5rem]"
@@ -195,29 +172,17 @@ export default async function Dashboard() {
 											<div className="flex w-full flex-row items-center justify-center gap-x-2">
 												{!State.Paused && State.Running ? (
 													<StyledSubmit variant="ghost" size="icon" pendingSpinner asChild>
-														<Link
-															href={{
-																pathname: `/view/${session.id}`,
-															}}
-														>
+														<Link href={`/view/${session.id}`}>
 															<Play />
 														</Link>
 													</StyledSubmit>
 												) : null}
-												{!State.Paused && State.Running ? (
+												{State.Running ? (
 													<ManageSessionButton
-														action="pause"
-														icon={<Pause />}
+														action={State.Paused ? "unpause" : "pause"}
+														redirectToView={State.Paused}
+														icon={State.Paused ? <Play /> : <Pause />}
 														session={session}
-														userSession={userSession}
-													/>
-												) : State.Paused ? (
-													<ManageSessionButton
-														action="unpause"
-														icon={<Play />}
-														redirectToView
-														session={session}
-														userSession={userSession}
 													/>
 												) : null}
 												<ManageSessionButton
@@ -225,14 +190,11 @@ export default async function Dashboard() {
 													redirectToView={!State.Running}
 													icon={State.Running ? <Square className="text-destructive" /> : <Play />}
 													session={session}
-													userSession={userSession}
 												/>
 												<form
 													action={async () => {
 														"use server";
-														if (!userSession) return;
-														await deleteSession(session.id, userSession).catch(errorCatcher);
-														revalidatePath("/");
+														await deleteSession(session.id).catch(errorCatcher);
 													}}
 												>
 													<StyledSubmit variant="destructive" size="icon" pendingSpinner>
@@ -244,10 +206,10 @@ export default async function Dashboard() {
 									);
 								})
 							) : (
-								<Card className="flex items-center justify-center flex-col w-full h-full bg-background/75 backdrop-blur-md p-24">
+								<div className="flex items-center justify-center flex-col w-full h-full  p-24">
 									<CardTitle className="text-lg text-foreground">No sessions found</CardTitle>
 									<p className="text-xs text-muted-foreground">Start a new session to see it here</p>
-								</Card>
+								</div>
 							)}
 						</Suspense>
 					</TabsContent>
