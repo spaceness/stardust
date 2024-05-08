@@ -1,14 +1,16 @@
 import { getAuthSession } from "@/lib/auth";
 import { getSession } from "@/lib/session/get-session";
+import { sessionRunning } from "@/lib/session/session-running";
 import type { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
 	const userSession = await getAuthSession();
 	const fileName = req.nextUrl.searchParams.get("name");
 	const { id, agentPort } = (await getSession(params.slug, userSession)) || {};
-	if (!id) {
+	if (!id || !agentPort) {
 		return Response.json(["not found"], { status: 404 });
 	}
+	await sessionRunning(agentPort);
 	if (fileName) {
 		try {
 			const download = await fetch(`http://${process.env.CONTAINER_HOST}:${agentPort}/files/download/${fileName}`);

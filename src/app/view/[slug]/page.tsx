@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteSession, manageSession } from "@/lib/session";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	AlertDialog,
@@ -14,6 +13,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { deleteSession, manageSession } from "@/lib/session";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,7 @@ import type { VncViewerHandle } from "@/components/vnc-screen";
 import { fetcher } from "@/lib/utils";
 import {
 	AlertCircle,
+	Camera,
 	ChevronRight,
 	Clipboard,
 	Download,
@@ -43,14 +44,15 @@ import {
 	RotateCw,
 	ScreenShareOff,
 	Sparkles,
+	Square,
 	TrashIcon,
 	Upload,
 } from "lucide-react";
-import { notFound, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import useSWR, { useSWRConfig } from "swr";
-import Link from "next/link";
+import useSWR from "swr";
 type ScalingValues = "remote" | "local" | "none";
 const Loading = ({ text }: { text: string }) => (
 	<Card className="flex absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 flex-col items-center justify-center gap-2 size-72">
@@ -61,17 +63,9 @@ const Loading = ({ text }: { text: string }) => (
 const VncScreen = lazy(() => import("@/components/vnc-screen"));
 export default function View({ params }: { params: { slug: string } }) {
 	const vncRef = useRef<VncViewerHandle>(null);
-	const [session, setSession] = useState<{
-		exists: boolean;
-		url: string | null;
-		error?: string;
-		paused?: boolean;
-		password?: string;
-	} | null>(null);
 	const [connected, setConnected] = useState(false);
 	const [fullScreen, setFullScreen] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
-	const [accordionValue, setAccordionValue] = useState<string | undefined>(undefined);
 	const [workingClipboard, setWorkingClipboard] = useState(true);
 	// noVNC options start
 	const [clipboard, setClipboard] = useState("");
@@ -82,21 +76,28 @@ export default function View({ params }: { params: { slug: string } }) {
 	const [scaling, setScaling] = useState<ScalingValues>("remote");
 	// noVNC options end
 	const router = useRouter();
-	const { mutate } = useSWRConfig();
+	const {
+		data: session,
+		error: sessionError,
+		isLoading: sessionLoading,
+		mutate: sessionMutate,
+	} = useSWR<{
+		exists: boolean;
+		url: string | null;
+		error?: string;
+		password?: string;
+	} | null>(`/api/session/${params.slug}`, fetcher, {
+		onErrorRetry: (error, _key, _config, revalidate, { retryCount }) => {
+			if (error.status === 404) return;
+			setTimeout(() => revalidate({ retryCount }), 1000);
+		},
+	});
 	const {
 		data: filesList,
 		error: filesError,
 		isLoading: filesLoading,
+		mutate: filesMutate,
 	} = useSWR<string[]>(`/api/session/${params.slug}/files`, fetcher, { refreshInterval: 10000 });
-	useEffect(() => {
-		if (!session)
-			fetch(`/api/vnc/${params.slug}`)
-				.then((res) => res.json())
-				.then((data) => {
-					setSession(data);
-				})
-				.catch(() => {});
-	}, [session, params.slug]);
 	useEffect(() => {
 		if (connected && vncRef.current?.rfb) {
 			vncRef.current.rfb.viewOnly = viewOnly;
@@ -107,10 +108,14 @@ export default function View({ params }: { params: { slug: string } }) {
 			vncRef.current.rfb.scaleViewport = scaling === "local";
 		}
 	}, [connected, viewOnly, qualityLevel, compressionLevel, scaling, clipViewport]);
+	// why did i even use swr for this raaaaaaah
+	useEffect(() => {
+		if (!session) sessionMutate();
+	}, [session, sessionMutate]);
 	// jank, but it works ¯\_(ツ)_/¯
 	useEffect(() => {
 		const interval = setInterval(() => {
-			if (connected && vncRef.current?.rfb && document.hasFocus()) {
+			if (connected && vncRef.current?.rfb && document.hasFocus() && !sidebarOpen) {
 				vncRef.current.rfb.focus();
 				navigator.clipboard
 					.readText()
@@ -125,13 +130,13 @@ export default function View({ params }: { params: { slug: string } }) {
 			}
 		}, 250);
 		return () => clearInterval(interval);
-	}, [connected, clipboard]);
+	}, [connected, clipboard, sidebarOpen]);
 	useEffect(() => {
 		const interval = setInterval(() => {
 			if (connected && document.hasFocus()) fetch(`/api/session/${params.slug}/keepalive`, { method: "POST" });
 		}, 10000);
 		return () => clearInterval(interval);
-	});
+	}, [connected, params.slug]);
 	useEffect(() => {
 		if (document.fullscreenElement === null && fullScreen) {
 			document.documentElement.requestFullscreen();
@@ -140,7 +145,7 @@ export default function View({ params }: { params: { slug: string } }) {
 		}
 	}, [fullScreen]);
 	return (
-		<div className="h-screen w-screen">
+		<div className="h-screen w-screen justify-center items-center flex">
 			{connected ? (
 				<Button
 					size="icon"
@@ -155,7 +160,7 @@ export default function View({ params }: { params: { slug: string } }) {
 				open={sidebarOpen}
 				onOpenChange={(value) => {
 					setSidebarOpen(value);
-					mutate(`/api/session/${params.slug}/files`);
+					filesMutate();
 				}}
 			>
 				<SheetContent
@@ -183,30 +188,43 @@ export default function View({ params }: { params: { slug: string } }) {
 							</Button>
 							<Button
 								className="w-[98%]"
-								onClick={() => {
-									vncRef.current?.rfb?.disconnect();
+								onClick={() =>
 									toast.promise(() => manageSession(params.slug, "pause").then(() => router.push("/")), {
 										loading: "Pausing container...",
 										success: "Session paused",
 										error: "Failed to pause container",
-									});
-								}}
+									})
+								}
 							>
 								<Pause className="mr-2 size-5 flex-shrink-0" />
 								Pause Session
 							</Button>
+
 							<Button
 								className="w-[98%]"
-								onClick={() => {
+								onClick={() =>
 									toast.promise(() => manageSession(params.slug, "restart"), {
 										loading: "Restarting container...",
 										success: "Session restarted",
 										error: "Failed to restart container",
-									});
-								}}
+									})
+								}
 							>
 								<RotateCw className="mr-2 size-5 flex-shrink-0" />
 								Restart Session
+							</Button>
+							<Button
+								className="w-[98%]"
+								onClick={() =>
+									toast.promise(() => manageSession(params.slug, "stop").then(() => router.push("/")), {
+										loading: "Stopping container...",
+										success: "Session stopped",
+										error: "Failed to stop container",
+									})
+								}
+							>
+								<Square className="mr-2 size-5 flex-shrink-0 text-destructive" />
+								Stop Session
 							</Button>
 							<AlertDialog>
 								<AlertDialogTrigger asChild>
@@ -247,6 +265,15 @@ export default function View({ params }: { params: { slug: string } }) {
 									Log Out
 								</Link>
 							</Button>
+							<Button asChild className="w-[98%]" variant="secondary">
+								<Link
+									href={`/api/session/${params.slug}/preview`}
+									download={`stardust-${params.slug.slice(0, 6)}-${new Date().toLocaleDateString("en-us")}`}
+									target="_blank"
+								>
+									<Camera className="mr-2 size-5 flex-shrink-0" /> Take Screenshot
+								</Link>
+							</Button>
 							<Button className="w-[98%]" variant="secondary" onClick={() => setFullScreen(!fullScreen)}>
 								{fullScreen ? (
 									<>
@@ -261,13 +288,7 @@ export default function View({ params }: { params: { slug: string } }) {
 								)}
 							</Button>
 						</section>
-						<Accordion
-							type="single"
-							collapsible
-							className="w-full"
-							onValueChange={setAccordionValue}
-							value={accordionValue}
-						>
+						<Accordion type="single" collapsible className="w-full">
 							<AccordionItem value="clipboard">
 								<AccordionTrigger>
 									<div className="p-2 rounded">
@@ -282,11 +303,9 @@ export default function View({ params }: { params: { slug: string } }) {
 										spellCheck={false}
 										autoCorrect="off"
 										autoCapitalize="off"
-										value={!workingClipboard ? clipboard : undefined}
+										value={clipboard}
 										disabled={workingClipboard}
-										placeholder={
-											workingClipboard ? "Clipboard is already synced" : "Paste here to send to remote machine"
-										}
+										placeholder="Paste here to send to remote machine"
 										onChange={(e) => {
 											if (vncRef.current?.rfb) {
 												setClipboard(e.target.value);
@@ -393,7 +412,7 @@ export default function View({ params }: { params: { slug: string } }) {
 														{
 															loading: "Uploading file...",
 															success: "File uploaded",
-															error: "Failed to upload file",
+															error: (error) => `Failed to upload file: ${error.message}`,
 														},
 													);
 												});
@@ -458,67 +477,62 @@ export default function View({ params }: { params: { slug: string } }) {
 					</div>
 				</SheetContent>
 			</Sheet>
-			{session ? (
-				session.exists ? (
-					session.url && session.password ? (
-						!session.paused ? (
-							<Suspense fallback={<Loading text="Loading" />}>
-								<VncScreen
-									url={session.url}
-									loader={<Loading text="Connecting" />}
-									onClipboard={(e) => {
-										if (e?.detail.text) {
-											setClipboard(e.detail.text);
-											navigator.clipboard.writeText(e.detail.text).catch(() => setWorkingClipboard(false));
-										}
-									}}
-									onConnect={() => {
-										setConnected(true);
-										toast.success(`Connected to session ${params.slug.slice(0, 6)}`);
-									}}
-									onDisconnect={() => {
-										setConnected(false);
-										setSidebarOpen(false);
-									}}
-									onSecurityFailure={() => {
-										setSession(null);
-										setSidebarOpen(false);
-									}}
-									ref={vncRef}
-									rfbOptions={{
-										credentials: {
-											username: "",
-											password: session.password,
-											target: "",
-										},
-									}}
-									focusOnClick
-									className="absolute z-20 h-screen w-screen overflow-clip"
-								/>
-							</Suspense>
-						) : (
-							<div className="flex h-screen w-full flex-grow justify-center gap-2">
-								<div className="flex flex-col items-center justify-center gap-2">
-									<h1 className="text-3xl font-bold">Session Paused</h1>
-									<p className="text-lg text-muted-foreground">This session is paused.</p>
-									<Button
-										onClick={() => {
-											setSession({ ...session, paused: false });
-											manageSession(params.slug, "unpause");
-											toast.info("Session unpaused");
-										}}
-									>
-										Resume
-									</Button>
-								</div>
-							</div>
-						)
-					) : null
+			{!sessionError ? (
+				!sessionLoading ? (
+					session?.exists && session.url && session.password ? (
+						<Suspense fallback={<Loading text="Loading" />}>
+							<VncScreen
+								url={session.url}
+								loader={<Loading text="Connecting" />}
+								onClipboard={(e) => {
+									if (e?.detail.text) {
+										setClipboard(e.detail.text);
+										navigator.clipboard.writeText(e.detail.text).catch(() => setWorkingClipboard(false));
+									}
+								}}
+								onConnect={() => {
+									setConnected(true);
+									toast.success(`Connected to session ${params.slug.slice(0, 6)}`);
+								}}
+								onDisconnect={() => {
+									setConnected(false);
+									setSidebarOpen(false);
+								}}
+								onSecurityFailure={() => sessionMutate(null)}
+								ref={vncRef}
+								rfbOptions={{
+									credentials: {
+										username: "",
+										password: session.password,
+										target: "",
+									},
+								}}
+								focusOnClick
+								className="absolute z-20 h-screen w-screen overflow-clip"
+							/>
+						</Suspense>
+					) : (
+						<Alert className="w-auto">
+							<Info className="size-4" />
+							<AlertTitle>Session not found, or loading</AlertTitle>
+							<AlertDescription>
+								Container might be restarting. If this screen doesn't go away, the session might not exist.
+							</AlertDescription>
+						</Alert>
+					)
 				) : (
-					notFound()
+					<Loading text="Authenticating" />
 				)
 			) : (
-				<Loading text="Authenticating" />
+				<Alert variant="destructive" className="w-auto">
+					<AlertCircle className="size-4" />
+					<AlertTitle>Error</AlertTitle>
+					<AlertDescription>
+						Failed to get session data
+						<br />
+						<code className="font-mono font-semibold">{sessionError.message}</code>
+					</AlertDescription>
+				</Alert>
 			)}
 		</div>
 	);

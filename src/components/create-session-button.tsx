@@ -1,9 +1,9 @@
 "use client";
-import { useTransition } from "react";
-import { Button } from "./ui/button";
-import { toast } from "sonner";
 import { createSession } from "@/lib/session";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
 export function CreateSessionButton({ image }: { image: string }) {
 	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
@@ -12,17 +12,15 @@ export function CreateSessionButton({ image }: { image: string }) {
 			disabled={isPending}
 			onClick={() =>
 				startTransition(async () => {
-					const toastId = toast.loading("Creating session...");
 					await createSession(image)
 						.then((session) => {
 							if (!session) {
 								throw new Error("Container not created");
 							}
-							toast.success("Session created", { id: toastId });
 							router.push(`/view/${session[0].id}`);
 						})
 						.catch((err) => {
-							toast.error(err.message, { id: toastId });
+							toast.error(err.message);
 						});
 				})
 			}

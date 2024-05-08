@@ -1,6 +1,7 @@
 // @ts-check
+import NextBundleAnalyzer from "@next/bundle-analyzer";
 import { execSync } from "node:child_process";
-await import("next-ws/server/index.js").then((m) => m.verifyPatch());
+const withBundleAnalyzer = NextBundleAnalyzer();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
@@ -14,12 +15,13 @@ const nextConfig = {
 		],
 	},
 	env: {
-		GIT_COMMIT: execSync("git rev-parse HEAD").toString().trim(),
+		GIT_COMMIT: process.env.NODE_ENV === "production" ? execSync("git rev-parse HEAD").toString().trim() : "DEVELOP",
 		BUILD_DATE: Date.now().toString(),
 	},
 	experimental: {
 		typedRoutes: true,
 		instrumentationHook: true,
+		webpackBuildWorker: true,
 		serverActions: {
 			allowedOrigins: ["localhost:3000", "*.use.devtunnels.ms"],
 		},
@@ -41,5 +43,8 @@ const nextConfig = {
 		return config;
 	},
 };
-
-export default nextConfig;
+let config = nextConfig;
+if (process.env.ANALYZE) {
+	config = withBundleAnalyzer(nextConfig);
+}
+export default config;

@@ -6,13 +6,14 @@ import { eq } from "drizzle-orm";
 import { getSession } from "./get-session";
 import { getAuthSession } from "../auth";
 import { revalidatePath } from "next/cache";
+import { consola } from "consola";
 const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 /**
  * Creates a new Stardust session
  * @param Image Docker image to use for making the session
  */
 async function createSession(Image: string) {
-	console.log(`✨ Stardust INFO: Creating session with image ${Image}`);
+	consola.info(`✨ Stardust: Creating session with image ${Image}`);
 	try {
 		const userSession = await getAuthSession();
 		if (!userSession.user) throw new Error("User not found");
@@ -38,6 +39,7 @@ async function createSession(Image: string) {
 						"5901/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: vncPort.toString() }],
 						"6080/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: agentPort.toString() }],
 					},
+					ShmSize: 1024,
 				},
 			})
 			.catch((error) => {
@@ -49,25 +51,27 @@ async function createSession(Image: string) {
 		});
 		const date = new Date();
 		date.setDate(date.getDate() + 7);
-		return await db
-			.insert(session)
-			.values({
-				vncPort,
-				agentPort,
-				id: container.id,
-				dockerImage: Image,
-				createdAt: Date.now(),
-				expiresAt: date.getTime(),
-				userId: (
-					await db
-						.select({
-							userId: user.id,
-						})
-						.from(user)
-						.where(eq(user.email, userSession.user.email as string))
-				)[0].userId,
-			})
-			.returning();
+		return await db.transaction(async (tx) => {
+			return await tx
+				.insert(session)
+				.values({
+					vncPort,
+					agentPort,
+					id: container.id,
+					dockerImage: Image,
+					createdAt: Date.now(),
+					expiresAt: date.getTime(),
+					userId: (
+						await tx
+							.select({
+								userId: user.id,
+							})
+							.from(user)
+							.where(eq(user.email, userSession.user?.email as string))
+					)[0].userId,
+				})
+				.returning();
+		});
 	} catch (error) {
 		console.error(error);
 	}
@@ -76,14 +80,28 @@ async function createSession(Image: string) {
  * Allows you to manage a Stardust session with dockerode
  * @param containerId The id of the container to manage
  * @param action The action to do on the container
+ * @param admin If this is triggered by an admin
  */
-async function manageSession(containerId: string, action: keyof Dockerode.Container) {
+async function manageSession(containerId: string, action: keyof Dockerode.Container, admin?: boolean) {
 	const userSession = await getAuthSession();
+	if (admin) {
+		const [{ isAdmin }] = await db
+			.select({ isAdmin: user.isAdmin })
+			.from(user)
+			.where(eq(user.email, userSession.user?.email as string));
+		if (isAdmin) {
+			const container = docker.getContainer(containerId);
+			await container[action]();
+			revalidatePath("/");
+		}
+		return;
+	}
 	const { id } = (await getSession(containerId, userSession)) || {};
 	if (!id) throw new Error("Session not found");
 	try {
 		const container = docker.getContainer(id);
 		await container[action]();
+		revalidatePath("/");
 	} catch (error) {
 		console.error(error);
 	}
@@ -91,10 +109,23 @@ async function manageSession(containerId: string, action: keyof Dockerode.Contai
 /**
  * Deletes a Stardust session
  * @param containerId The id of the container to delete
- * @param userSession An Auth.js `Session` Object
+ * @param admin If this is triggered by an admin
  */
-async function deleteSession(containerId: string) {
+async function deleteSession(containerId: string, admin?: boolean) {
 	const userSession = await getAuthSession();
+	if (admin) {
+		const [{ isAdmin }] = await db
+			.select({ isAdmin: user.isAdmin })
+			.from(user)
+			.where(eq(user.email, userSession.user?.email as string));
+		if (isAdmin) {
+			const container = docker.getContainer(containerId);
+			await container.remove({ force: true });
+			await db.delete(session).where(eq(session.id, containerId));
+			revalidatePath("/");
+		}
+		return;
+	}
 	const { id } = (await getSession(containerId, userSession)) || {};
 	if (!id) throw new Error("Session not found");
 	try {

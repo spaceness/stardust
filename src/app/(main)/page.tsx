@@ -11,22 +11,23 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { CreateSessionButton } from "@/components/create-session-button";
+import { SessionDate } from "./session-date";
+import { SkeletionImage } from "@/components/skeleton-image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { getAuthSession } from "@/lib/auth";
 import docker from "@/lib/docker";
-import type Dockerode from "dockerode";
 import { type SelectSession, db, image, user } from "@/lib/drizzle/db";
-import { createSession, deleteSession, manageSession } from "@/lib/session";
+import { deleteSession, manageSession } from "@/lib/session";
+import type Dockerode from "dockerode";
 import { eq } from "drizzle-orm";
 import { Container, Loader2, Pause, Play, Square, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { SkeletionImage } from "@/components/skeleton-image";
-import { CreateSessionButton } from "@/components/create-session-button";
 const errorCatcher = (error: string) => {
 	throw new Error(error);
 };
@@ -55,28 +56,32 @@ const ManageSessionButton = ({
 );
 export default async function Dashboard() {
 	const userSession = await getAuthSession();
-	const images = await db.select().from(image).catch(errorCatcher);
-	const { userId } = (
-		await db
+	const { sessions, images } = await db.transaction(async (tx) => {
+		const [{ userId }] = await tx
 			.select({
 				userId: user.id,
 			})
 			.from(user)
 			.where(eq(user.email, userSession?.user?.email as string))
-			.catch(errorCatcher)
-	)[0];
-	const sessions = await db.query.session
-		.findMany({
-			with: {
-				image: true,
-			},
-			where: (users, { eq }) => eq(users.userId, userId),
-		})
-		.catch(errorCatcher);
+			.catch(errorCatcher);
+		const images = await db.select().from(image).catch(errorCatcher);
+		const sessions = await tx.query.session
+			.findMany({
+				with: {
+					image: true,
+				},
+				where: (users, { eq }) => eq(users.userId, userId),
+			})
+			.catch(errorCatcher);
+		return { sessions, images };
+	});
 	return (
 		<div className="flex h-full items-center justify-center">
 			<div className="m-auto flex w-full max-w-5xl flex-col">
-				<Tabs defaultValue="workspaces" className="flex justify-center items-center flex-col top-12">
+				<Tabs
+					defaultValue={sessions.length !== 0 ? "sessions" : "workspaces"}
+					className="flex justify-center items-center flex-col top-12"
+				>
 					<TabsList className="md:absolute top-16">
 						<TabsTrigger value="workspaces">Workspaces</TabsTrigger>
 						<TabsTrigger value="sessions">Sessions</TabsTrigger>
@@ -149,10 +154,7 @@ export default async function Dashboard() {
 													<p className="rounded-sm font-mono text-xs font-bold text-primary">
 														{session.id.slice(0, 6)}
 													</p>
-													<p className="text-xs text-muted-foreground">
-														Expires at{" "}
-														{`${expiresAt.toLocaleTimeString()} on ${expiresAt.getMonth()}/${expiresAt.getDate()}/${expiresAt.getFullYear()}`}
-													</p>
+													<SessionDate expiresAt={expiresAt} />
 												</div>
 											</section>
 											{!State.Paused && State.Running ? (
@@ -160,6 +162,7 @@ export default async function Dashboard() {
 													<SkeletionImage
 														src={`/api/session/${session.id}/preview`}
 														fill
+														sizes="6.5rem 13rem"
 														alt=""
 														className="object-fill rounded-sm md:h-[6.5rem] md:w-[13rem] h-[3.25rem] w-[6.5rem]"
 													/>
@@ -171,11 +174,11 @@ export default async function Dashboard() {
 											)}
 											<div className="flex w-full flex-row items-center justify-center gap-x-2">
 												{!State.Paused && State.Running ? (
-													<StyledSubmit variant="ghost" size="icon" pendingSpinner asChild>
+													<Button variant="ghost" size="icon" asChild>
 														<Link href={`/view/${session.id}`}>
 															<Play />
 														</Link>
-													</StyledSubmit>
+													</Button>
 												) : null}
 												{State.Running ? (
 													<ManageSessionButton

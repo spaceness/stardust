@@ -18,6 +18,7 @@ export const image = pgTable("Image", {
 	icon: text("icon").notNull(),
 	pulled: boolean("pulled").default(false).notNull(),
 });
+export type SelectImage = typeof user.$inferSelect;
 export const imageRelations = relations(image, ({ many }) => ({
 	session: many(session),
 }));
