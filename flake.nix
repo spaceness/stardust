@@ -20,9 +20,10 @@
         devShells.default = pkgs.mkShell
           {
             packages = with pkgs; [
-              nodePackages_latest.nodejs
-              nodePackages_latest.node-gyp
-              pkgs.nodePackages_latest.pnpm
+              nodejs_latest # NodeJS runtime + NPM
+              nodePackages_latest.pnpm # PNPM package manager
+              postgresql_16
+              libpqxx
             ];
           };
       }
