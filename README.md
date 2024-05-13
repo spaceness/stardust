@@ -1,5 +1,5 @@
 <img alt="Stardust banner" src="media/banner.png">
-<p align="center">An opensource kasm alternative. <br> <a href="https://discord.gg/ZyE5PPQh">Discord Server</a> </p>
+<p align="center">An opensource kasm alternative. <br> <a href="https://discord.gg/xyW6kqrSf5">Discord Server</a> </p>
 <br>
 
 ## Setup
