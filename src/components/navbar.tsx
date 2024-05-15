@@ -214,7 +214,7 @@ export default function Navigation({
 					<DropdownMenuContent className="mr-4 mt-4 w-48">
 						<DropdownMenuLabel className="flex flex-col">
 							<span className="flex flex-row items-center justify-between gap-1">
-								<p className="text-lg">{name || email}</p>
+								<p className="text-lg">{name}</p>
 								{dbUser.isAdmin ? (
 									<span className="flex items-center justify-center rounded-lg bg-primary px-2 py-[1px] text-xs font-bold text-primary-foreground">
 										Admin

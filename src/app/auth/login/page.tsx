@@ -1,21 +1,18 @@
-"use client";
-
+import { StyledSubmit } from "@/components/submit-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
-import { AlertCircle, Loader2, LogIn } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
-import { redirect, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { auth, signIn } from "@/lib/auth";
+import { AlertCircle, LogIn } from "lucide-react";
+import { redirect } from "next/navigation";
 
-export default function Login() {
-	const searchParams = useSearchParams();
-	const [loading, setLoading] = useState(false);
-	const error = searchParams.get("error");
-	const { data: session } = useSession();
-	if (session) {
-		redirect("/");
-	}
+export default async function Login({
+	searchParams,
+}: {
+	searchParams: { [key: string]: string | string[] | undefined };
+}) {
+	const session = await auth();
+	if (session) redirect("/");
+	const { error } = searchParams;
 	return (
 		<CardContent className="m-2 w-full flex-col">
 			{error ? (
@@ -26,17 +23,18 @@ export default function Login() {
 				</Alert>
 			) : null}
 			<div className="mx-auto mt-4 flex w-full flex-col items-center justify-center gap-2">
-				<Button
-					disabled={loading}
-					className="my-1 w-full"
-					onClick={() => {
-						setLoading(true);
-						signIn("auth0");
+				<form
+					className="w-full"
+					action={async () => {
+						"use server";
+						await signIn("auth0");
 					}}
 				>
-					{loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <LogIn className="mr-2 size-4" />}
-					{loading ? "Logging in" : "Log in with Auth0"}
-				</Button>
+					<StyledSubmit className="my-1 w-full">
+						<LogIn className="mr-2 size-4" />
+						Log in with Auth0
+					</StyledSubmit>
+				</form>
 			</div>
 		</CardContent>
 	);

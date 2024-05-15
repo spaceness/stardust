@@ -1,10 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAuthSession } from "@/lib/auth";
-import { db, image, session, user } from "@/lib/drizzle/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
+import { db, user } from "@/lib/drizzle/db";
 import { Container, Users } from "lucide-react";
 
 export default async function AdminPage() {
-	const userSession = await getAuthSession();
+	const userSession = await auth();
 	const { users, sessions } = await db.transaction(async (tx) => {
 		const users = await tx.select().from(user);
 		const sessions = await tx.query.session.findMany({
@@ -15,7 +15,7 @@ export default async function AdminPage() {
 	const activeUsers = sessions.map((s) => s.user);
 	return (
 		<div className="flex h-full flex-col">
-			<h1 className="ml-10 py-6 text-3xl font-bold">Welcome, {userSession.user?.name}</h1>
+			<h1 className="ml-10 py-6 text-3xl font-bold">Welcome, {userSession?.user?.name}</h1>
 			<section className="flex justify-start items-start h-full ml-10 gap-4">
 				<Card className="w-64">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
