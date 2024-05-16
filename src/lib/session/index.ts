@@ -8,6 +8,10 @@ import { getAuthSession } from "../auth";
 import { revalidatePath } from "next/cache";
 import { consola } from "consola";
 const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+const encodeEmailLocal = (email: string) =>
+	Array.from(email)
+		.map((char) => (/[a-zA-Z0-9_.-]/.test(char) ? char : char.charCodeAt(0)))
+		.join("");
 /**
  * Creates a new Stardust session
  * @param Image Docker image to use for making the session
@@ -32,7 +36,7 @@ async function createSession(Image: string) {
 		}
 		const container = await docker
 			.createContainer({
-				name: `stardust-${Date.now()}-${userSession.user.email?.split("@")[0]}`,
+				name: `stardust-${Date.now()}-${encodeEmailLocal((userSession.user?.email as string).split("@")[0])}`,
 				Image,
 				HostConfig: {
 					PortBindings: {
