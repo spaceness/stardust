@@ -35,11 +35,16 @@ const nextConfig = {
 			},
 		];
 	},
-	webpack(config) {
+	webpack(config, { webpack }) {
 		config.module.rules.push({
 			test: /\.node$/,
 			loader: "node-loader",
 		});
+		config.plugins.push(
+			new webpack.IgnorePlugin({
+				resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+			}),
+		);
 		return config;
 	},
 };

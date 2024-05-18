@@ -1,11 +1,11 @@
-import { getAuthSession } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import docker from "@/lib/docker";
 import { getSession } from "@/lib/session/get-session";
 import { sessionRunning } from "@/lib/session/session-running";
 import type { NextRequest } from "next/server";
 
 export async function GET(_req: NextRequest, { params }: { params: { slug: string } }) {
-	const userSession = await getAuthSession();
+	const userSession = await auth();
 	const containerSession = await getSession(params.slug, userSession);
 	if (!containerSession) {
 		return Response.json({ exists: false, error: "Container not found" }, { status: 404 });

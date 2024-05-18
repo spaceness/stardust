@@ -12,12 +12,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { CreateSessionButton } from "@/components/create-session-button";
-import { SessionDate } from "./session-date";
 import { SkeletionImage } from "@/components/skeleton-image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
-import { getAuthSession } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import docker from "@/lib/docker";
 import { type SelectSession, db, image, user } from "@/lib/drizzle/db";
 import { deleteSession, manageSession } from "@/lib/session";
@@ -28,9 +27,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-const errorCatcher = (error: string) => {
-	throw new Error(error);
-};
+import { SessionDate } from "./session-date";
+
 const ManageSessionButton = ({
 	session,
 	action,
@@ -45,7 +43,8 @@ const ManageSessionButton = ({
 	<form
 		action={async () => {
 			"use server";
-			await manageSession(session.id, action).catch(errorCatcher);
+			await manageSession(session.id, action);
+
 			if (redirectToView) redirect(`/view/${session.id}`);
 		}}
 	>
@@ -55,24 +54,23 @@ const ManageSessionButton = ({
 	</form>
 );
 export default async function Dashboard() {
-	const userSession = await getAuthSession();
+	const userSession = await auth();
 	const { sessions, images } = await db.transaction(async (tx) => {
 		const [{ userId }] = await tx
 			.select({
 				userId: user.id,
 			})
 			.from(user)
-			.where(eq(user.email, userSession?.user?.email as string))
-			.catch(errorCatcher);
-		const images = await db.select().from(image).catch(errorCatcher);
-		const sessions = await tx.query.session
-			.findMany({
-				with: {
-					image: true,
-				},
-				where: (users, { eq }) => eq(users.userId, userId),
-			})
-			.catch(errorCatcher);
+			.where(eq(user.email, userSession?.user?.email as string));
+
+		const images = await db.select().from(image);
+		const sessions = await tx.query.session.findMany({
+			with: {
+				image: true,
+			},
+			where: (users, { eq }) => eq(users.userId, userId),
+		});
+
 		return { sessions, images };
 	});
 	return (
@@ -160,6 +158,7 @@ export default async function Dashboard() {
 											{!State.Paused && State.Running ? (
 												<AspectRatio ratio={16 / 9}>
 													<SkeletionImage
+														priority
 														src={`/api/session/${session.id}/preview`}
 														fill
 														sizes="6.5rem 13rem"
@@ -197,7 +196,7 @@ export default async function Dashboard() {
 												<form
 													action={async () => {
 														"use server";
-														await deleteSession(session.id).catch(errorCatcher);
+														await deleteSession(session.id);
 													}}
 												>
 													<StyledSubmit variant="destructive" size="icon" pendingSpinner>

@@ -1,12 +1,12 @@
 "use server";
 import docker from "@/lib/docker";
 import { db, session, user } from "@/lib/drizzle/db";
+import { consola } from "consola";
 import type Dockerode from "dockerode";
 import { eq } from "drizzle-orm";
-import { getSession } from "./get-session";
-import { getAuthSession } from "../auth";
 import { revalidatePath } from "next/cache";
-import { consola } from "consola";
+import { auth } from "../auth";
+import { getSession } from "./get-session";
 const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 const encodeEmailLocal = (email: string) =>
 	Array.from(email)
@@ -19,8 +19,8 @@ const encodeEmailLocal = (email: string) =>
 async function createSession(Image: string) {
 	consola.info(`✨ Stardust: Creating session with image ${Image}`);
 	try {
-		const userSession = await getAuthSession();
-		if (!userSession.user) throw new Error("User not found");
+		const userSession = await auth();
+		if (!userSession?.user) throw new Error("User not found");
 		if (!process.env.DOCKER_PORT_RANGE) throw new Error("Docker port range not set");
 		const portsRange = process.env.DOCKER_PORT_RANGE.split("-").map(Number);
 		let vncPort: number = getRandomNumber(portsRange[0], portsRange[1]);
@@ -55,7 +55,7 @@ async function createSession(Image: string) {
 		});
 		const date = new Date();
 		date.setDate(date.getDate() + 7);
-		return await db.transaction(async (tx) => {
+		return db.transaction(async (tx) => {
 			return await tx
 				.insert(session)
 				.values({
@@ -87,12 +87,12 @@ async function createSession(Image: string) {
  * @param admin If this is triggered by an admin
  */
 async function manageSession(containerId: string, action: keyof Dockerode.Container, admin?: boolean) {
-	const userSession = await getAuthSession();
+	const userSession = await auth();
 	if (admin) {
 		const [{ isAdmin }] = await db
 			.select({ isAdmin: user.isAdmin })
 			.from(user)
-			.where(eq(user.email, userSession.user?.email as string));
+			.where(eq(user.email, userSession?.user?.email as string));
 		if (isAdmin) {
 			const container = docker.getContainer(containerId);
 			await container[action]();
@@ -116,12 +116,12 @@ async function manageSession(containerId: string, action: keyof Dockerode.Contai
  * @param admin If this is triggered by an admin
  */
 async function deleteSession(containerId: string, admin?: boolean) {
-	const userSession = await getAuthSession();
+	const userSession = await auth();
 	if (admin) {
 		const [{ isAdmin }] = await db
 			.select({ isAdmin: user.isAdmin })
 			.from(user)
-			.where(eq(user.email, userSession.user?.email as string));
+			.where(eq(user.email, userSession?.user?.email as string));
 		if (isAdmin) {
 			const container = docker.getContainer(containerId);
 			await container.remove({ force: true });
