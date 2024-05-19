@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 import { db, image as imageSchema } from "@/lib/drizzle/db";
 
 (async () => {
@@ -33,7 +33,7 @@ import { db, image as imageSchema } from "@/lib/drizzle/db";
   const insertion = await db.insert(imageSchema).values(images).onConflictDoNothing().returning()
   console.log(`✨Stardust: Seeded ${insertion.length} images.`)
   console.log(`✨Stardust: Seeded ${insertion.map((i) => i.dockerImage).join(", ")}`)
-  if (process.argv.includes("--pull") {
+  if (process.argv.includes("--pull")) {
     console.log("Pulling images...")
     for (const image of images) {
       execSync(`docker pull ${image.dockerImage}`)
