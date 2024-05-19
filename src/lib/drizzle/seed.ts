@@ -38,6 +38,7 @@ import { db, image as imageSchema } from "@/lib/drizzle/db";
     for (let i = 0; i < images.length; i++) {
       const image = images[i]
       await new Promise<void>((resolve, reject) => {
+        console.log(`✨Stardust: Pulling image ${image.dockerImage}`)
         exec(`docker pull ${image.dockerImage}`, (err, stdout, stderr) => {
           if (err) {
             console.error(`✨Stardust: Error pulling image ${image.dockerImage}`)
