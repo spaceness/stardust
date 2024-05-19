@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { execSync } from "node:child_process";
+import { exec } from "node:child_process";
 import { db, image as imageSchema } from "@/lib/drizzle/db";
 
 (async () => {
@@ -32,12 +32,26 @@ import { db, image as imageSchema } from "@/lib/drizzle/db";
   ]
   const insertion = await db.insert(imageSchema).values(images).onConflictDoNothing().returning()
   console.log(`✨Stardust: Seeded ${insertion.length} images.`)
-  console.log(`✨Stardust: Seeded ${insertion.map((i) => i.dockerImage).join(", ")}`)
+  console.log(`✨Stardust: Seeded ${insertion.map((i) => i.dockerImage).join(", ") || "no images"}`)
   if (process.argv.includes("--pull")) {
     console.log("Pulling images...")
-    for (const image of images) {
-      execSync(`docker pull ${image.dockerImage}`)
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i]
+      await new Promise<void>((resolve, reject) => {
+        exec(`docker pull ${image.dockerImage}`, (err, stdout, stderr) => {
+          if (err) {
+            console.error(`✨Stardust: Error pulling image ${image.dockerImage}`)
+            console.error(stderr)
+            console.error(err)
+            reject(err)
+          } else {
+            console.log(stdout)
+            console.log(`✨Stardust: Pulled image ${image.dockerImage}`)
+            resolve()
+          }
+        })
+      })
     }
   }
-  process.exit();
-})();
+  process.exit()
+})()
