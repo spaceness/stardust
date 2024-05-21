@@ -18,10 +18,8 @@ export async function GET(_req: NextRequest, { params }: { params: { slug: strin
 	if (State.Paused) {
 		await container.unpause();
 	}
-	await sessionRunning(containerSession.agentPort);
-	const password = await fetch(`http://${process.env.CONTAINER_HOST}:${containerSession.agentPort}/password`).then(
-		(res) => res.text(),
-	);
+	await sessionRunning(containerSession.ip);
+	const password = await fetch(`http://${containerSession.ip}:6080/password`).then((res) => res.text());
 	return Response.json({
 		exists: true,
 		password,

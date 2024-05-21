@@ -2,11 +2,10 @@ import "dotenv/config";
 
 import { createServer } from "node:http";
 import { Socket } from "node:net";
-import { db, session } from "@/lib/drizzle/db";
 import { consola } from "consola";
-import { eq } from "drizzle-orm";
 import next from "next";
 import { WebSocketServer } from "ws";
+import docker from "@/lib/docker";
 const port = Number.parseInt(process.env.PORT as string) || 3000;
 const dev = process.env.NODE_ENV !== "production";
 if (process.argv.includes("--turbo")) {
@@ -20,40 +19,44 @@ const nextRequest = app.getRequestHandler();
 const nextUpgrade = app.getUpgradeHandler();
 const websockify = new WebSocketServer({ noServer: true });
 websockify.on("connection", async (ws, req) => {
-	const id = req.url?.split("/")[2];
-	if (!id) {
-		ws.close(1008, "Missing ID");
-		return;
+	try {
+		const id = req.url?.split("/")[2];
+		if (!id) {
+			ws.close(1008, "Missing ID");
+			return;
+		}
+		const container = docker.getContainer(id);
+		const ip = await container
+			.inspect()
+			.then((data) => data.NetworkSettings.Networks[data.HostConfig.NetworkMode as string].IPAddress);
+		const socket = new Socket();
+		socket.connect(5901, ip);
+		ws.on("message", (message: Uint8Array) => {
+			socket.write(message);
+		});
+		ws.on("close", (code, reason) => {
+			consola.info(
+				`✨ Stardust: Connection closed with code ${code} and ${reason ? `reason ${reason.toString()}` : "no reason"}`,
+			);
+			socket.end();
+		});
+
+		socket.on("data", (data) => {
+			ws.send(data);
+		});
+
+		socket.on("error", (err) => {
+			consola.warn(`✨ Stardust: ${err.message}`);
+			ws.close();
+		});
+
+		socket.on("close", () => {
+			ws.close();
+		});
+	} catch (error) {
+		ws.close(1008, "Server error");
+		consola.error(`✨ Stardust: ${(error as Error).message}`);
 	}
-	const [{ vncPort }] = await db.select({ vncPort: session.vncPort }).from(session).where(eq(session.id, id)).limit(1);
-	if (!vncPort) {
-		ws.close(1008, "Session not found");
-		return;
-	}
-	const socket = new Socket();
-	socket.connect(vncPort, process.env.CONTAINER_HOST as string);
-	ws.on("message", (message: Uint8Array) => {
-		socket.write(message);
-	});
-	ws.on("close", (code, reason) => {
-		consola.info(
-			`✨ Stardust: Connection closed with code ${code} and ${reason ? `reason ${reason.toString()}` : "no reason"}`,
-		);
-		socket.end();
-	});
-
-	socket.on("data", (data) => {
-		ws.send(data);
-	});
-
-	socket.on("error", (err) => {
-		consola.warn(`✨ Stardust: ${err.message}`);
-		ws.close();
-	});
-
-	socket.on("close", () => {
-		ws.close();
-	});
 });
 server.on("request", nextRequest);
 server.on("upgrade", async (req, socket, head) => {

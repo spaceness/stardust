@@ -8,7 +8,6 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { getSession } from "./get-session";
-const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 /**
  * Creates a new Stardust session
  * @param Image Docker image to use for making the session
@@ -18,19 +17,6 @@ async function createSession(Image: string) {
 	try {
 		const userSession = await auth();
 		if (!userSession?.user) throw new Error("User not found");
-		if (!process.env.DOCKER_PORT_RANGE) throw new Error("Docker port range not set");
-		const portsRange = process.env.DOCKER_PORT_RANGE.split("-").map(Number);
-		let vncPort: number = getRandomNumber(portsRange[0], portsRange[1]);
-		let agentPort: number = getRandomNumber(portsRange[0], portsRange[1]);
-		const portInUse = await docker
-			.listContainers({ all: true })
-			.then((containers) => containers.flatMap((container) => container.Ports?.map((port) => port.PublicPort)));
-		while (portInUse.includes(vncPort)) {
-			vncPort = getRandomNumber(portsRange[0], portsRange[1]);
-		}
-		while (portInUse.includes(agentPort)) {
-			agentPort = getRandomNumber(portsRange[0], portsRange[1]);
-		}
 		const id = `stardust-${crypto.randomUUID()}-${Image.split("/")[2]}`;
 		await docker.createNetwork({
 			Name: id,
@@ -41,10 +27,6 @@ async function createSession(Image: string) {
 			HostConfig: {
 				NetworkMode: id,
 				ShmSize: 1024,
-				PortBindings: {
-					"5901/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: vncPort.toString() }],
-					"6080/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: agentPort.toString() }],
-				},
 			},
 		});
 		await container.start().catch((e) => {
@@ -58,8 +40,6 @@ async function createSession(Image: string) {
 				return await tx
 					.insert(session)
 					.values({
-						vncPort,
-						agentPort,
 						id: container.id,
 						dockerImage: Image,
 						createdAt: Date.now(),
