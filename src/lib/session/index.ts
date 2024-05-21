@@ -1,4 +1,5 @@
 "use server";
+import crypto from "node:crypto";
 import docker from "@/lib/docker";
 import { db, session, user } from "@/lib/drizzle/db";
 import { consola } from "consola";
@@ -8,10 +9,6 @@ import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { getSession } from "./get-session";
 const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-const encodeEmailLocal = (email: string) =>
-	Array.from(email)
-		.map((char) => (/[a-zA-Z0-9_.-]/.test(char) ? char : char.charCodeAt(0)))
-		.join("");
 /**
  * Creates a new Stardust session
  * @param Image Docker image to use for making the session
@@ -34,48 +31,54 @@ async function createSession(Image: string) {
 		while (portInUse.includes(agentPort)) {
 			agentPort = getRandomNumber(portsRange[0], portsRange[1]);
 		}
-		const container = await docker
-			.createContainer({
-				name: `stardust-${Date.now()}-${encodeEmailLocal((userSession.user?.email as string).split("@")[0])}`,
-				Image,
-				HostConfig: {
-					PortBindings: {
-						"5901/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: vncPort.toString() }],
-						"6080/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: agentPort.toString() }],
-					},
-					ShmSize: 1024,
+		const id = `stardust-${crypto.randomUUID()}-${Image.split("/")[2]}`;
+		await docker.createNetwork({
+			Name: id,
+		});
+		const container = await docker.createContainer({
+			name: id,
+			Image,
+			HostConfig: {
+				NetworkMode: id,
+				ShmSize: 1024,
+				PortBindings: {
+					"5901/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: vncPort.toString() }],
+					"6080/tcp": [{ hostIp: "127.0.0.1" }, { HostPort: agentPort.toString() }],
 				},
-			})
-			.catch((error) => {
-				throw new Error(`Container not created:${error}`);
-			});
-		await container.start().catch(() => {
+			},
+		});
+		await container.start().catch((e) => {
 			container.remove({ force: true });
-			throw new Error("Container not started");
+			throw new Error(`Container not started ${e.message}`);
 		});
 		const date = new Date();
 		date.setDate(date.getDate() + 7);
-		return db.transaction(async (tx) => {
-			return await tx
-				.insert(session)
-				.values({
-					vncPort,
-					agentPort,
-					id: container.id,
-					dockerImage: Image,
-					createdAt: Date.now(),
-					expiresAt: date.getTime(),
-					userId: (
-						await tx
-							.select({
-								userId: user.id,
-							})
-							.from(user)
-							.where(eq(user.email, userSession.user?.email as string))
-					)[0].userId,
-				})
-				.returning();
-		});
+		return db
+			.transaction(async (tx) => {
+				return await tx
+					.insert(session)
+					.values({
+						vncPort,
+						agentPort,
+						id: container.id,
+						dockerImage: Image,
+						createdAt: Date.now(),
+						expiresAt: date.getTime(),
+						userId: (
+							await tx
+								.select({
+									userId: user.id,
+								})
+								.from(user)
+								.where(eq(user.email, userSession.user?.email as string))
+						)[0].userId,
+					})
+					.returning();
+			})
+			.catch(async (e) => {
+				await container.remove({ force: true });
+				throw new Error(e.message);
+			});
 	} catch (error) {
 		console.error(error);
 	}
@@ -124,7 +127,9 @@ async function deleteSession(containerId: string, admin?: boolean) {
 			.where(eq(user.email, userSession?.user?.email as string));
 		if (isAdmin) {
 			const container = docker.getContainer(containerId);
+			const network = await container.inspect().then((container) => container.HostConfig.NetworkMode);
 			await container.remove({ force: true });
+			await docker.getNetwork(network as string).remove({ force: true });
 			await db.delete(session).where(eq(session.id, containerId));
 			revalidatePath("/");
 		}
@@ -134,7 +139,9 @@ async function deleteSession(containerId: string, admin?: boolean) {
 	if (!id) throw new Error("Session not found");
 	try {
 		const container = docker.getContainer(id);
+		const network = await container.inspect().then((container) => container.HostConfig.NetworkMode);
 		await container.remove({ force: true });
+		await docker.getNetwork(network as string).remove({ force: true });
 		await db.delete(session).where(eq(session.id, id));
 		revalidatePath("/");
 	} catch (error) {

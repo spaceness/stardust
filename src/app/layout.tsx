@@ -5,22 +5,31 @@ import { ThemeProvider } from "next-themes";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import { headers } from "next/headers";
 const inter = Inter({ subsets: ["latin"] });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
-
-export const metadata: Metadata = {
-	title: {
-		default: "Stardust",
-		template: "%s | Stardust",
-	},
-	description: "Stardust is the platform for streaming isolated desktop containers.",
-	openGraph: {
-		title: "Stardust",
-		description: "Stardust is the platform for streaming isolated desktop containers.",
-		type: "website",
-		url: "https://stardust.spaceness.one",
-	},
-};
+const shouldDisplayMetadata = () =>
+	process.env.METADATA_URL &&
+	(headers().get("x-forwarded-host") ?? headers().get("host"))?.includes(new URL(process.env.METADATA_URL).host);
+export function generateMetadata(): Metadata {
+	return {
+		title: {
+			default: "Stardust",
+			template: "%s | Stardust",
+		},
+		description: shouldDisplayMetadata()
+			? "Stardust is the platform for streaming isolated desktop containers."
+			: undefined,
+		openGraph: shouldDisplayMetadata()
+			? {
+					title: "Stardust",
+					description: "Stardust is the platform for streaming isolated desktop containers.",
+					type: "website",
+					url: "https://stardust.spaceness.one",
+				}
+			: undefined,
+	};
+}
 export default async function RootLayout({
 	children,
 }: Readonly<{

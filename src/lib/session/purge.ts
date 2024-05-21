@@ -10,7 +10,9 @@ setInterval(async () => {
 		await Promise.all(
 			staleSessions.map(async (s) => {
 				const container = docker.getContainer(s.id);
+				const network = await container.inspect().then((container) => container.HostConfig.NetworkMode);
 				await container.remove({ force: true });
+				await docker.getNetwork(network as string).remove({ force: true });
 				await tx.delete(session).where(eq(session.id, s.id));
 			}),
 		);

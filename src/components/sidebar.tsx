@@ -21,7 +21,7 @@ export function AdminSidebar() {
 		{ href: "/admin/sessions", label: "Sessions", Icon: Container },
 	];
 	return (
-		<nav>
+		<nav className="z-50">
 			<Separator />
 			<div className="w-20">
 				<section className="w-[4.5rem] h-full fixed p-4 border-r items-start flex flex-col gap-2">

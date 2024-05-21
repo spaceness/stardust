@@ -55,10 +55,7 @@ websockify.on("connection", async (ws, req) => {
 		ws.close();
 	});
 });
-server.on("request", (req, res) => {
-	process.env.HOST = req.headers.host;
-	nextRequest(req, res);
-});
+server.on("request", nextRequest);
 server.on("upgrade", async (req, socket, head) => {
 	if (req.url?.includes("websockify")) {
 		websockify.handleUpgrade(req, socket, head, (ws) => {

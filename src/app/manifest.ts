@@ -7,13 +7,16 @@ export default function manifest(): MetadataRoute.Manifest {
 		description: "Stardust is the platform for streaming isolated desktop containers.",
 		start_url: "/",
 		display: "standalone",
-		background_color: "#09090b",
-		theme_color: "#09090b",
+		background_color: "#1e1e2e",
+		theme_color: "#cba6f7",
 		icons: [
 			{
 				src: "/icon.svg",
-				sizes: "any",
-				type: "image/x-icon",
+				sizes: "192x192",
+			},
+			{
+				src: "/icon.svg",
+				sizes: "512x512",
 			},
 		],
 	};

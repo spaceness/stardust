@@ -1,7 +1,10 @@
 import { db } from "@/lib/drizzle/db";
 import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
-
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+	title: "Users",
+};
 export default async function AdminPage() {
 	const sessions = await db.query.user.findMany({
 		with: {

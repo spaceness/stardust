@@ -150,7 +150,7 @@ export default function View({ params }: { params: { slug: string } }) {
 				<Button
 					size="icon"
 					hidden={sidebarOpen}
-					className="absolute left-0 right-2 top-1/2 z-40 h-16 w-8 rounded-l-none border-l-0 bg-primary/70 backdrop-blur-md"
+					className="absolute left-0 right-2 top-1/2 z-40 h-16 w-8 rounded-l-none border-l-0 bg-primary"
 					onClick={() => setSidebarOpen((prev) => !prev)}
 				>
 					<ChevronRight />
@@ -163,10 +163,7 @@ export default function View({ params }: { params: { slug: string } }) {
 					filesMutate();
 				}}
 			>
-				<SheetContent
-					side="left"
-					className="z-50 flex flex-col overflow-y-auto overflow-x-clip bg-background/75 backdrop-blur-lg"
-				>
+				<SheetContent side="left" className="z-50 flex flex-col overflow-y-auto overflow-x-clip bg-background/90">
 					<SheetHeader>
 						<SheetTitle className="py-2 text-2xl">Control Panel</SheetTitle>
 						<SheetDescription className="text-muted-foreground">
@@ -298,7 +295,7 @@ export default function View({ params }: { params: { slug: string } }) {
 								</AccordionTrigger>
 								<AccordionContent className="flex flex-col gap-4">
 									<Textarea
-										className="h-48 w-full font-mono"
+										className="h-48 w-full"
 										tabIndex={-20}
 										spellCheck={false}
 										autoCorrect="off"
