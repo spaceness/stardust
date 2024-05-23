@@ -23,6 +23,7 @@ const nextConfig = {
 		typedRoutes: true,
 		instrumentationHook: true,
 		webpackBuildWorker: true,
+		reactCompiler: true,
 		serverActions: {
 			allowedOrigins: ["localhost:3000", "*.use.devtunnels.ms"],
 		},
