@@ -1,7 +1,7 @@
 // @ts-check
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 import { execSync } from "node:child_process";
-const withBundleAnalyzer = NextBundleAnalyzer();
+const withBundleAnalyzer = NextBundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
@@ -19,9 +19,11 @@ const nextConfig = {
 		BUILD_DATE: Date.now().toString(),
 	},
 	experimental: {
+		ppr: true,
 		typedRoutes: true,
 		instrumentationHook: true,
 		webpackBuildWorker: true,
+		reactCompiler: true,
 		serverActions: {
 			allowedOrigins: ["localhost:3000", "*.use.devtunnels.ms"],
 		},
@@ -48,8 +50,5 @@ const nextConfig = {
 		return config;
 	},
 };
-let config = nextConfig;
-if (process.env.ANALYZE) {
-	config = withBundleAnalyzer(nextConfig);
-}
-export default config;
+
+export default withBundleAnalyzer(nextConfig);

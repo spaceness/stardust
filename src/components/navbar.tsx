@@ -70,6 +70,10 @@ export default function Navigation({
 	];
 	const projectsUsed = [
 		{
+			name: "Next.js",
+			url: "https://nextjs.org/",
+		},
+		{
 			name: "noVNC",
 			url: "https://github.com/noVNC/noVNC",
 		},
@@ -78,7 +82,7 @@ export default function Navigation({
 			url: "https://ui.shadcn.com/",
 		},
 	];
-	const developers = ["incognitotgt", "yosoof3"];
+	const developers = ["incognitotgt", "yosoof3", "rare1k"];
 	return (
 		<nav className="flex h-16 min-w-full items-center justify-between bg-transparent px-4">
 			<div className="flex items-center justify-start gap-2">
