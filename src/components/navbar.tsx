@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SelectUser } from "@/lib/drizzle/schema";
-import { cn } from "@/lib/utils";
 import { Book, ComputerIcon, Globe, Info, LogOut, Settings, Sparkles, SwatchBook, User } from "lucide-react";
 import type { Route } from "next";
 import type { Session } from "next-auth";
@@ -84,7 +83,7 @@ export default function Navigation({
 	];
 	const developers = ["incognitotgt", "yosoof3", "rare1k"];
 	return (
-		<nav className="flex h-16 min-w-full items-center justify-between bg-transparent px-4">
+		<nav className="flex h-16 min-w-full items-center justify-between px-4">
 			<div className="flex items-center justify-start gap-2">
 				<Sparkles className="size-6" />
 				<span className="text-2xl font-bold md:block hidden mr-2">Stardust</span>
@@ -95,7 +94,7 @@ export default function Navigation({
 								{!item.adminOnly || (item.adminOnly && dbUser.isAdmin) ? (
 									<NavigationMenuItem key={item.href}>
 										<Link href={item.href} legacyBehavior passHref>
-											<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
+											<NavigationMenuLink className={navigationMenuTriggerStyle()}>
 												<span className="mr-2 flex size-4 items-center justify-center">{item.icon}</span> {item.label}
 											</NavigationMenuLink>
 										</Link>

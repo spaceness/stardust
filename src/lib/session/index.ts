@@ -107,7 +107,7 @@ async function deleteSession(containerId: string, admin?: boolean) {
 			.where(eq(user.email, userSession?.user?.email as string));
 		if (isAdmin) {
 			const container = docker.getContainer(containerId);
-			const network = await container.inspect().then((container) => container.HostConfig.NetworkMode);
+			const network = (await container.inspect()).HostConfig.NetworkMode;
 			await container.remove({ force: true });
 			await docker.getNetwork(network as string).remove({ force: true });
 			await db.delete(session).where(eq(session.id, containerId));
@@ -119,7 +119,7 @@ async function deleteSession(containerId: string, admin?: boolean) {
 	if (!id) throw new Error("Session not found");
 	try {
 		const container = docker.getContainer(id);
-		const network = await container.inspect().then((container) => container.HostConfig.NetworkMode);
+		const network = (await container.inspect()).HostConfig.NetworkMode;
 		await container.remove({ force: true });
 		await docker.getNetwork(network as string).remove({ force: true });
 		await db.delete(session).where(eq(session.id, id));

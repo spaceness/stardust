@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { Container, Layers, LayoutDashboard, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Route } from "next";
@@ -24,30 +24,23 @@ export function AdminSidebar() {
 		<nav className="z-50">
 			<Separator />
 			<div className="w-20">
-				<section className="w-[4.5rem] h-full fixed p-4 border-r items-start flex flex-col gap-2">
-					<TooltipProvider>
-						{links.map(({ href, label, Icon }) => (
-							<Tooltip key={href}>
-								<TooltipTrigger asChild>
-									<Button
-										asChild
-										variant="ghost"
-										size="icon"
-										className={
-											pathname === href
-												? "text-primary bg-secondary hover:text-primary"
-												: "text-muted-foreground hover:text-primary"
-										}
-									>
-										<Link href={href}>
-											<Icon className="size-5" />
-										</Link>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent side="right">{label}</TooltipContent>
-							</Tooltip>
-						))}
-					</TooltipProvider>
+				<section className="h-full fixed p-4 border-r items-start flex flex-col gap-2">
+					{links.map(({ href, label, Icon }) => (
+						<Button
+							asChild
+							key={href}
+							variant="ghost"
+							className={cn(
+								pathname === href ? "text-primary bg-secondary" : "text-muted-foreground",
+								"hover:text-primary flex gap-2 w-full justify-start",
+							)}
+						>
+							<Link href={href}>
+								<Icon className="size-5" />
+								{label}
+							</Link>
+						</Button>
+					))}
 				</section>
 			</div>
 		</nav>

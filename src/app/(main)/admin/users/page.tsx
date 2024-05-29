@@ -6,16 +6,16 @@ export const metadata: Metadata = {
 	title: "Users",
 };
 export default async function AdminPage() {
-	const sessions = await db.query.user.findMany({
+	const data = await db.query.user.findMany({
 		with: {
 			session: true,
 		},
 	});
 	return (
 		<div className="flex h-full flex-col">
-			<h1 className="ml-10 py-6 text-3xl font-bold">Users</h1>
-			<section className="flex justify-center items-start w-full h-full">
-				<DataTable columns={columns} data={sessions} />
+			<h1 className="py-6 text-3xl font-bold">Users</h1>
+			<section className="-ml-8">
+				<DataTable data={data} columns={columns} />
 			</section>
 		</div>
 	);

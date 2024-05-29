@@ -52,7 +52,7 @@ export const columns: ColumnDef<SelectSessionRelation>[] = [
 	{ accessorKey: "dockerImage", header: ({ column }) => <DataTableColumnHeader column={column} title="Image" /> },
 	{
 		accessorKey: "createdAt",
-		header: "Created at",
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
 		cell: ({ row }) => {
 			const date = new Date(row.original.createdAt);
 			return date.toLocaleString();
@@ -60,7 +60,7 @@ export const columns: ColumnDef<SelectSessionRelation>[] = [
 	},
 	{
 		accessorKey: "expiresAt",
-		header: "Expires at",
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Expires at" />,
 		cell: ({ row }) => {
 			const date = new Date(row.original.expiresAt);
 			return date.toLocaleString();

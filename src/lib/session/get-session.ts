@@ -22,10 +22,8 @@ async function getSession(containerId: string, userSession: Session | null) {
 			.where(and(eq(session.id, containerId), eq(session.userId, userId)));
 	});
 	if (!containerSession) return null;
-	const ip = await docker
-		.getContainer(containerId)
-		.inspect()
-		.then((data) => data.NetworkSettings.Networks[data.HostConfig.NetworkMode as string].IPAddress);
+	const container = await docker.getContainer(containerId).inspect();
+	const ip = container.NetworkSettings.Networks[container.HostConfig.NetworkMode as string].IPAddress;
 	return {
 		ip,
 		...containerSession,

@@ -38,3 +38,6 @@ next-env.d.ts
 .tmp
 docker/
 .assets
+
+# IDE
+.idea/

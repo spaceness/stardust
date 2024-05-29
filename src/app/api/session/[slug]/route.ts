@@ -19,7 +19,7 @@ export async function GET(_req: NextRequest, { params }: { params: { slug: strin
 		await container.unpause();
 	}
 	await sessionRunning(containerSession.ip);
-	const password = await fetch(`http://${containerSession.ip}:6080/password`).then((res) => res.text());
+	const password = await (await fetch(`http://${containerSession.ip}:6080/password`)).text();
 	return Response.json({
 		exists: true,
 		password,

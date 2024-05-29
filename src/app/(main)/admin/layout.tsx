@@ -22,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 	return (
 		<>
 			<AdminSidebar />
-			<div className="ml-[4.5rem] h-full">{children}</div>
+			<div className="ml-48 h-full">{children}</div>
 		</>
 	);
 }

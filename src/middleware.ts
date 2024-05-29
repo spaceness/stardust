@@ -13,7 +13,6 @@ export const middleware = auth(async (req) => {
 	}
 	const url = new URL("/auth/login", req.url);
 	url.searchParams.set("callbackUrl", req.nextUrl.pathname);
-	console.log(url.toString());
 	return NextResponse.redirect(url);
 });
 export const config = {

@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { bigint, boolean, pgTable, text } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 
 export const user = pgTable("User", {
 	email: text("email").notNull().unique(),
@@ -19,6 +20,7 @@ export const image = pgTable("Image", {
 	pulled: boolean("pulled").default(false).notNull(),
 });
 export type SelectImage = typeof user.$inferSelect;
+export const insertImageSchema = createInsertSchema(image);
 export const imageRelations = relations(image, ({ many }) => ({
 	session: many(session),
 }));

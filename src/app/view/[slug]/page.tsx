@@ -31,7 +31,6 @@ import { fetcher } from "@/lib/utils";
 import {
 	AlertCircle,
 	Camera,
-	ChevronRight,
 	Clipboard,
 	Download,
 	File,
@@ -43,14 +42,16 @@ import {
 	Pause,
 	RotateCw,
 	ScreenShareOff,
+	Settings,
 	Sparkles,
 	Square,
 	TrashIcon,
 	Upload,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import useSWR from "swr";
 type ScalingValues = "remote" | "local" | "none";
@@ -60,7 +61,7 @@ const Loading = ({ text }: { text: string }) => (
 		<h1 className="text-xl font-semibold">{text}</h1>
 	</Card>
 );
-const VncScreen = lazy(() => import("@/components/vnc-screen"));
+const VncScreen = dynamic(() => import("@/components/vnc-screen"), { loading: () => <Loading text="Loading" /> });
 export default function View({ params }: { params: { slug: string } }) {
 	const vncRef = useRef<VncViewerHandle>(null);
 	const [connected, setConnected] = useState(false);
@@ -114,19 +115,15 @@ export default function View({ params }: { params: { slug: string } }) {
 	}, [session, sessionMutate]);
 	// jank, but it works ¯\_(ツ)_/¯
 	useEffect(() => {
-		const interval = setInterval(() => {
+		const interval = setInterval(async () => {
 			if (connected && vncRef.current?.rfb && document.hasFocus() && !sidebarOpen) {
 				vncRef.current.rfb.focus();
-				navigator.clipboard
-					.readText()
-					.then((text) => {
-						if (text !== clipboard) {
-							setWorkingClipboard(true);
-							vncRef.current?.clipboardPaste(text);
-							setClipboard(text);
-						}
-					})
-					.catch(() => setWorkingClipboard(false));
+				const text = await navigator.clipboard.readText().catch(() => setWorkingClipboard(false));
+				if (text && text !== clipboard) {
+					setWorkingClipboard(true);
+					vncRef.current?.clipboardPaste(text);
+					setClipboard(text);
+				}
 			}
 		}, 250);
 		return () => clearInterval(interval);
@@ -147,14 +144,23 @@ export default function View({ params }: { params: { slug: string } }) {
 	return (
 		<div className="h-screen w-screen justify-center items-center flex">
 			{connected ? (
-				<Button
-					size="icon"
-					hidden={sidebarOpen}
-					className="absolute left-0 right-2 top-1/2 z-40 h-16 w-8 rounded-l-none border-l-0 bg-primary"
-					onClick={() => setSidebarOpen((prev) => !prev)}
-				>
-					<ChevronRight />
-				</Button>
+				<section className="flex flex-col gap-2 z-40 absolute -translate-y-1/2 left-0 top-1/2 rounded-r-lg bg-background/80 p-[0.25rem] text-xs backdrop-blur-lg w-12">
+					<Button variant="ghost" size="icon" onClick={() => setFullScreen(!fullScreen)}>
+						{fullScreen ? <Minimize /> : <Maximize />}
+					</Button>
+					<Button variant="ghost" size="icon" hidden={sidebarOpen} onClick={() => setSidebarOpen((prev) => !prev)}>
+						<Settings />
+					</Button>
+					<Button asChild size="icon" variant="ghost">
+						<Link
+							href={`/api/session/${params.slug}/preview`}
+							download={`stardust-${params.slug.slice(0, 6)}-${new Date().toLocaleDateString("en-us")}`}
+							target="_blank"
+						>
+							<Camera />
+						</Link>
+					</Button>
+				</section>
 			) : null}
 			<Sheet
 				open={sidebarOpen}
@@ -186,11 +192,17 @@ export default function View({ params }: { params: { slug: string } }) {
 							<Button
 								className="w-[98%]"
 								onClick={() =>
-									toast.promise(() => manageSession(params.slug, "pause").then(() => router.push("/")), {
-										loading: "Pausing container...",
-										success: "Session paused",
-										error: "Failed to pause container",
-									})
+									toast.promise(
+										async () => {
+											await manageSession(params.slug, "pause");
+											router.push("/");
+										},
+										{
+											loading: "Pausing container...",
+											success: "Session paused",
+											error: "Failed to pause container",
+										},
+									)
 								}
 							>
 								<Pause className="mr-2 size-5 flex-shrink-0" />
@@ -213,14 +225,20 @@ export default function View({ params }: { params: { slug: string } }) {
 							<Button
 								className="w-[98%]"
 								onClick={() =>
-									toast.promise(() => manageSession(params.slug, "stop").then(() => router.push("/")), {
-										loading: "Stopping container...",
-										success: "Session stopped",
-										error: "Failed to stop container",
-									})
+									toast.promise(
+										async () => {
+											await manageSession(params.slug, "stop");
+											router.push("/");
+										},
+										{
+											loading: "Stopping container...",
+											success: "Session stopped",
+											error: "Failed to stop container",
+										},
+									)
 								}
 							>
-								<Square className="mr-2 size-5 flex-shrink-0 text-destructive" />
+								<Square className="mr-2 size-5 flex-shrink-0" />
 								Stop Session
 							</Button>
 							<AlertDialog>
@@ -244,11 +262,17 @@ export default function View({ params }: { params: { slug: string } }) {
 											asChild
 											onClick={() => {
 												vncRef.current?.rfb?.disconnect();
-												toast.promise(() => deleteSession(params.slug).then(() => router.push("/")), {
-													loading: "Deleting session...",
-													success: "Session deleted",
-													error: "Failed to delete session",
-												});
+												toast.promise(
+													async () => {
+														await deleteSession(params.slug);
+														router.push("/");
+													},
+													{
+														loading: "Deleting session...",
+														success: "Session deleted",
+														error: "Failed to delete session",
+													},
+												);
 											}}
 										>
 											<Button variant="destructive">Delete Session</Button>
@@ -261,28 +285,6 @@ export default function View({ params }: { params: { slug: string } }) {
 									<LogOut className="mr-2 size-5 flex-shrink-0" />
 									Log Out
 								</Link>
-							</Button>
-							<Button asChild className="w-[98%]" variant="secondary">
-								<Link
-									href={`/api/session/${params.slug}/preview`}
-									download={`stardust-${params.slug.slice(0, 6)}-${new Date().toLocaleDateString("en-us")}`}
-									target="_blank"
-								>
-									<Camera className="mr-2 size-5 flex-shrink-0" /> Take Screenshot
-								</Link>
-							</Button>
-							<Button className="w-[98%]" variant="secondary" onClick={() => setFullScreen(!fullScreen)}>
-								{fullScreen ? (
-									<>
-										<Minimize className="mr-2 size-5 flex-shrink-0" />
-										Exit Fullscreen
-									</>
-								) : (
-									<>
-										<Maximize className="mr-2 size-5 flex-shrink-0" />
-										Enter Fullscreen
-									</>
-								)}
 							</Button>
 						</section>
 						<Accordion type="single" collapsible className="w-full">
@@ -314,18 +316,16 @@ export default function View({ params }: { params: { slug: string } }) {
 										<Button
 											type="button"
 											className="text-start place-self-start"
-											onClick={() => {
-												navigator.clipboard
-													.readText()
-													.then((text) => {
-														setClipboard(text);
-														vncRef.current?.clipboardPaste(text);
-														setWorkingClipboard(true);
-													})
-													.catch(() => {
-														setWorkingClipboard(false);
-														toast.error("Failed to read clipboard, did you deny clipboard permissions?");
-													});
+											onClick={async () => {
+												const text = await navigator.clipboard.readText().catch(() => {
+													setWorkingClipboard(false);
+													toast.error("Failed to read clipboard, did you deny clipboard permissions?");
+												});
+												if (text) {
+													setClipboard(text);
+													vncRef.current?.clipboardPaste(text);
+													setWorkingClipboard(true);
+												}
 											}}
 										>
 											Click here to sync clipboard
@@ -396,23 +396,21 @@ export default function View({ params }: { params: { slug: string } }) {
 									<p className="text-muted-foreground">Files will be in the session's Uploads folder.</p>
 									<Input
 										type="file"
-										onChange={(e) => {
+										onChange={async (e) => {
 											const [file] = e.target.files || [];
-											if (file)
-												file.arrayBuffer().then((buffer) => {
-													toast.promise(
-														() =>
-															fetch(`/api/session/${params.slug}/files?name=${file.name}`, {
-																method: "PUT",
-																body: buffer,
-															}),
-														{
-															loading: "Uploading file...",
-															success: "File uploaded",
-															error: (error) => `Failed to upload file: ${error.message}`,
-														},
-													);
-												});
+											const buffer = await file.arrayBuffer();
+											toast.promise(
+												() =>
+													fetch(`/api/session/${params.slug}/files?name=${file.name}`, {
+														method: "PUT",
+														body: buffer,
+													}),
+												{
+													loading: "Uploading file...",
+													success: "File uploaded",
+													error: (error) => `Failed to upload file: ${error.message}`,
+												},
+											);
 										}}
 									/>
 								</AccordionContent>
@@ -477,37 +475,35 @@ export default function View({ params }: { params: { slug: string } }) {
 			{!sessionError ? (
 				!sessionLoading ? (
 					session?.exists && session.url && session.password ? (
-						<Suspense fallback={<Loading text="Loading" />}>
-							<VncScreen
-								url={session.url}
-								loader={<Loading text="Connecting" />}
-								onClipboard={(e) => {
-									if (e?.detail.text) {
-										setClipboard(e.detail.text);
-										navigator.clipboard.writeText(e.detail.text).catch(() => setWorkingClipboard(false));
-									}
-								}}
-								onConnect={() => {
-									setConnected(true);
-									toast.success(`Connected to session ${params.slug.slice(0, 6)}`);
-								}}
-								onDisconnect={() => {
-									setConnected(false);
-									setSidebarOpen(false);
-								}}
-								onSecurityFailure={() => sessionMutate(null)}
-								ref={vncRef}
-								rfbOptions={{
-									credentials: {
-										username: "",
-										password: session.password,
-										target: "",
-									},
-								}}
-								focusOnClick
-								className="absolute z-20 h-screen w-screen overflow-clip"
-							/>
-						</Suspense>
+						<VncScreen
+							url={session.url}
+							loader={<Loading text="Connecting" />}
+							onClipboard={(e) => {
+								if (e?.detail.text) {
+									setClipboard(e.detail.text);
+									navigator.clipboard.writeText(e.detail.text).catch(() => setWorkingClipboard(false));
+								}
+							}}
+							onConnect={() => {
+								setConnected(true);
+								toast.success(`Connected to session ${params.slug.slice(0, 6)}`);
+							}}
+							onDisconnect={() => {
+								setConnected(false);
+								setSidebarOpen(false);
+							}}
+							onSecurityFailure={() => sessionMutate(null)}
+							ref={vncRef}
+							rfbOptions={{
+								credentials: {
+									username: "",
+									password: session.password,
+									target: "",
+								},
+							}}
+							focusOnClick
+							className="absolute z-20 h-screen w-screen overflow-clip"
+						/>
 					) : (
 						<Alert className="w-auto">
 							<Info className="size-4" />

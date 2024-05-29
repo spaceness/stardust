@@ -73,6 +73,7 @@ export default async function Dashboard() {
 
 		return { sessions, images };
 	});
+	const containerStates = await Promise.all(sessions.map((session) => docker.getContainer(session.id).inspect()));
 	return (
 		<div className="flex h-full items-center justify-center">
 			<div className="m-auto flex w-full max-w-5xl flex-col">
@@ -130,8 +131,8 @@ export default async function Dashboard() {
 					<TabsContent value="sessions" className="flex flex-col md:flex-row">
 						<Suspense fallback={<Loader2 size={64} className="animate-spin" />}>
 							{sessions.length ? (
-								sessions.map(async (session) => {
-									const { State } = await docker.getContainer(session.id).inspect();
+								sessions.map((session, key) => {
+									const { State } = containerStates[key];
 									const expiresAt = new Date(session.expiresAt);
 									return (
 										<Card

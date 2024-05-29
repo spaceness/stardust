@@ -1,10 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
-import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 import { headers } from "next/headers";
 const inter = Inter({ subsets: ["latin"] });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
@@ -38,18 +36,16 @@ export default async function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${inter.className} ${jetbrains.variable}`}>
-				<SessionProvider session={await auth()}>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="system"
-						themes={["light", "dark", "slate", "zinc"]}
-						enableSystem
-						disableTransitionOnChange
-					>
-						<Toaster richColors theme="system" position="top-center" />
-						{children}
-					</ThemeProvider>
-				</SessionProvider>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					themes={["light", "dark", "slate", "zinc"]}
+					enableSystem
+					disableTransitionOnChange
+				>
+					<Toaster richColors theme="system" position="top-center" />
+					{children}
+				</ThemeProvider>
 			</body>
 		</html>
 	);

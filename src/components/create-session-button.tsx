@@ -12,16 +12,13 @@ export function CreateSessionButton({ image }: { image: string }) {
 			disabled={isPending}
 			onClick={() =>
 				startTransition(async () => {
-					await createSession(image)
-						.then((session) => {
-							if (!session) {
-								throw new Error("Container not created");
-							}
-							router.push(`/view/${session[0].id}`);
-						})
-						.catch((err) => {
-							toast.error(err.message);
-						});
+					const session = await createSession(image).catch((err) => {
+						toast.error(err.message);
+					});
+					if (!session) {
+						throw new Error("Container not created");
+					}
+					router.push(`/view/${session[0].id}`);
 				})
 			}
 		>

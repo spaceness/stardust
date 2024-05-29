@@ -1,22 +1,59 @@
 import { db } from "@/lib/drizzle/db";
 import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
+import { StyledSubmit } from "@/components/submit-button";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Metadata } from "next";
+import { addImage } from "@/actions/image";
 export const metadata: Metadata = {
 	title: "Images",
 };
 export default async function AdminPage() {
-	const sessions = await db.query.image.findMany({
+	const data = await db.query.image.findMany({
 		with: {
 			session: true,
 		},
 	});
 	return (
 		<div className="flex h-full flex-col">
-			<h1 className="ml-10 py-6 text-3xl font-bold">Images</h1>
-			<section className="flex justify-center items-start w-full h-full">
-				<DataTable columns={columns} data={sessions} />
+			<h1 className="py-6 text-3xl font-bold">Images</h1>
+			<section className="-ml-8">
+				<DataTable data={data} columns={columns} />
 			</section>
+			<div className="flex justify-start items-center">
+				<Dialog>
+					<DialogTrigger asChild>
+						<Button className="ml-2">Add Image</Button>
+					</DialogTrigger>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>Add Image</DialogTitle>
+							<DialogDescription>The image will automatically save after you click the button.</DialogDescription>
+						</DialogHeader>
+						<form action={addImage} className="flex flex-col gap-2 w-full">
+							<Label htmlFor="name">Name</Label>
+							<Input id="name" placeholder="Name" name="friendlyName" minLength={2} required />
+							<Label htmlFor="cat">Category (comma seperated)</Label>
+							<Input id="cat" placeholder="Category" name="category" />
+							<Label htmlFor="img">Docker pull URL</Label>
+							<Input id="img" placeholder="ghcr.io/spaceness/xxxx" name="dockerImage" required />
+							<Label htmlFor="icon">Icon</Label>
+							<Input id="icon" placeholder="Icon URL" name="icon" required />
+							<StyledSubmit>Submit</StyledSubmit>
+						</form>
+					</DialogContent>
+				</Dialog>
+			</div>
 		</div>
 	);
 }

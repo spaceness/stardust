@@ -8,7 +8,7 @@ export function SessionDate({ expiresAt }: { expiresAt: Date }) {
 		<Suspense key={hydrated ? "hydrated" : "server"}>
 			<p className="text-xs text-muted-foreground">
 				Expires at {`${expiresAt.toLocaleTimeString()} on ${expiresAt.toLocaleDateString("en-US")}`}
-				{hydrated ? "" : " (UTC)"}
+				{hydrated ? "" : " (Server TZ)"}
 			</p>
 		</Suspense>
 	);
