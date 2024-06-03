@@ -1,29 +1,35 @@
-<img alt="Stardust banner" src="media/banner.png">
-<p align="center">An opensource kasm alternative. <br> <a href="https://discord.gg/xyW6kqrSf5">Discord Server</a> </p>
+<<img alt="Stardust banner" src="media/banner.png">
+<p align="center">An open-source <a href="https://kasmweb.com">Kasm Workspaces</a> alternative.<br>
+<a href="https://discord.gg/xyW6kqrSf5">
+    <img alt="Join our Discord" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0b5061df29d55a92d945_full_logo_blurple_RGB.svg" width="200">
+</a>
+</p>
 <br>
 
 ## Setup
 
-Go ahead and install dependency's
+Follow the steps below to set up the project.
 
-```
+First, install the dependencies:
+
+```bash
 pnpm i
 ```
 
-Getting an error?
-Might be because you do not have PostgreSQL, install PostgreSQL with your system's package manager.
+If you encounter any errors, it might be because you do not have PostgreSQL. You can install PostgreSQL using your system's package manager.
 
-Build the project
+Next, build the project:
 
-```
+```bash
 pnpm build
 ```
 
-Then start it
+Finally, start the project:
 
-```
+```bash
 pnpm start
 ```
 
 <hr>
-🎉 There you have it, enjoy stardust.
+🎉 There you have it, enjoy Stardust.
+```
