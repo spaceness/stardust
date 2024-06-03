@@ -34,5 +34,6 @@ pnpm start
 ```
 
 <hr>
+
 🎉 There you have it, enjoy Stardust.
-```
+
