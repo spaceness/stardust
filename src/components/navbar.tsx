@@ -81,7 +81,7 @@ export default function Navigation({
 			url: "https://ui.shadcn.com/",
 		},
 	];
-	const developers = ["incognitotgt", "yosoof3", "rare1k"];
+	const developers = ["incognitotgt", "yosoof3", "uhidontkno"];
 	return (
 		<nav className="flex h-16 min-w-full items-center justify-between px-4">
 			<div className="flex items-center justify-start gap-2">
