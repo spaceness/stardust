@@ -11,7 +11,8 @@
 		"ignore": ["**/pnpm-lock.yaml", "**/.next/**", "**/node_modules/**"]
 	},
 	"organizeImports": {
-		"enabled": true
+		"enabled": true,
+		"ignore": ["**/pnpm-lock.yaml", "**/.next/**", "**/node_modules/**"]
 	},
 	"linter": {
 		"enabled": true,

@@ -3,7 +3,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CardContent } from "@/components/ui/card";
 import { auth, signIn } from "@/lib/auth";
 import { AlertCircle, LogIn } from "lucide-react";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function Login({
@@ -14,6 +13,7 @@ export default async function Login({
 	const session = await auth();
 	if (session) redirect("/");
 	const { error } = searchParams;
+	const providersArray = process.env.AUTH_PROVIDERS?.split(",").filter(Boolean) || [];
 	return (
 		<CardContent className="m-2 w-full flex-col">
 			{error ? (
@@ -24,20 +24,21 @@ export default async function Login({
 				</Alert>
 			) : null}
 			<div className="mx-auto mt-4 flex w-full flex-col items-center justify-center gap-2">
-				<form
-					className="w-full"
-					action={async () => {
-						"use server";
-						await signIn("auth0", {
-							redirectTo: `https://${headers().get("x-forwarded-host") || headers().get("host")}/`,
-						});
-					}}
-				>
-					<StyledSubmit className="my-1 w-full">
-						<LogIn className="mr-2 size-4" />
-						Log in with Auth0
-					</StyledSubmit>
-				</form>
+				{providersArray.map((provider) => (
+					<form
+						key={provider}
+						className="w-full"
+						action={async () => {
+							"use server";
+							await signIn(provider);
+						}}
+					>
+						<StyledSubmit className="my-1 w-full">
+							<LogIn className="mr-2 size-4" />
+							Log in with {provider.charAt(0).toUpperCase() + provider.slice(1)}
+						</StyledSubmit>
+					</form>
+				))}
 			</div>
 		</CardContent>
 	);

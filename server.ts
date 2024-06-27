@@ -34,7 +34,9 @@ websockify.on("connection", async (ws, req) => {
 		});
 		ws.on("close", (code, reason) => {
 			consola.info(
-				`✨ Stardust: Connection closed with code ${code} and ${reason ? `reason ${reason.toString()}` : "no reason"}`,
+				`✨ Stardust: Connection closed with code ${code} and ${
+					reason.toString() ? `reason ${reason.toString()}` : "no reason"
+				}`,
 			);
 			socket.end();
 		});

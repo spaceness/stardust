@@ -1,12 +1,12 @@
 "use client";
 import { DataTablePagination } from "@/components/data-table/pagination";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
 	flexRender,
 	getCoreRowModel,
@@ -16,9 +16,9 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/react-table";
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import { Button } from "./button";
-import { ChevronDown } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];

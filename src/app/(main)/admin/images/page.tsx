@@ -1,8 +1,7 @@
-import { db } from "@/lib/drizzle/db";
-import { columns } from "./columns";
-import { DataTable } from "@/components/ui/data-table";
+import { addImage } from "@/actions/image";
 import { StyledSubmit } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
 import {
 	Dialog,
 	DialogContent,
@@ -13,8 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { db } from "@/lib/drizzle/db";
 import type { Metadata } from "next";
-import { addImage } from "@/actions/image";
+import { columns } from "./columns";
 export const metadata: Metadata = {
 	title: "Images",
 };

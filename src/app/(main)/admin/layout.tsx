@@ -1,9 +1,9 @@
+import { AdminSidebar } from "@/components/sidebar";
 import { auth } from "@/lib/auth";
 import { db, user } from "@/lib/drizzle/db";
 import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
-import { AdminSidebar } from "@/components/sidebar";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 export const metadata: Metadata = {
 	title: {
 		absolute: "Admin | Stardust",

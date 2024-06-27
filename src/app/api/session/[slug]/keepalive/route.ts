@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
-import { getSession } from "@/lib/session/get-session";
-import type { NextRequest } from "next/server";
 import { db, session } from "@/lib/drizzle/db";
+import { getSession } from "@/lib/session/get-session";
 import { eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 export async function POST(_req: NextRequest, { params }: { params: { slug: string } }) {
 	const userSession = await auth();
 	const { id } = (await getSession(params.slug, userSession)) || {};

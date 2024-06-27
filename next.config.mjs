@@ -1,6 +1,6 @@
+import { execSync } from "node:child_process";
 // @ts-check
 import NextBundleAnalyzer from "@next/bundle-analyzer";
-import { execSync } from "node:child_process";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {

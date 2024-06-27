@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Inter, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
 import { headers } from "next/headers";
+import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
 const shouldDisplayMetadata = () =>
