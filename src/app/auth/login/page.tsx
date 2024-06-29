@@ -2,7 +2,8 @@ import { StyledSubmit } from "@/components/submit-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CardContent } from "@/components/ui/card";
 import { auth, signIn } from "@/lib/auth";
-import { AlertCircle, LogIn } from "lucide-react";
+import { providers } from "@/lib/auth.config";
+import { AlertCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function Login({
@@ -24,21 +25,24 @@ export default async function Login({
 				</Alert>
 			) : null}
 			<div className="mx-auto mt-4 flex w-full flex-col items-center justify-center gap-2">
-				{providersArray.map((provider) => (
-					<form
-						key={provider}
-						className="w-full"
-						action={async () => {
-							"use server";
-							await signIn(provider);
-						}}
-					>
-						<StyledSubmit className="my-1 w-full">
-							<LogIn className="mr-2 size-4" />
-							Log in with {provider.charAt(0).toUpperCase() + provider.slice(1)}
-						</StyledSubmit>
-					</form>
-				))}
+				{providersArray.map((provider) => {
+					const { Icon } = providers[provider];
+					return (
+						<form
+							key={provider}
+							className="w-full"
+							action={async () => {
+								"use server";
+								await signIn(provider);
+							}}
+						>
+							<StyledSubmit className="my-1 w-full">
+								<Icon className="mr-2 size-4" />
+								Log in with {provider.charAt(0).toUpperCase() + provider.slice(1)}
+							</StyledSubmit>
+						</form>
+					);
+				})}
 			</div>
 		</CardContent>
 	);

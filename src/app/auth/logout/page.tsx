@@ -13,8 +13,8 @@ export default function SignOut() {
 			<form
 				action={async () => {
 					"use server";
-					await signOut();
-					redirect("/");
+					await signOut({ redirect: false });
+					redirect("/auth/login");
 				}}
 			>
 				<StyledSubmit className="mt-6 w-full">
