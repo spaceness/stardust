@@ -1,4 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { getConfig } from "@/lib/config";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Inter, JetBrains_Mono } from "next/font/google";
@@ -6,9 +8,13 @@ import { headers } from "next/headers";
 import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
-const shouldDisplayMetadata = () =>
-	process.env.METADATA_URL &&
-	(headers().get("x-forwarded-host") ?? headers().get("host"))?.includes(new URL(process.env.METADATA_URL).host);
+const shouldDisplayMetadata = () => {
+	const config = getConfig();
+	return (
+		config.metadataUrl &&
+		(headers().get("x-forwarded-host") ?? headers().get("host"))?.includes(new URL(config.metadataUrl).host)
+	);
+};
 export function generateMetadata(): Metadata {
 	return {
 		title: {
@@ -44,7 +50,7 @@ export default async function RootLayout({
 					disableTransitionOnChange
 				>
 					<Toaster richColors theme="system" position="top-center" />
-					{children}
+					<TooltipProvider>{children}</TooltipProvider>
 				</ThemeProvider>
 			</body>
 		</html>

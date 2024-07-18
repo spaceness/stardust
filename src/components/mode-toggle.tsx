@@ -8,7 +8,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { SwatchBook } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -17,19 +17,17 @@ export default function ModeToggle({ className }: Readonly<{ className?: string 
 
 	return (
 		<DropdownMenu>
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<DropdownMenuTrigger asChild className={className}>
-							<Button variant="outline" size="icon">
-								<SwatchBook className="h-[1.2rem] w-[1.2rem] transition-all" />
-								<span className="sr-only">Toggle theme</span>
-							</Button>
-						</DropdownMenuTrigger>
-					</TooltipTrigger>
-					<TooltipContent>Themes</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<DropdownMenuTrigger asChild className={className}>
+						<Button variant="outline" size="icon">
+							<SwatchBook className="h-[1.2rem] w-[1.2rem] transition-all" />
+							<span className="sr-only">Toggle theme</span>
+						</Button>
+					</DropdownMenuTrigger>
+				</TooltipTrigger>
+				<TooltipContent>Themes</TooltipContent>
+			</Tooltip>
 
 			<DropdownMenuContent align="end">
 				<DropdownMenuLabel>Themes</DropdownMenuLabel>

@@ -1,11 +1,12 @@
 import Dockerode from "dockerode";
-const docker = new Dockerode({
-	socketPath:
-		!process.env.DOCKER_TYPE || process.env.DOCKER_TYPE === "socket"
-			? process.env.DOCKER_SOCKET || "/var/run/docker.sock"
-			: undefined,
-	host: process.env.DOCKER_TYPE === "http" ? process.env.CONTAINER_HOST : undefined,
-	port: process.env.DOCKER_TYPE === "http" ? process.env.DOCKER_PORT : undefined,
-	protocol: process.env.DOCKER_TYPE === "http" ? "http" : undefined,
-});
+import { getConfig } from "./config";
+const { docker: config } = getConfig();
+const docker = new Dockerode(
+	(() => ({
+		socketPath: !config.type || config.type === "socket" ? config.socket || "/var/run/docker.sock" : undefined,
+		host: config.type === "http" ? config.host : undefined,
+		port: config.type === "http" ? config.port : undefined,
+		protocol: config.type === "http" ? "http" : undefined,
+	}))(),
+);
 export default docker;

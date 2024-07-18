@@ -5,13 +5,12 @@
 	"type": "module",
 	"scripts": {
 		"dev": "tsx server.ts",
-		"build": "next build",
+		"build": "CONFIG=$(cat .config/config.json) next build",
 		"start": "NODE_ENV=production tsx server.ts",
-		"lint": "biome lint --apply .",
 		"check": "biome check --apply .",
-		"format": "biome format --write .",
 		"drizzle-kit": "drizzle-kit",
-		"db:push": "drizzle-kit push"
+		"db:push": "drizzle-kit push",
+		"config:generate": "ts-json-schema-generator --tsconfig ./tsconfig.json --path ./src/types/config.d.ts --type Config > ./.config/config-schema.json"
 	},
 	"dependencies": {
 		"@next/bundle-analyzer": "^14.2.3",
@@ -38,6 +37,7 @@
 		"@tanstack/react-table": "^8.16.0",
 		"@types/dockerode": "^3.3.26",
 		"@types/ws": "^8.5.10",
+		"argon2": "^0.40.3",
 		"babel-plugin-react-compiler": "0.0.0-experimental-696af53-20240625",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.0",
@@ -52,8 +52,8 @@
 		"next-themes": "^0.3.0",
 		"node-loader": "^2.0.0",
 		"postgres": "^3.4.4",
-		"react": "19.0.0-rc-8971381549-20240625",
-		"react-dom": "19.0.0-rc-8971381549-20240625",
+		"react": "19.0.0-rc-163365a0-20240717",
+		"react-dom": "19.0.0-rc-163365a0-20240717",
 		"server-only": "^0.0.1",
 		"sharp": "^0.33.3",
 		"sonner": "^1.4.41",
@@ -76,6 +76,7 @@
 		"postcss": "^8.4.38",
 		"tailwindcss": "^3.4.1",
 		"tailwindcss-dotted-background": "^1.1.0",
+		"ts-json-schema-generator": "^2.3.0",
 		"typescript": "^5.4.3"
 	}
 }

@@ -1,0 +1,110 @@
+{
+	"$ref": "#/definitions/Config",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"definitions": {
+		"AuthConfig": {
+			"additionalProperties": false,
+			"properties": {
+				"credentials": {
+					"additionalProperties": false,
+					"description": "Credentials configuration. Leave `undefined` to disable user/password signups.",
+					"properties": {
+						"signups": {
+							"description": "Whether to allow user signups.",
+							"type": "boolean"
+						}
+					},
+					"type": "object"
+				},
+				"oauth": {
+					"additionalProperties": false,
+					"description": "OAuth configuration. Leave `undefined` to disable OAuth signups.",
+					"properties": {
+						"providers": {
+							"additionalProperties": {
+								"additionalProperties": false,
+								"properties": {
+									"clientId": {
+										"description": "The client ID for the OAuth provider.",
+										"type": "string"
+									},
+									"clientSecret": {
+										"description": "The client secret for the OAuth provider.",
+										"type": "string"
+									},
+									"issuer": {
+										"description": "The OAuth provider's issuer, if applicable.",
+										"type": "string"
+									}
+								},
+								"required": ["clientId", "clientSecret"],
+								"type": "object"
+							},
+							"description": "The OAuth providers to enable.",
+							"type": "object"
+						}
+					},
+					"required": ["providers"],
+					"type": "object"
+				},
+				"secret": {
+					"description": "The JWT secret used to sign tokens.",
+					"type": "string"
+				}
+			},
+			"required": ["secret"],
+			"type": "object"
+		},
+		"Config": {
+			"additionalProperties": false,
+			"properties": {
+				"auth": {
+					"$ref": "#/definitions/AuthConfig"
+				},
+				"databaseUrl": {
+					"description": "The URL of the database to connect to.",
+					"type": "string"
+				},
+				"docker": {
+					"$ref": "#/definitions/DockerConfig"
+				},
+				"metadataUrl": {
+					"description": "The public URL of your Stardust instance. Use this if you want to display site metadata.",
+					"type": "string"
+				}
+			},
+			"required": ["databaseUrl", "docker", "auth"],
+			"type": "object"
+		},
+		"DockerConfig": {
+			"additionalProperties": false,
+			"properties": {
+				"host": {
+					"description": "The host to connect to, if using an HTTP connection.",
+					"type": "string"
+				},
+				"network": {
+					"description": "The Docker network used for connecting to containers",
+					"type": "string"
+				},
+				"port": {
+					"description": "The port for the docker host, if using an HTTP connection.",
+					"type": "number"
+				},
+				"socket": {
+					"default": "/var/run/docker.sock",
+					"description": "The path to the Docker socket to connect to, if using a socket connection.",
+					"type": "string"
+				},
+				"type": {
+					"default": "socket",
+					"description": "The type of connection to use to connect to the Docker daemon.",
+					"enum": ["http", "socket"],
+					"type": "string"
+				}
+			},
+			"required": ["network"],
+			"type": "object"
+		}
+	}
+}

@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { getConfig } from "../config";
 import * as schema from "./schema";
 
 const drizzleSingleton = () => drizzle(client, { schema });
@@ -8,7 +9,7 @@ declare const globalThis: {
 	db: ReturnType<typeof drizzleSingleton>;
 } & typeof global;
 
-const client = postgres(process.env.DATABASE_URL as string);
+const client = postgres(getConfig().databaseUrl);
 let db: ReturnType<typeof drizzleSingleton>;
 if (process.env.NODE_ENV === "production") {
 	db = drizzleSingleton();
