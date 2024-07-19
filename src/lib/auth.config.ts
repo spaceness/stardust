@@ -1,8 +1,7 @@
-import { AppleIcon, DiscordIcon, GitHubIcon, GitLabIcon, GoogleIcon } from "@/components/icons";
+import { DiscordIcon, GitHubIcon, GitLabIcon, GoogleIcon } from "@/components/icons";
 import { LogIn } from "lucide-react";
-import type { NextAuthConfig, Profile } from "next-auth";
+import type { NextAuthConfig } from "next-auth";
 import type { OAuthUserConfig, OIDCUserConfig, Provider } from "next-auth/providers";
-import Apple from "next-auth/providers/apple";
 import Auth0 from "next-auth/providers/auth0";
 import Discord from "next-auth/providers/discord";
 import GitHub from "next-auth/providers/github";
@@ -48,6 +47,7 @@ for (const [name, { provider }] of Object.entries(providersList)) {
 	// @ts-expect-error all functions are callable lol
 	if (authConfig.oauth && name in authConfig.oauth.providers) providers.push(provider(providerArgs(name)));
 }
+
 const config: NextAuthConfig = {
 	secret: authConfig.secret,
 	trustHost: true,

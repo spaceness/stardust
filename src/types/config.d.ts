@@ -47,6 +47,7 @@ export interface AuthConfig {
 	credentials?: {
 		/**
 		 * Whether to allow user signups.
+		 * @default false
 		 **/
 		signups?: boolean;
 	};

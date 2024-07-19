@@ -2,13 +2,9 @@ import { config as authConfig } from "@/lib/auth.config";
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 const { auth } = NextAuth(authConfig);
+const allowedPaths = ["/auth/login", "/auth/error", "/auth/verify", "/auth/signup"];
 export const middleware = auth(async (req) => {
-	if (
-		req.auth ||
-		req.nextUrl.pathname.startsWith("/auth/login") ||
-		req.nextUrl.pathname.startsWith("/auth/error") ||
-		req.nextUrl.pathname.startsWith("/auth/verify")
-	) {
+	if (req.auth || allowedPaths.includes(req.nextUrl.pathname)) {
 		return NextResponse.next();
 	}
 	const url = new URL("/auth/login", req.url);
