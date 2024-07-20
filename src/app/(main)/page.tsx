@@ -56,19 +56,12 @@ const ManageSessionButton = ({
 export default async function Dashboard() {
 	const userSession = await auth();
 	const { sessions, images } = await db.transaction(async (tx) => {
-		const [{ userId }] = await tx
-			.select({
-				userId: user.id,
-			})
-			.from(user)
-			.where(eq(user.email, userSession?.user?.email as string));
-
 		const images = await db.select().from(image);
 		const sessions = await tx.query.session.findMany({
 			with: {
 				image: true,
 			},
-			where: (users, { eq }) => eq(users.userId, userId),
+			where: (users, { eq }) => eq(users.userId, userSession?.user.id as string),
 		});
 
 		return { sessions, images };

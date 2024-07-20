@@ -21,28 +21,25 @@ export function AdminSidebar() {
 		{ href: "/admin/sessions", label: "Sessions", Icon: Container },
 	];
 	return (
-		<nav className="z-50">
-			<Separator />
-			<div className="w-20">
-				<section className="h-full fixed p-4 border-r items-start flex flex-col gap-2">
-					{links.map(({ href, label, Icon }) => (
-						<Button
-							asChild
-							key={href}
-							variant="ghost"
-							className={cn(
-								pathname === href ? "text-primary bg-secondary" : "text-muted-foreground",
-								"hover:text-primary flex gap-2 w-full justify-start",
-							)}
-						>
-							<Link href={href}>
-								<Icon className="size-5" />
-								{label}
-							</Link>
-						</Button>
-					))}
-				</section>
-			</div>
+		<nav className="grid gap-x-4 text-sm text-muted-foreground">
+			<section className="h-full p-4 items-start flex flex-col gap-2">
+				{links.map(({ href, label, Icon }) => (
+					<Button
+						asChild
+						key={href}
+						variant="ghost"
+						className={cn(
+							pathname === href ? "text-primary bg-secondary" : "text-muted-foreground",
+							"hover:text-primary flex gap-2 w-full justify-start",
+						)}
+					>
+						<Link href={href}>
+							<Icon className="size-5" />
+							{label}
+						</Link>
+					</Button>
+				))}
+			</section>
 		</nav>
 	);
 }

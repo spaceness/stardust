@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SelectUser } from "@/lib/drizzle/schema";
-import { Book, ComputerIcon, Globe, Info, LogOut, Settings, Sparkles, SwatchBook, User } from "lucide-react";
+import { Book, ComputerIcon, Globe, Info, Key, LogOut, Settings, Sparkles, SwatchBook } from "lucide-react";
 import type { Route } from "next";
 import type { Session } from "next-auth";
 import { useTheme } from "next-themes";
@@ -86,7 +86,7 @@ export default function Navigation({
 			url: "https://authjs.dev/",
 		},
 	];
-	const developers = ["incognitotgt", "yosoof3", "uhidontkno"];
+	const developers = ["incognitotgt", "1yusof", "genericness"];
 	return (
 		<nav className="flex h-16 min-w-full items-center justify-between px-4">
 			<div className="flex items-center justify-start gap-2">
@@ -222,10 +222,6 @@ export default function Navigation({
 							<p className="text-xs font-light text-muted-foreground">{name ? email : name}</p>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
-							<User className="size-4 mr-2" />
-							<span>Profile</span>
-						</DropdownMenuItem>
 						<DropdownMenuSub>
 							<DropdownMenuSubTrigger>
 								<SwatchBook className="size-4 mr-2" />
@@ -246,9 +242,14 @@ export default function Navigation({
 							<span>About Stardust</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
+							<Link href="/auth/reset-password">
+								<Key className="size-4 mr-2" />
+								<span>Reset Password</span>
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild>
 							<Link href="/auth/logout">
 								<LogOut className="size-4 mr-2" />
-
 								<span>Log Out</span>
 							</Link>
 						</DropdownMenuItem>

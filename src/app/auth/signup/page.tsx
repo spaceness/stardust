@@ -62,6 +62,7 @@ export default async function Page({
 				/>
 				<Label htmlFor="password">Password</Label>
 				<Input
+					minLength={8}
 					id="password"
 					type="password"
 					name="password"

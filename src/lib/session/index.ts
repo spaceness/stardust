@@ -11,17 +11,17 @@ import { getConfig } from "../config";
 import { getSession } from "./get-session";
 /**
  * Creates a new Stardust session
- * @param Image Docker image to use for making the session
+ * @param image Docker image to use for making the session
  */
-async function createSession(Image: string) {
-	consola.info(`✨ Stardust: Creating session with image ${Image}`);
+async function createSession(image: string) {
+	consola.info(`✨ Stardust: Creating session with image ${image}`);
 	try {
 		const userSession = await auth();
 		if (!userSession?.user) throw new Error("User not found");
-		const id = `stardust-${crypto.randomUUID()}-${Image.split("/")[2]}`;
+		const id = `stardust-${crypto.randomUUID()}-${image.split("/")[2]}`;
 		const container = await docker.createContainer({
 			name: id,
-			Image,
+			Image: image,
 			HostConfig: {
 				ShmSize: 1024,
 				NetworkMode: getConfig().docker.network,
@@ -39,17 +39,10 @@ async function createSession(Image: string) {
 					.insert(session)
 					.values({
 						id: container.id,
-						dockerImage: Image,
+						dockerImage: image,
 						createdAt: Date.now(),
 						expiresAt: date.getTime(),
-						userId: (
-							await tx
-								.select({
-									userId: user.id,
-								})
-								.from(user)
-								.where(eq(user.email, userSession.user?.email as string))
-						)[0].userId,
+						userId: userSession.user.id,
 					})
 					.returning();
 			})
@@ -72,7 +65,7 @@ async function manageSession(containerId: string, action: keyof Dockerode.Contai
 	const [{ isAdmin }] = await db
 		.select({ isAdmin: user.isAdmin })
 		.from(user)
-		.where(eq(user.email, userSession?.user?.email as string));
+		.where(eq(user.id, userSession?.user?.id as string));
 	const { id } = (await getSession(containerId, userSession)) || {};
 	if ((admin && isAdmin) || id) {
 		const container = docker.getContainer(id || containerId);
@@ -89,7 +82,7 @@ async function deleteSession(containerId: string, admin?: boolean) {
 	const [{ isAdmin }] = await db
 		.select({ isAdmin: user.isAdmin })
 		.from(user)
-		.where(eq(user.email, userSession?.user?.email as string));
+		.where(eq(user.id, userSession?.user?.id as string));
 	const { id } = (await getSession(containerId, userSession)) || {};
 	if ((admin && isAdmin) || id) {
 		const container = docker.getContainer(id || containerId);

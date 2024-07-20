@@ -20,9 +20,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 		return redirect("/");
 	}
 	return (
-		<>
+		<div className="flex flex-row gap-4">
 			<AdminSidebar />
-			<div className="ml-48 h-full">{children}</div>
-		</>
+			<div className="h-full min-h-[calc(100vh_-_theme(spacing.16))] w-full px-4">{children}</div>
+		</div>
 	);
 }
