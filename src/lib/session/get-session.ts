@@ -10,12 +10,10 @@ import { getConfig } from "../config";
  * @returns The database query for the session along with the container IP, or `null` if it doesn't exist.
  */
 async function getSession(containerId: string, userSession: Session | null) {
-	const [containerSession] = await db.transaction(async (tx) => {
-		return tx
-			.select()
-			.from(session)
-			.where(and(eq(session.id, containerId), eq(session.userId, userSession?.user.id as string)));
-	});
+	const [containerSession] = await db
+		.select()
+		.from(session)
+		.where(and(eq(session.id, containerId), eq(session.userId, userSession?.user.id as string)));
 	if (!containerSession) return null;
 	const ip = (await docker.getContainer(containerId).inspect()).NetworkSettings.Networks[getConfig().docker.network]
 		.IPAddress;

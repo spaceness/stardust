@@ -44,7 +44,7 @@ export default async function AdminPage() {
 							<Label htmlFor="name">Name</Label>
 							<Input id="name" placeholder="Name" name="friendlyName" minLength={2} required />
 							<Label htmlFor="cat">Category (comma seperated)</Label>
-							<Input id="cat" placeholder="Category" name="category" />
+							<Input id="cat" placeholder="Category" name="category" required />
 							<Label htmlFor="img">Docker pull URL</Label>
 							<Input id="img" placeholder="ghcr.io/spaceness/xxxx" name="dockerImage" required />
 							<Label htmlFor="icon">Icon</Label>

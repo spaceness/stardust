@@ -9,6 +9,7 @@ export interface Config {
 	metadataUrl?: string;
 	docker: DockerConfig;
 	auth: AuthConfig;
+	session?: SessionConfig;
 }
 
 export interface DockerConfig {
@@ -78,4 +79,12 @@ export interface AuthConfig {
 			};
 		};
 	};
+}
+
+export interface SessionConfig {
+	/**
+	 * The amount of time to keep an inactive session alive for, in minutes.
+	 * @default 1440
+	 */
+	keepaliveDuration?: number;
 }

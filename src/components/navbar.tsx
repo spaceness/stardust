@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SelectUser } from "@/lib/drizzle/schema";
-import { Book, ComputerIcon, Globe, Info, Key, LogOut, Settings, Sparkles, SwatchBook } from "lucide-react";
+import { Book, ComputerIcon, Globe, Info, Key, LogOut, Settings, Sparkles, SwatchBook, Trash } from "lucide-react";
 import type { Route } from "next";
 import type { Session } from "next-auth";
 import { useTheme } from "next-themes";
@@ -245,6 +245,12 @@ export default function Navigation({
 							<Link href="/auth/reset-password">
 								<Key className="size-4 mr-2" />
 								<span>Reset Password</span>
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild>
+							<Link href="/auth/delete">
+								<Trash className="size-4 mr-2" />
+								<span>Delete Account</span>
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>

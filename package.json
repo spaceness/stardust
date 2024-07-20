@@ -1,6 +1,6 @@
 {
 	"name": "stardust",
-	"version": "0.8-rc",
+	"version": "0.9",
 	"private": true,
 	"type": "module",
 	"scripts": {

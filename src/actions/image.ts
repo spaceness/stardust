@@ -15,7 +15,6 @@ export async function addImage(data: FormData) {
 			.split(",")
 			.map((cat) => cat.trim()),
 		icon: data.get("icon"),
-		pulled: true,
 	});
 	if (!validatedFields.success) {
 		return {
@@ -40,7 +39,6 @@ export async function addImage(data: FormData) {
 			dockerImage: validatedFields.data.dockerImage,
 			friendlyName: validatedFields.data.friendlyName,
 			icon: validatedFields.data.icon,
-			pulled: validatedFields.data.pulled,
 		})
 		.onConflictDoUpdate({
 			target: image.dockerImage,
@@ -48,7 +46,6 @@ export async function addImage(data: FormData) {
 				category: [validatedFields.data.category as string],
 				friendlyName: validatedFields.data.friendlyName,
 				icon: validatedFields.data.icon,
-				pulled: validatedFields.data.pulled,
 			},
 		});
 	revalidatePath("/admin/images");

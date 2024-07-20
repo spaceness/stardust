@@ -16,6 +16,7 @@ import { getSession } from "./get-session";
 async function createSession(image: string) {
 	consola.info(`✨ Stardust: Creating session with image ${image}`);
 	try {
+		const config = getConfig();
 		const userSession = await auth();
 		if (!userSession?.user) throw new Error("User not found");
 		const id = `stardust-${crypto.randomUUID()}-${image.split("/")[2]}`;
@@ -24,7 +25,7 @@ async function createSession(image: string) {
 			Image: image,
 			HostConfig: {
 				ShmSize: 1024,
-				NetworkMode: getConfig().docker.network,
+				NetworkMode: config.docker.network,
 			},
 		});
 		await container.start().catch((e) => {
@@ -32,26 +33,24 @@ async function createSession(image: string) {
 			throw new Error(`Container not started ${e.message}`);
 		});
 		const date = new Date();
-		date.setDate(date.getDate() + 7);
+		date.setHours(date.getHours() + (config.session?.keepaliveDuration || 1440));
 		return db
-			.transaction(async (tx) => {
-				return await tx
-					.insert(session)
-					.values({
-						id: container.id,
-						dockerImage: image,
-						createdAt: Date.now(),
-						expiresAt: date.getTime(),
-						userId: userSession.user.id,
-					})
-					.returning();
+			.insert(session)
+			.values({
+				id: container.id,
+				dockerImage: image,
+				createdAt: Date.now(),
+				expiresAt: date.getTime(),
+				userId: userSession.user.id,
 			})
+			.returning()
 			.catch(async (e) => {
 				await container.remove({ force: true });
-				throw new Error(e.message);
+				throw e;
 			});
 	} catch (error) {
 		console.error(error);
+		throw error;
 	}
 }
 /**

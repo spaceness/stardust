@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { unstable_rethrow } from "next/navigation";
 
-export const resetPassword = async (dbUser: SelectUser | undefined, data: FormData) => {
+export async function resetPassword(dbUser: SelectUser | undefined, data: FormData) {
 	try {
 		if (!dbUser) throw new Error("this ain't supposed to happen, why is there no user");
 		const newPw = data.get("new-password")?.toString();
@@ -35,4 +35,4 @@ export const resetPassword = async (dbUser: SelectUser | undefined, data: FormDa
 		unstable_rethrow(error);
 		throw error;
 	}
-};
+}

@@ -10,6 +10,7 @@
 					"description": "Credentials configuration. Leave `undefined` to disable user/password signups.",
 					"properties": {
 						"signups": {
+							"default": false,
 							"description": "Whether to allow user signups.",
 							"type": "boolean"
 						}
@@ -23,6 +24,7 @@
 						"providers": {
 							"additionalProperties": {
 								"additionalProperties": false,
+								"description": "the provider name",
 								"properties": {
 									"clientId": {
 										"description": "The client ID for the OAuth provider.",
@@ -71,6 +73,9 @@
 				"metadataUrl": {
 					"description": "The public URL of your Stardust instance. Use this if you want to display site metadata.",
 					"type": "string"
+				},
+				"session": {
+					"$ref": "#/definitions/SessionConfig"
 				}
 			},
 			"required": ["databaseUrl", "docker", "auth"],
@@ -104,6 +109,17 @@
 				}
 			},
 			"required": ["network"],
+			"type": "object"
+		},
+		"SessionConfig": {
+			"additionalProperties": false,
+			"properties": {
+				"keepaliveDuration": {
+					"default": 1440,
+					"description": "The amount of time to keep an inactive session alive for, in minutes.",
+					"type": "number"
+				}
+			},
 			"type": "object"
 		}
 	}

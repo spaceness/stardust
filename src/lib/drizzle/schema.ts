@@ -18,7 +18,6 @@ export const image = pgTable("Image", {
 	friendlyName: text("friendlyName").notNull(),
 	category: text("category").array(),
 	icon: text("icon").notNull(),
-	pulled: boolean("pulled").default(false).notNull(),
 });
 export type SelectImage = typeof user.$inferSelect;
 export const insertImageSchema = createInsertSchema(image);
