@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { getConfig } from "@/lib/config";
 import { db, session } from "@/lib/drizzle/db";
 import { getSession } from "@/lib/session/get-session";
 import { eq } from "drizzle-orm";
@@ -7,7 +8,7 @@ export async function POST(_req: NextRequest, { params }: { params: { slug: stri
 	const userSession = await auth();
 	const { id } = (await getSession(params.slug, userSession)) || {};
 	const date = new Date();
-	date.setDate(date.getDate() + 7);
+	date.setHours(date.getHours() + (getConfig().session?.keepaliveDuration || 1440));
 	if (!id) {
 		return Response.json({ error: "Not Found" }, { status: 404 });
 	}
