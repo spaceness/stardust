@@ -43,6 +43,13 @@ export interface AuthConfig {
 	 **/
 	secret: string;
 	/**
+	 * Cloudflare turnstile configuration. Leave `undefined` to disable turnstile.
+	 **/
+	turnstile?: {
+		secret: string;
+		siteKey: string;
+	};
+	/**
 	 * Credentials configuration. Leave `undefined` to disable user/password signups.
 	 **/
 	credentials?: {

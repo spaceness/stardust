@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@marsidev/react-turnstile':
+        specifier: ^0.7.2
+        version: 0.7.2(react-dom@19.0.0-rc-163365a0-20240717(react@19.0.0-rc-163365a0-20240717))(react@19.0.0-rc-163365a0-20240717)
       '@next/bundle-analyzer':
         specifier: ^14.2.3
         version: 14.2.3
@@ -936,6 +939,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@marsidev/react-turnstile@0.7.2':
+    resolution: {integrity: sha512-0jwLvAUkcLkaYaS6jBOZB3zzUiKi5dU3kZtlaeBX6yV7Y4CbFEtfHCY352ovphNz1v0ZjpOj6+3QUczJvD56VA==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@next/bundle-analyzer@14.2.3':
     resolution: {integrity: sha512-Z88hbbngMs7njZKI8kTJIlpdLKYfMSLwnsqYe54AP4aLmgL70/Ynx/J201DQ+q2Lr6FxFw1uCeLGImDrHOl2ZA==}
@@ -3544,6 +3553,11 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
+
+  '@marsidev/react-turnstile@0.7.2(react-dom@19.0.0-rc-163365a0-20240717(react@19.0.0-rc-163365a0-20240717))(react@19.0.0-rc-163365a0-20240717)':
+    dependencies:
+      react: 19.0.0-rc-163365a0-20240717
+      react-dom: 19.0.0-rc-163365a0-20240717(react@19.0.0-rc-163365a0-20240717)
 
   '@next/bundle-analyzer@14.2.3':
     dependencies:

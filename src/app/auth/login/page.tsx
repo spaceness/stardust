@@ -1,4 +1,5 @@
 import { StyledSubmit } from "@/components/submit-button";
+import Turnstile from "@/components/turnstile";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { auth, signIn } from "@/lib/auth";
 import { providers } from "@/lib/auth.config";
 import { getConfig } from "@/lib/config";
+import turnstileCheck from "@/lib/turnstile";
 import { AlertCircle, Info } from "lucide-react";
 import type { CredentialsSignin } from "next-auth";
 import Link from "next/link";
@@ -43,9 +45,15 @@ export default async function Login({
 					action={async (data) => {
 						"use server";
 						try {
-							await signIn("credentials", data);
+							if (await turnstileCheck(data)) {
+								await signIn("credentials", data);
+							} else {
+								throw new Error("Failed captcha");
+							}
 						} catch (error) {
-							redirect(`/auth/login?error=${(error as CredentialsSignin).cause?.err?.message}`);
+							redirect(
+								`/auth/login?error=${(error as CredentialsSignin).cause?.err?.message || (error as Error).message}`,
+							);
 						}
 					}}
 				>
@@ -69,6 +77,7 @@ export default async function Login({
 						required
 						className="w-full"
 					/>
+					<Turnstile />
 					<StyledSubmit className="w-full">Log in</StyledSubmit>
 				</form>
 			) : null}

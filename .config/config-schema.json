@@ -52,6 +52,20 @@
 				"secret": {
 					"description": "The JWT secret used to sign tokens.",
 					"type": "string"
+				},
+				"turnstile": {
+					"additionalProperties": false,
+					"description": "Cloudflare turnstile configuration. Leave `undefined` to disable turnstile.",
+					"properties": {
+						"secret": {
+							"type": "string"
+						},
+						"siteKey": {
+							"type": "string"
+						}
+					},
+					"required": ["secret", "siteKey"],
+					"type": "object"
 				}
 			},
 			"required": ["secret"],

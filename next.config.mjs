@@ -1,5 +1,5 @@
-import { execSync } from "node:child_process";
 // @ts-check
+import { execSync } from "node:child_process";
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -16,6 +16,7 @@ const nextConfig = {
 	env: {
 		GIT_COMMIT: process.env.NODE_ENV === "production" ? execSync("git rev-parse HEAD").toString().trim() : "DEVELOP",
 		BUILD_DATE: Date.now().toString(),
+		TURNSTILE_SITEKEY: JSON.parse(process.env.CONFIG || "").auth.turnstile?.siteKey,
 	},
 	experimental: {
 		ppr: true,
@@ -50,5 +51,4 @@ const nextConfig = {
 		return config;
 	},
 };
-
 export default NextBundleAnalyzer({ enabled: process.env.ANALYZE === "true" })(nextConfig);

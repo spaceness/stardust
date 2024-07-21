@@ -1,4 +1,5 @@
 import { StyledSubmit } from "@/components/submit-button";
+import Turnstile from "@/components/turnstile";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { CardContent, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/config";
 import { db, user } from "@/lib/drizzle/db";
+import turnstileCheck from "@/lib/turnstile";
 import { createId } from "@paralleldrive/cuid2";
 import { hash } from "argon2";
 import { Info } from "lucide-react";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 
 export default async function Page({
 	searchParams,
@@ -19,7 +21,7 @@ export default async function Page({
 	const session = await auth();
 	if (session) redirect("/");
 	const config = getConfig();
-	const { message } = searchParams;
+	const { message, error } = searchParams;
 	if (!config.auth.credentials || !config.auth.credentials.signups)
 		redirect(`/auth/error?error=${encodeURIComponent("Signups are disabled for this instance.")}`);
 	return (
@@ -31,21 +33,35 @@ export default async function Page({
 					<AlertTitle>{message}</AlertTitle>
 				</Alert>
 			) : null}
+			{error ? (
+				<Alert className="w-full my-4" variant="destructive">
+					<Info className="h-4 w-4" />
+					<AlertTitle>{error}</AlertTitle>
+				</Alert>
+			) : null}
 			<form
 				className="mx-auto mb-4 flex w-full flex-col items-start justify-center gap-2"
 				action={async (data) => {
 					"use server";
-					const userCheck = await db.query.user.findFirst({
-						where: (user, { eq }) => eq(user.email, data.get("email")?.toString() || ""),
-					});
-					if (userCheck) redirect("/auth/login?error=Email%20already%20in%20use");
-					await db.insert(user).values({
-						name: data.get("name")?.toString(),
-						email: data.get("email")?.toString() as string,
-						password: await hash(data.get("password")?.toString() as string),
-						id: createId(),
-					});
-					redirect("/auth/login?message=Account%20created%20successfully");
+					try {
+						if (!(await turnstileCheck(data))) {
+							redirect("/auth/signup?error=Failed%captcha");
+						}
+						const userCheck = await db.query.user.findFirst({
+							where: (user, { eq }) => eq(user.email, data.get("email")?.toString() || ""),
+						});
+						if (userCheck) redirect("/auth/login?error=Email%20already%20in%20use");
+						await db.insert(user).values({
+							name: data.get("name")?.toString(),
+							email: data.get("email")?.toString() as string,
+							password: await hash(data.get("password")?.toString() as string),
+							id: createId(),
+						});
+						redirect("/auth/login?message=Account%20created%20successfully");
+					} catch (e) {
+						unstable_rethrow(e);
+						throw e;
+					}
 				}}
 			>
 				<Label htmlFor="name">Name</Label>
@@ -71,6 +87,7 @@ export default async function Page({
 					required
 					className="w-full"
 				/>
+				<Turnstile />
 				<StyledSubmit className="w-full">Sign up</StyledSubmit>
 			</form>
 		</CardContent>

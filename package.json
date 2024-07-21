@@ -13,6 +13,7 @@
 		"config:generate": "ts-json-schema-generator --tsconfig ./tsconfig.json --path ./src/types/config.d.ts --type Config > ./.config/config-schema.json"
 	},
 	"dependencies": {
+		"@marsidev/react-turnstile": "^0.7.2",
 		"@next/bundle-analyzer": "^14.2.3",
 		"@novnc/novnc": "^1.4.0",
 		"@paralleldrive/cuid2": "^2.2.2",
