@@ -153,7 +153,7 @@ export default function Navigation({
 								</li>
 							))}
 						</ul>
-						Copyright 2024 Spaceness.
+						Copyleft 2024 Spaceness.
 						<section>
 							This version of Stardust is from commit{" "}
 							<a
