@@ -86,7 +86,7 @@ export default function Navigation({
 			url: "https://authjs.dev/",
 		},
 	];
-	const developers = ["incognitotgt", "1yusof", "genericness"];
+	const developers = ["incognitotgt", "1yusof", "genericness","uhidontkno"];
 	return (
 		<nav className="flex h-16 min-w-full items-center justify-between px-4">
 			<div className="flex items-center justify-start gap-2">
@@ -153,7 +153,7 @@ export default function Navigation({
 								</li>
 							))}
 						</ul>
-						Copyright 2024 Spaceness.
+						Copyleft 2024 Spaceness.
 						<section>
 							This version of Stardust is from commit{" "}
 							<a
