@@ -15,8 +15,5 @@ export default async function turnstileCheck(data: FormData) {
 		},
 	});
 	const outcome = await result.json();
-	if (outcome.success) {
-		return true;
-	}
-	return false;
+	return outcome.success;
 }

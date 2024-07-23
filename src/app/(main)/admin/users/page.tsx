@@ -15,6 +15,7 @@ import { db, user } from "@/lib/drizzle/db";
 import { createId } from "@paralleldrive/cuid2";
 import { hash } from "argon2";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { columns } from "./columns";
 export const metadata: Metadata = {
 	title: "Users",
@@ -54,11 +55,13 @@ export default async function AdminPage() {
 									password: await hash(data.get("password")?.toString() as string),
 									id: createId(),
 								});
+								redirect("/admin");
 							}}
 							className="flex flex-col gap-2 w-full"
 						>
 							<Label htmlFor="name">Name</Label>
 							<Input id="name" type="text" name="name" placeholder="Name" />
+							<Label htmlFor="email">Email</Label>
 							<Input id="email" type="email" name="email" placeholder="Email" required />
 							<Label htmlFor="password">Password</Label>
 							<Input minLength={8} id="password" type="password" name="password" placeholder="Password" required />

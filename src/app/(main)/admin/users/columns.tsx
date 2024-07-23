@@ -4,7 +4,7 @@ import { DataTableColumnHeader } from "@/components/data-table/column-header";
 import { StyledSubmit } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -65,7 +65,6 @@ export const columns: ColumnDef<SelectUserRelation>[] = [
 	{
 		id: "actions",
 		cell: ({ row }) => {
-			// why does this feel illegal
 			const [resetDialogOpen, setResetDialogOpen] = useState(false);
 			const user = row.original;
 			return (

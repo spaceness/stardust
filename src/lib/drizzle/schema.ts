@@ -19,7 +19,7 @@ export const image = pgTable("Image", {
 	category: text("category").array(),
 	icon: text("icon").notNull(),
 });
-export type SelectImage = typeof user.$inferSelect;
+export type SelectImage = typeof image.$inferSelect;
 export const insertImageSchema = createInsertSchema(image);
 export const imageRelations = relations(image, ({ many }) => ({
 	session: many(session),

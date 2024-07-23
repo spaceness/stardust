@@ -1,8 +1,7 @@
 import "dotenv/config";
 
 import { exec } from "node:child_process";
-import { db, image as imageSchema } from "@/lib/drizzle/db";
-
+import { type SelectImage, db, image as imageSchema } from "@/lib/drizzle/db";
 (async () => {
 	const images = [
 		{
@@ -30,18 +29,20 @@ import { db, image as imageSchema } from "@/lib/drizzle/db";
 			icon: "/images/workspaces/firefox.svg",
 		},
 		{
-			dockerImage: "ghcr.io/spaceness/pinball",
-			friendlyName: "Pinball",
-			category: ["Games"],
-			icon: "/icon.svg",
-		},
-		{
 			dockerImage: "ghcr.io/spaceness/gimp",
 			friendlyName: "GIMP",
 			category: ["Photo Editing"],
 			icon: "https://www.gimp.org/images/frontpage/wilber-big.png",
 		},
 	];
+	if (process.arch === "x64") {
+		Object.assign(images, {
+			dockerImage: "ghcr.io/spaceness/pinball",
+			friendlyName: "Pinball",
+			category: ["Games"],
+			icon: "/icon.svg",
+		} satisfies SelectImage);
+	}
 	const insertion = await db.insert(imageSchema).values(images).onConflictDoNothing().returning();
 	console.log(`✨Stardust: Seeded ${insertion.length} images.`);
 	console.log(`✨Stardust: Seeded ${insertion.map((i) => i.dockerImage).join(", ") || "no images"}`);
@@ -53,11 +54,11 @@ import { db, image as imageSchema } from "@/lib/drizzle/db";
 				exec(`docker pull ${image.dockerImage}`, (err, stdout, stderr) => {
 					if (err) {
 						console.error(`✨Stardust: Error pulling image ${image.dockerImage}`);
-						console.error(stderr);
+						process.stderr.write(stderr);
 						console.error(err);
 						reject(err);
 					} else {
-						console.log(stdout);
+						process.stdout.write(stdout);
 						console.log(`✨Stardust: Pulled image ${image.dockerImage}`);
 						resolve();
 					}
