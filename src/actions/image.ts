@@ -42,7 +42,7 @@ export async function addImage(data: FormData) {
 			await pullImage(fields.dockerImage);
 		} else {
 			await pullImage(fields.dockerImage);
-			await deleteImage(oldImg[0].Id);
+			await deleteImage(oldImg[0].Id, false);
 		}
 	}
 	await db
@@ -59,7 +59,7 @@ export async function addImage(data: FormData) {
 	redirect("/admin/images");
 }
 
-export async function deleteImage(dockerImage: string) {
+export async function deleteImage(dockerImage: string, dbDelete = true) {
 	await Promise.all(
 		(await db.select().from(session).where(eq(session.dockerImage, dockerImage))).map((s) => deleteSession(s.id, true)),
 	);
@@ -67,6 +67,6 @@ export async function deleteImage(dockerImage: string) {
 		.getImage(dockerImage)
 		.remove()
 		.catch(() => {});
-	await db.delete(image).where(eq(image.dockerImage, dockerImage));
+	if (dbDelete) await db.delete(image).where(eq(image.dockerImage, dockerImage));
 	revalidatePath("/admin/images");
 }

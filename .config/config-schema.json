@@ -7,7 +7,7 @@
 			"properties": {
 				"credentials": {
 					"additionalProperties": false,
-					"description": "Credentials configuration. Leave `undefined` to disable user/password signups.",
+					"description": "Credentials configuration. Leave `undefined` to disable user/password signups, or as `{}` to enable.",
 					"properties": {
 						"signups": {
 							"default": false,
@@ -54,18 +54,8 @@
 					"type": "string"
 				},
 				"turnstile": {
-					"additionalProperties": false,
-					"description": "Cloudflare turnstile configuration. Leave `undefined` to disable turnstile.",
-					"properties": {
-						"secret": {
-							"type": "string"
-						},
-						"siteKey": {
-							"type": "string"
-						}
-					},
-					"required": ["secret", "siteKey"],
-					"type": "object"
+					"$ref": "#/definitions/TurnstileConfig",
+					"description": "Cloudflare turnstile configuration. Leave `undefined` to disable turnstile."
 				}
 			},
 			"required": ["secret"],
@@ -134,6 +124,25 @@
 					"type": "number"
 				}
 			},
+			"type": "object"
+		},
+		"TurnstileConfig": {
+			"additionalProperties": false,
+			"properties": {
+				"hosts": {
+					"items": {
+						"type": "string"
+					},
+					"type": "array"
+				},
+				"secret": {
+					"type": "string"
+				},
+				"siteKey": {
+					"type": "string"
+				}
+			},
+			"required": ["secret", "siteKey"],
 			"type": "object"
 		}
 	}
