@@ -33,7 +33,7 @@ async function createSession(image: string) {
 			throw new Error(`Container not started ${e.message}`);
 		});
 		const date = new Date();
-		date.setHours(date.getHours() + (config.session?.keepaliveDuration || 1440));
+		date.setMinutes(date.getMinutes() + (config.session?.keepaliveDuration || 1440));
 		return db
 			.insert(session)
 			.values({

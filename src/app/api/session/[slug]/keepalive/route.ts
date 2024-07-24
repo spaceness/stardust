@@ -8,7 +8,7 @@ export async function POST(_req: NextRequest, { params }: { params: { slug: stri
 	const userSession = await auth();
 	const { id } = (await getSession(params.slug, userSession)) || {};
 	const date = new Date();
-	date.setHours(date.getHours() + (getConfig().session?.keepaliveDuration || 1440));
+	date.setMinutes(date.getMinutes() + (getConfig().session?.keepaliveDuration || 1440));
 	if (!id) {
 		return Response.json({ error: "Not Found" }, { status: 404 });
 	}
