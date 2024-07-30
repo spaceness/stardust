@@ -1,4 +1,4 @@
-import { DiscordIcon, GitHubIcon, GitLabIcon, GoogleIcon } from "@/components/icons";
+import { DiscordIcon, GitHubIcon, GitLabIcon, GoogleIcon, MattermostIcon } from "@/components/icons";
 import { LogIn } from "lucide-react";
 import type { NextAuthConfig } from "next-auth";
 import type { OAuthUserConfig, OIDCUserConfig, Provider } from "next-auth/providers";
@@ -7,6 +7,7 @@ import Discord from "next-auth/providers/discord";
 import GitHub from "next-auth/providers/github";
 import GitLab from "next-auth/providers/gitlab";
 import Google from "next-auth/providers/google";
+import Mattermost from "next-auth/providers/mattermost";
 import Okta from "next-auth/providers/okta";
 import { getConfig } from "./config";
 const { auth: authConfig } = getConfig();
@@ -39,6 +40,10 @@ const providersList = {
 	okta: {
 		provider: Okta,
 		Icon: LogIn,
+	},
+	mattermost: {
+		provider: Mattermost,
+		Icon: MattermostIcon,
 	},
 } as const;
 
