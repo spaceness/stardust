@@ -1,21 +1,26 @@
-import "dotenv/config";
-
 import { createServer } from "node:http";
 import { Socket } from "node:net";
-import type { Config } from "@/types/config";
+import { getConfig } from "@/lib/config";
+import docker from "@/lib/docker";
+import { db, session } from "@/lib/drizzle/db";
 import { consola } from "consola";
+import { and, eq } from "drizzle-orm";
 import next from "next";
+import { getToken } from "next-auth/jwt";
 import { WebSocketServer } from "ws";
+const config = getConfig();
 const port = Number.parseInt(process.env.PORT as string) || 3000;
 const dev = process.env.NODE_ENV !== "production";
-const config: Config = await import("./.config/config.json");
-process.env.CONFIG = JSON.stringify(config);
-const docker = (await import("@/lib/docker")).default;
 if (process.argv.includes("--turbo")) {
 	process.env.TURBOPACK = "1";
 }
 const server = createServer();
-const app = next({ dev, port, httpServer: server, hostname: process.env.HOSTNAME });
+const app = next({
+	dev,
+	port,
+	httpServer: server,
+	hostname: process.env.HOSTNAME,
+});
 consola.start(`✨ Stardust: Starting ${dev ? "development" : "production"} server...`);
 await app.prepare();
 const nextRequest = app.getRequestHandler();
@@ -63,8 +68,24 @@ websockify.on("connection", async (ws, req) => {
 server.on("request", nextRequest);
 server.on("upgrade", async (req, socket, head) => {
 	if (req.url?.includes("websockify")) {
+		const cookie = req.headers.cookie?.includes("__Secure") ? "__Secure-authjs.session-token" : "authjs.session-token";
+		const token = await getToken({
+			req: { headers: req.headers as Record<string, string> },
+			secret: config.auth.secret,
+			secureCookie: req.headers.cookie?.includes("__Secure"),
+			salt: cookie,
+			cookieName: cookie,
+		});
+		const [dbSession] = await db
+			.select({})
+			.from(session)
+			.where(and(eq(session.userId, token?.id as string), eq(session.id, req.url?.split("/")[2] as string)));
 		websockify.handleUpgrade(req, socket, head, (ws) => {
-			websockify.emit("connection", ws, req, websockify);
+			if (dbSession) {
+				websockify.emit("connection", ws, req, websockify);
+			} else {
+				ws.close(1008, "Unauthorized");
+			}
 		});
 	} else {
 		nextUpgrade(req, socket, head);

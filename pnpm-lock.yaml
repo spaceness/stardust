@@ -77,12 +77,6 @@ importers:
       '@tanstack/react-table':
         specifier: 8.19.3
         version: 8.19.3(react-dom@19.0.0-rc-f6cce072-20240723(react@19.0.0-rc-f6cce072-20240723))(react@19.0.0-rc-f6cce072-20240723)
-      '@types/dockerode':
-        specifier: ^3.3.26
-        version: 3.3.26
-      '@types/ws':
-        specifier: ^8.5.10
-        version: 8.5.10
       argon2:
         specifier: ^0.40.3
         version: 0.40.3
@@ -165,6 +159,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.8.3
         version: 1.8.3
+      '@types/dockerode':
+        specifier: ^3.3.26
+        version: 3.3.26
       '@types/node':
         specifier: ^20.11.30
         version: 20.11.30
@@ -180,6 +177,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.38)
@@ -1598,8 +1598,8 @@ packages:
   '@types/node@20.12.7':
     resolution: {integrity: sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==}
 
-  '@types/node@20.14.13':
-    resolution: {integrity: sha512-+bHoGiZb8UiQ0+WEtmph2IWQCjIqg8MDZMAV+ppRRhUZnquF5mQkP/9vpSwJClEiSM/C7fZZExPzfU0vJTyp8w==}
+  '@types/node@20.14.14':
+    resolution: {integrity: sha512-d64f00982fS9YoOgJkAMolK7MN8Iq3TDdVjchbYHdEmjth/DHowx82GnoA+tVUAN+7vxfYUgAzi+JXbKNd2SDQ==}
 
   '@types/novnc__novnc@1.3.5':
     resolution: {integrity: sha512-iMYzwgNDVmSlkqTKh6tkz25Tir2i2h1Jlhja0e6ycL3GPP+HCuhPA3uzZrVLrgKUEj1RaDhI3KGMPI47bV0jQw==}
@@ -1792,8 +1792,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
-  browserslist@4.23.2:
-    resolution: {integrity: sha512-qkqSyistMYdxAcw+CzbZwlBy8AGmS/eEWs+sEV5TnLRGDOL+C5M2EnH6tlZyg0YoAxGJAFKh61En9BR941GnHA==}
+  browserslist@4.23.3:
+    resolution: {integrity: sha512-btwCFJVjI4YWDNfau8RhZ+B1Q/VLoUITrm3RlP6y1tYGWIOa+InuYiRGXUBXo8nA1qKmHMyLB/iVQg5TT4eFoA==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
@@ -1821,8 +1821,8 @@ packages:
   caniuse-lite@1.0.30001643:
     resolution: {integrity: sha512-ERgWGNleEilSrHM6iUz/zJNSQTP8Mr21wDWpdgvRwcTXGAq6jMtOUPP4dqFPTdKqZ2wKTdtB+uucZ3MRpAUSmg==}
 
-  caniuse-lite@1.0.30001644:
-    resolution: {integrity: sha512-YGvlOZB4QhZuiis+ETS0VXR+MExbFf4fZYYeMTEE0aTQd/RdIjkTyZjLrbYVKnHzppDvnOhritRVv+i7Go6mHw==}
+  caniuse-lite@1.0.30001647:
+    resolution: {integrity: sha512-n83xdNiyeNcHpzWY+1aFbqCK7LuLfBricc4+alSQL2Xb6OR3XpnQAmlDG+pQcdTfiHRuLcQ96VOfrPSGiNJYSg==}
 
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
@@ -2066,8 +2066,8 @@ packages:
   electron-to-chromium@1.4.715:
     resolution: {integrity: sha512-XzWNH4ZSa9BwVUQSDorPWAUQ5WGuYz7zJUNpNif40zFCiCl20t8zgylmreNmn26h5kiyw2lg7RfTmeMBsDklqg==}
 
-  electron-to-chromium@1.5.3:
-    resolution: {integrity: sha512-QNdYSS5i8D9axWp/6XIezRObRHqaav/ur9z1VzCDUCH1XIFOr9WQk5xmgunhsTpjjgDy3oLxO/WMOVZlpUQrlA==}
+  electron-to-chromium@1.5.4:
+    resolution: {integrity: sha512-orzA81VqLyIGUEA77YkVA1D+N+nNfl2isJVjjmOyrlxuooZ19ynb+dOlaDTqd/idKRS9lDCSBmtzM+kyCsMnkA==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -4219,7 +4219,7 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@20.14.13':
+  '@types/node@20.14.14':
     dependencies:
       undici-types: 5.26.5
 
@@ -4449,12 +4449,12 @@ snapshots:
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
 
-  browserslist@4.23.2:
+  browserslist@4.23.3:
     dependencies:
-      caniuse-lite: 1.0.30001644
-      electron-to-chromium: 1.5.3
+      caniuse-lite: 1.0.30001647
+      electron-to-chromium: 1.5.4
       node-releases: 2.0.18
-      update-browserslist-db: 1.1.0(browserslist@4.23.2)
+      update-browserslist-db: 1.1.0(browserslist@4.23.3)
 
   buffer-from@1.1.2: {}
 
@@ -4476,7 +4476,7 @@ snapshots:
 
   caniuse-lite@1.0.30001643: {}
 
-  caniuse-lite@1.0.30001644: {}
+  caniuse-lite@1.0.30001647: {}
 
   chalk@4.1.2:
     dependencies:
@@ -4622,7 +4622,7 @@ snapshots:
 
   electron-to-chromium@1.4.715: {}
 
-  electron-to-chromium@1.5.3: {}
+  electron-to-chromium@1.5.4: {}
 
   emoji-regex@8.0.0: {}
 
@@ -4875,7 +4875,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.14.13
+      '@types/node': 20.14.14
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -5545,9 +5545,9 @@ snapshots:
       escalade: 3.1.2
       picocolors: 1.0.0
 
-  update-browserslist-db@1.1.0(browserslist@4.23.2):
+  update-browserslist-db@1.1.0(browserslist@4.23.3):
     dependencies:
-      browserslist: 4.23.2
+      browserslist: 4.23.3
       escalade: 3.1.2
       picocolors: 1.0.1
 
@@ -5611,7 +5611,7 @@ snapshots:
       '@webassemblyjs/wasm-parser': 1.12.1
       acorn: 8.12.1
       acorn-import-assertions: 1.9.0(acorn@8.12.1)
-      browserslist: 4.23.2
+      browserslist: 4.23.3
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.1
       es-module-lexer: 1.5.4

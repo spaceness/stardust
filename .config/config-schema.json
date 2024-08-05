@@ -130,15 +130,18 @@
 			"additionalProperties": false,
 			"properties": {
 				"hosts": {
+					"description": "The hosts to enable Turnstile on",
 					"items": {
 						"type": "string"
 					},
 					"type": "array"
 				},
 				"secret": {
+					"description": "The Turnstile secret key, used by the backend",
 					"type": "string"
 				},
 				"siteKey": {
+					"description": "The Turnstile site key, used by the frontend",
 					"type": "string"
 				}
 			},
