@@ -9,6 +9,9 @@
 					"additionalProperties": false,
 					"description": "Credentials configuration. Leave `undefined` to disable user/password signups, or as `{}` to enable.",
 					"properties": {
+						"huDb": {
+							"type": "string"
+						},
 						"signups": {
 							"default": false,
 							"description": "Whether to allow user signups.",

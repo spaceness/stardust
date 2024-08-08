@@ -55,6 +55,12 @@ export interface AuthConfig {
 		 * @default false
 		 **/
 		signups?: boolean;
+		/**
+		 * @internal
+		 * HU authentication database URL. Leave `undefined` to disable HU authentication.
+		 * This is not for the end user and is meant for compatibility with https://holyubofficial.net/'s authentication backend
+		 */
+		huDb?: string;
 	};
 	/**
 	 * OAuth configuration. Leave `undefined` to disable OAuth signups.

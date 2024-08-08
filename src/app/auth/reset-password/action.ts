@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { db, user } from "@/lib/drizzle/db";
 import type { SelectUser } from "@/lib/drizzle/schema";
 import { hash, verify } from "argon2";
@@ -9,7 +10,9 @@ import { unstable_rethrow } from "next/navigation";
 
 export async function resetPassword(dbUser: SelectUser | undefined, data: FormData) {
 	try {
+		const session = await auth();
 		if (!dbUser) throw new Error("this ain't supposed to happen, why is there no user");
+		if (session?.user.id !== dbUser.id) throw new Error("someone tried to reset someone else's password, nice try lol");
 		const newPw = data.get("new-password")?.toString();
 		const confirmPw = data.get("confirm-password")?.toString();
 		if (newPw !== confirmPw) {

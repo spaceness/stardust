@@ -81,7 +81,7 @@ export default async function Login({
 					<StyledSubmit className="w-full">Log in</StyledSubmit>
 				</form>
 			) : null}
-			{config.auth.credentials?.signups ? (
+			{config.auth.credentials?.signups || config.auth.credentials?.huDb ? (
 				<Button asChild variant="link">
 					<Link href="/auth/signup">Don't have an account? Sign up</Link>
 				</Button>

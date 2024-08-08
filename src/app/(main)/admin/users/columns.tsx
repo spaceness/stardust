@@ -114,7 +114,7 @@ export const columns: ColumnDef<SelectUserRelation>[] = [
 									toast.promise(() => changeUserAdminStatus(user.id, !user.isAdmin), {
 										loading: "Changing user's admin status...",
 										success: ({ admin }) => `Admin status changed to ${admin}`,
-										error: (error) => `Failed to change admin status: ${error}`,
+										error: "Failed to change admin status",
 									})
 								}
 							>
@@ -137,7 +137,7 @@ export const columns: ColumnDef<SelectUserRelation>[] = [
 									toast.promise(() => deleteUser(user.id), {
 										loading: "Deleting user...",
 										success: "User deleted",
-										error: (error) => `Failed to delete user: ${error}`,
+										error: "Failed to delete user",
 									})
 								}
 							>

@@ -77,7 +77,7 @@ server.on("upgrade", async (req, socket, head) => {
 			cookieName: cookie,
 		});
 		const [dbSession] = await db
-			.select({})
+			.select()
 			.from(session)
 			.where(and(eq(session.userId, token?.id as string), eq(session.id, req.url?.split("/")[2] as string)));
 		websockify.handleUpgrade(req, socket, head, (ws) => {

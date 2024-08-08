@@ -1,7 +1,7 @@
 "use server";
-import crypto from "node:crypto";
 import docker from "@/lib/docker";
 import { db, session, user } from "@/lib/drizzle/db";
+import { createId } from "@paralleldrive/cuid2";
 import { consola } from "consola";
 import type Dockerode from "dockerode";
 import { eq } from "drizzle-orm";
@@ -19,14 +19,15 @@ async function createSession(image: string) {
 		const config = getConfig();
 		const userSession = await auth();
 		if (!userSession?.user) throw new Error("User not found");
-		const id = `stardust-${crypto.randomUUID()}-${image.split("/")[2]}`;
 		const container = await docker.createContainer({
-			name: id,
+			name: `stardust-${createId()}-${image.split("/")[2] || image.split("/")[1]}`,
 			Image: image,
 			HostConfig: {
 				ShmSize: 1024,
 				NetworkMode: config.docker.network,
+				ExtraHosts: ["stardust-host:host-gateway"],
 			},
+			Env: [`USER_ID=${userSession.user.id}`, `STARDUST_PORT=${process.env.PORT || 3000}`],
 		});
 		await container.start().catch((e) => {
 			container.remove({ force: true });
