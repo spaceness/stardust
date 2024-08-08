@@ -11,31 +11,5 @@
     <a href="https://st.spaceness.one/">Production demo instance</a>
 <br>
 
-## Setup
-
-Follow the steps below to set up Stardust.
-
-First, install the dependencies:
-
-```bash
-pnpm i
-```
-
-If you encounter any errors, it might be because you do not have PostgreSQL. You can install PostgreSQL using your system's package manager.
-
-Next, build the project:
-
-```bash
-pnpm build
-```
-
-Finally, start the project:
-
-```bash
-pnpm start
-```
-
-<hr>
-
-🎉 There you have it, enjoy Stardust.
+See [documentation](https://stardust.spaceness.one/docs) for setup and usage
 
