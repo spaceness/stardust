@@ -8,11 +8,11 @@ import { Label } from "@/components/ui/label";
 import { auth, signIn } from "@/lib/auth";
 import { providers } from "@/lib/auth.config";
 import { getConfig } from "@/lib/config";
-import turnstileCheck from "@/lib/turnstile";
 import { AlertCircle, Info } from "lucide-react";
-import type { CredentialsSignin } from "next-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { logIn } from "./action";
+import HuLogin from "./hu";
 
 export default async function Login({
 	searchParams,
@@ -40,23 +40,7 @@ export default async function Login({
 				</Alert>
 			) : null}
 			{config.auth.credentials ? (
-				<form
-					className="mx-auto mb-4 flex w-full flex-col items-start justify-center gap-2"
-					action={async (data) => {
-						"use server";
-						try {
-							if (await turnstileCheck(data)) {
-								await signIn("credentials", data);
-							} else {
-								throw new Error("Failed captcha");
-							}
-						} catch (error) {
-							redirect(
-								`/auth/login?error=${(error as CredentialsSignin).cause?.err?.message || (error as Error).message}`,
-							);
-						}
-					}}
-				>
+				<form className="mx-auto mb-4 flex w-full flex-col items-start justify-center gap-2" action={logIn}>
 					<Label htmlFor="email">Email</Label>
 					<Input
 						id="email"
@@ -81,7 +65,8 @@ export default async function Login({
 					<StyledSubmit className="w-full">Log in</StyledSubmit>
 				</form>
 			) : null}
-			{config.auth.credentials?.signups || config.auth.credentials?.huDb ? (
+			{config.auth.huDb ? <HuLogin /> : null}
+			{config.auth.credentials?.signups || config.auth.huDb ? (
 				<Button asChild variant="link">
 					<Link href="/auth/signup">Don't have an account? Sign up</Link>
 				</Button>

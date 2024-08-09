@@ -1,10 +1,10 @@
 import crypto from "node:crypto";
-/* This is not for the end user and is meant for compatibility with https://holyubofficial.net/'s authentication backend
- */
 import Credentials from "next-auth/providers/credentials";
+import { authenticator } from "otplib";
 import postgres from "postgres";
 import { getConfig } from "./config";
-interface UserModel {
+import { db, user } from "./drizzle/db";
+export interface UserModel {
 	id: number;
 	email: string;
 	email_verified: boolean;
@@ -43,28 +43,52 @@ export default Credentials({
 	credentials: {
 		email: {},
 		password: {},
+		otp: {},
 	},
 	async authorize(credentials) {
 		if (!credentials.email || !credentials.password) {
 			throw new Error("Invalid credentials");
 		}
-		const sql = postgres(authConfig.credentials?.huDb as string);
-		const [maybeUser] = await sql<UserModel[]>`SELECT * FROM users WHERE EMAIL = ${credentials.email as string}`;
+		const sql = postgres(authConfig.huDb as string);
+		const [maybeUser] = await sql<
+			UserModel[] | undefined[]
+		>`SELECT * FROM users WHERE EMAIL = ${credentials.email as string}`;
 		await sql.end({ timeout: 5 });
 		if (!maybeUser) throw new Error("User not found");
 		if (Date.now() > maybeUser.paid_until.getTime()) {
 			throw new Error("User is not paid");
 		}
 		if (!maybeUser.email_verified) throw new Error("Email not verified");
+		if (maybeUser.totp_enabled && maybeUser.totp_secret && credentials.otp) {
+			const result = authenticator.verify({
+				token: credentials.otp as string,
+				secret: maybeUser.totp_secret,
+			});
+			if (!result) throw new Error("Invalid OTP");
+		}
 		if (await verify(credentials.password as string, maybeUser.password_hash)) {
+			const [insertion] = await db
+				.insert(user)
+				.values({
+					email: maybeUser.email,
+					id: maybeUser.id.toString(),
+					isAdmin: maybeUser.admin,
+					name: maybeUser.discord_name,
+				})
+				.onConflictDoUpdate({
+					target: user.id,
+					set: {
+						email: maybeUser.email,
+						isAdmin: maybeUser.admin,
+						name: maybeUser.discord_name,
+					},
+				})
+				.returning();
 			return {
 				image: maybeUser.discord_avatar,
-				email: maybeUser.email,
-				name: maybeUser.discord_name,
-				id: maybeUser.id.toString(),
+				...insertion,
 			};
 		}
-		await sql.end({ timeout: 5 });
 		throw new Error("Invalid password");
 	},
 });

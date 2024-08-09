@@ -212,14 +212,14 @@ export default function Navigation({
 					<DropdownMenuContent className="mr-4 mt-4 w-48">
 						<DropdownMenuLabel className="flex flex-col">
 							<span className="flex flex-row items-center justify-between gap-1">
-								<p className="text-lg">{name || email}</p>
+								<p className="text-lg">{name || email?.split("@")[0]}</p>
 								{dbUser.isAdmin ? (
 									<span className="flex items-center justify-center rounded-lg bg-primary px-2 py-[1px] text-xs font-bold text-primary-foreground">
 										Admin
 									</span>
 								) : null}
 							</span>
-							<p className="text-xs font-light text-muted-foreground">{name ? email : name}</p>
+							<p className="text-xs font-light text-muted-foreground">{email}</p>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuSub>

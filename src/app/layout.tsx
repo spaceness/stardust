@@ -44,8 +44,8 @@ export default function RootLayout({
 			<body className={`${inter.className} ${jetbrains.variable}`}>
 				<ThemeProvider
 					attribute="class"
-					defaultTheme="system"
-					themes={["light", "dark", "slate", "zinc"]}
+					defaultTheme={getConfig().auth.huDb ? "nord" : "system"}
+					themes={["light", "dark", "nord", "zinc"]}
 					enableSystem
 					disableTransitionOnChange
 				>

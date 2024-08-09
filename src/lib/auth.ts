@@ -18,34 +18,33 @@ import HuProvider from "./hu-provider";
 const newProvider: Provider[] = [];
 const { auth: authConfig } = getConfig();
 if (authConfig.credentials) {
-	const provider = authConfig.credentials.huDb
-		? HuProvider
-		: Credentials({
-				credentials: {
-					email: {},
-					password: {},
-				},
-				async authorize(credentials) {
-					if (!credentials.email || !credentials.password) {
-						throw new Error("Invalid credentials");
-					}
-					const maybeUser = await db.query.user.findFirst({
-						where: (user, { eq }) => eq(user.email, credentials.email as string),
-					});
-					if (!maybeUser) throw new Error("User not found");
-					if (!maybeUser?.password) throw new Error("User does not have password signin enabled.");
-					if (await verify(maybeUser.password, credentials.password as string)) {
-						maybeUser.password = null;
-						return maybeUser;
-					}
-					throw new Error("Invalid password");
-				},
+	const provider = Credentials({
+		credentials: {
+			email: {},
+			password: {},
+		},
+		async authorize(credentials) {
+			if (!credentials.email || !credentials.password) {
+				throw new Error("Invalid credentials");
+			}
+			const maybeUser = await db.query.user.findFirst({
+				where: (user, { eq }) => eq(user.email, credentials.email as string),
 			});
+			if (!maybeUser) throw new Error("User not found");
+			if (!maybeUser?.password) throw new Error("User does not have password signin enabled.");
+			if (await verify(maybeUser.password, credentials.password as string)) {
+				maybeUser.password = null;
+				return maybeUser;
+			}
+			throw new Error("Invalid password");
+		},
+	});
 	newProvider.push(provider);
 }
 export const { auth, handlers, signIn, signOut } = NextAuth({
 	callbacks: {
 		async signIn({ profile: { email, name } = {} }) {
+			if (authConfig.huDb) return true;
 			await db.transaction(async (tx) => {
 				const currentUsers = await tx.query.user.findMany();
 				const id =
@@ -73,18 +72,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 				})) || {};
 			if (id) token.id = id;
 			if (!token.image) {
-				token.image = `https://gravatar.com/avatar/${createHash("sha256")
-					.update(authUser?.email?.toLowerCase() || "")
-					.digest("hex")}?d=404&s=128`;
+				token.image =
+					authUser.image ||
+					`https://gravatar.com/avatar/${createHash("sha256")
+						.update(authUser?.email?.toLowerCase() || "")
+						.digest("hex")}?d=404&s=128`;
 			}
 			return token;
 		},
-		session({ session, token }) {
+		async session({ session, token }) {
 			session.user.id = token.id as string;
 			session.user.image = token.image as string;
 			return session;
 		},
 	},
 	...config,
-	providers: [...newProvider, ...config.providers],
+	providers: config.providers.concat(authConfig.huDb ? HuProvider : newProvider),
 });

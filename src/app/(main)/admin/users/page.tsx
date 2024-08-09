@@ -33,7 +33,7 @@ export default async function AdminPage() {
 			<section className="-ml-8">
 				<DataTable data={data} columns={columns} />
 			</section>
-			{!getConfig().auth.credentials?.huDb ? (
+			{!getConfig().auth.huDb ? (
 				<div className="flex justify-start items-center">
 					<Dialog>
 						<DialogTrigger asChild>

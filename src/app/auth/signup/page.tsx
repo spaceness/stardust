@@ -22,7 +22,7 @@ export default async function Page({
 	if (session) redirect("/");
 	const config = getConfig();
 	const { message, error } = searchParams;
-	if (config.auth.credentials?.huDb) redirect("https://holyubofficial.net/pro/signup");
+	if (config.auth.huDb) redirect(`${config.auth.huUrl || "https://holyubofficial.net"}/pro/signup`);
 	if (!config.auth.credentials || !config.auth.credentials.signups)
 		redirect(`/auth/error?error=${encodeURIComponent("Signups are disabled for this instance.")}`);
 	return (
