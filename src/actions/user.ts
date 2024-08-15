@@ -22,7 +22,7 @@ export async function deleteUser(userId: string, triggeredByUser = false) {
 		}
 	}
 	const sessions = await db.select().from(session).where(eq(session.userId, userId));
-	await Promise.all(sessions.map((session) => deleteSession(session.id)));
+	await Promise.all(sessions.map((session) => deleteSession(session.id))).catch(() => {});
 	await db.delete(user).where(eq(user.id, userId));
 	revalidatePath("/admin/users");
 	return { success: true };

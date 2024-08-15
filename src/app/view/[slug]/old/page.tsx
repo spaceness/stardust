@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import type { XpraHandle } from "@/components/xpra";
+import type { VncViewerHandle } from "@/components/vnc-screen";
 import { fetcher } from "@/lib/utils";
 import {
 	AlertCircle,
@@ -61,21 +61,23 @@ const Loading = ({ text }: { text: string }) => (
 		<h1 className="text-xl font-semibold">{text}</h1>
 	</Card>
 );
-const VncScreen = dynamic(() => import("@/components/xpra"), {
+const VncScreen = dynamic(() => import("@/components/vnc-screen"), {
 	loading: () => <Loading text="Loading" />,
 });
 export default function View({ params }: { params: { slug: string } }) {
-	const vncRef = useRef<XpraHandle>(null);
+	const vncRef = useRef<VncViewerHandle>(null);
 	const [connected, setConnected] = useState(false);
 	const [fullScreen, setFullScreen] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [workingClipboard, setWorkingClipboard] = useState(true);
+	// noVNC options start
 	const [clipboard, setClipboard] = useState("");
 	const [viewOnly, setViewOnly] = useState(false);
 	const [qualityLevel, setQualityLevel] = useState(6);
 	const [compressionLevel, setCompressionLevel] = useState(2);
 	const [clipViewport, setClipViewport] = useState(false);
 	const [scaling, setScaling] = useState<ScalingValues>("remote");
+	// noVNC options end
 	const router = useRouter();
 	const {
 		data: session,
@@ -101,27 +103,35 @@ export default function View({ params }: { params: { slug: string } }) {
 	} = useSWR<string[]>(`/api/session/${params.slug}/files`, fetcher, {
 		refreshInterval: 10000,
 	});
-	// useEffect(() => {
-	//   if (connected && vncRef.current?.rfb) {
-	//     vncRef.current.rfb.viewOnly = viewOnly;
-	//     vncRef.current.rfb.qualityLevel = qualityLevel;
-	//     vncRef.current.rfb.compressionLevel = compressionLevel;
-	//     vncRef.current.rfb.clipViewport = clipViewport;
-	//     vncRef.current.rfb.resizeSession = scaling === "remote";
-	//     vncRef.current.rfb.scaleViewport = scaling === "local";
-	//   }
-	// }, [
-	//   connected,
-	//   viewOnly,
-	//   qualityLevel,
-	//   compressionLevel,
-	//   scaling,
-	//   clipViewport,
-	// ]);
+	useEffect(() => {
+		if (connected && vncRef.current?.rfb) {
+			vncRef.current.rfb.viewOnly = viewOnly;
+			vncRef.current.rfb.qualityLevel = qualityLevel;
+			vncRef.current.rfb.compressionLevel = compressionLevel;
+			vncRef.current.rfb.clipViewport = clipViewport;
+			vncRef.current.rfb.resizeSession = scaling === "remote";
+			vncRef.current.rfb.scaleViewport = scaling === "local";
+		}
+	}, [connected, viewOnly, qualityLevel, compressionLevel, scaling, clipViewport]);
 	// why did i even use swr for this raaaaaaah
 	useEffect(() => {
 		if (!session) sessionMutate();
 	}, [session, sessionMutate]);
+	// jank, but it works ¯\_(ツ)_/¯
+	useEffect(() => {
+		const interval = setInterval(async () => {
+			if (connected && vncRef.current?.rfb && document.hasFocus() && !sidebarOpen) {
+				vncRef.current.rfb.focus();
+				const text = await navigator.clipboard.readText().catch(() => setWorkingClipboard(false));
+				if (text && text !== clipboard) {
+					setWorkingClipboard(true);
+					vncRef.current?.clipboardPaste(text);
+					setClipboard(text);
+				}
+			}
+		}, 250);
+		return () => clearInterval(interval);
+	}, [connected, clipboard, sidebarOpen]);
 	useEffect(() => {
 		const interval = setInterval(() => {
 			if (connected && document.hasFocus()) fetch(`/api/session/${params.slug}/keepalive`, { method: "POST" });
@@ -134,9 +144,6 @@ export default function View({ params }: { params: { slug: string } }) {
 		} else if (document.fullscreenElement !== null && !fullScreen) {
 			document.exitFullscreen();
 		}
-		const listener = () => setFullScreen(Boolean(document.fullscreenElement));
-		document.addEventListener("fullscreenchange", listener);
-		return () => document.removeEventListener("fullscreenchange", listener);
 	}, [fullScreen]);
 	return (
 		<div className="h-screen w-screen justify-center items-center flex">
@@ -151,7 +158,7 @@ export default function View({ params }: { params: { slug: string } }) {
 					<Button asChild size="icon" variant="ghost">
 						<Link
 							href={`/api/session/${params.slug}/preview`}
-							download={`stardust-${params.slug.slice(0, 6)}-${new Date().toLocaleDateString()}`}
+							download={`stardust-${params.slug.slice(0, 6)}-${new Date().toLocaleDateString("en-us")}`}
 							target="_blank"
 						>
 							<Camera />
@@ -179,7 +186,7 @@ export default function View({ params }: { params: { slug: string } }) {
 								className="w-[98%]"
 								onClick={() => {
 									setSidebarOpen(false);
-									vncRef.current?.client?.disconnect();
+									vncRef.current?.rfb?.disconnect();
 									router.push("/");
 								}}
 							>
@@ -258,7 +265,7 @@ export default function View({ params }: { params: { slug: string } }) {
 										<AlertDialogAction
 											asChild
 											onClick={() => {
-												vncRef.current?.client?.disconnect();
+												vncRef.current?.rfb?.disconnect();
 												toast.promise(
 													async () => {
 														await deleteSession(params.slug);
@@ -299,15 +306,35 @@ export default function View({ params }: { params: { slug: string } }) {
 										spellCheck={false}
 										autoCorrect="off"
 										autoCapitalize="off"
-										// value={clipboard}
+										value={clipboard}
+										disabled={workingClipboard}
 										placeholder="Paste here to send to remote machine"
-										// onChange={(e) => {
-										//   if (vncRef.current?.rfb) {
-										//     setClipboard(e.target.value);
-										//     vncRef.current.clipboardPaste(e.target.value);
-										//   }
-										// }}
+										onChange={(e) => {
+											if (vncRef.current?.rfb) {
+												setClipboard(e.target.value);
+												vncRef.current.clipboardPaste(e.target.value);
+											}
+										}}
 									/>
+									{workingClipboard ? null : (
+										<Button
+											type="button"
+											className="text-start place-self-start"
+											onClick={async () => {
+												const text = await navigator.clipboard.readText().catch(() => {
+													setWorkingClipboard(false);
+													toast.error("Failed to read clipboard, did you deny clipboard permissions?");
+												});
+												if (text) {
+													setClipboard(text);
+													vncRef.current?.clipboardPaste(text);
+													setWorkingClipboard(true);
+												}
+											}}
+										>
+											Click here to sync clipboard
+										</Button>
+									)}
 								</AccordionContent>
 							</AccordionItem>
 							<AccordionItem value="filesDownload">
@@ -375,11 +402,12 @@ export default function View({ params }: { params: { slug: string } }) {
 										type="file"
 										onChange={async (e) => {
 											const [file] = e.target.files || [];
+											const buffer = await file.arrayBuffer();
 											toast.promise(
-												async () =>
+												() =>
 													fetch(`/api/session/${params.slug}/files?name=${file.name}`, {
 														method: "PUT",
-														body: await file.arrayBuffer(),
+														body: buffer,
 													}),
 												{
 													loading: "Uploading file...",
@@ -401,37 +429,29 @@ export default function View({ params }: { params: { slug: string } }) {
 								<AccordionContent className="flex flex-col gap-4">
 									<div className="flex flex-col items-start gap-2">
 										<Label htmlFor="viewonly">View Only</Label>
-										<Switch
-											id="viewonly"
-											// checked={viewOnly}
-											// onCheckedChange={setViewOnly}
-										/>
+										<Switch id="viewonly" checked={viewOnly} onCheckedChange={setViewOnly} />
 									</div>
 									<div className="flex flex-col items-start gap-2">
 										<Label htmlFor="clipToWindow">Clip to Window</Label>
-										<Switch
-											id="clipToWindow"
-											// checked={clipViewport}
-											// onCheckedChange={setClipViewport}
-										/>
+										<Switch id="clipToWindow" checked={clipViewport} onCheckedChange={setClipViewport} />
 									</div>
 									<div className="flex flex-col items-start gap-2">
-										<Label htmlFor="quality">Quality ({"changeme now"})</Label>
+										<Label htmlFor="quality">Quality ({qualityLevel})</Label>
 										<Slider
 											id="quality"
-											// value={[qualityLevel]}
-											// onValueChange={([v]) => setQualityLevel(v)}
+											value={[qualityLevel]}
+											onValueChange={([v]) => setQualityLevel(v)}
 											min={0}
 											max={9}
 											className="my-1"
 										/>
 									</div>
 									<div className="flex flex-col items-start gap-2">
-										<Label htmlFor="compression">Compression ({"changeme now"})</Label>
+										<Label htmlFor="compression">Compression ({compressionLevel})</Label>
 										<Slider
 											id="compression"
-											// value={[compressionLevel]}
-											// onValueChange={([v]) => setCompressionLevel(v)}
+											value={[compressionLevel]}
+											onValueChange={([v]) => setCompressionLevel(v)}
 											min={0}
 											max={9}
 											className="my-1"
@@ -439,12 +459,9 @@ export default function View({ params }: { params: { slug: string } }) {
 									</div>
 									<div className="flex flex-col items-start gap-2">
 										<Label htmlFor="scale">Scaling</Label>
-										<Select
-										// value={scaling}
-										// onValueChange={setScaling as (v: ScalingValues) => void}
-										>
+										<Select value={scaling} onValueChange={setScaling as (v: ScalingValues) => void}>
 											<SelectTrigger id="scale">
-												<SelectValue /* placeholder={scaling} */ />
+												<SelectValue placeholder={scaling} />
 											</SelectTrigger>
 											<SelectContent>
 												<SelectItem value="remote">Remote Resizing</SelectItem>
@@ -463,29 +480,32 @@ export default function View({ params }: { params: { slug: string } }) {
 				!sessionLoading ? (
 					session?.exists && session.url && session.password ? (
 						<VncScreen
-							events={{
-								connect: () => {
-									setConnected(true);
-									setSidebarOpen(false);
-								},
-								disconnect: () => {
-									setConnected(false);
-									setSidebarOpen(false);
-								},
-								error: () => {
-									sessionMutate(null);
+							url={session.url}
+							loader={<Loading text="Connecting" />}
+							onClipboard={(e) => {
+								if (e?.detail.text) {
+									setClipboard(e.detail.text);
+									navigator.clipboard.writeText(e.detail.text).catch(() => setWorkingClipboard(false));
+								}
+							}}
+							onConnect={() => {
+								setConnected(true);
+								toast.success(`Connected to session ${params.slug.slice(0, 6)}`);
+							}}
+							onDisconnect={() => {
+								setConnected(false);
+								setSidebarOpen(false);
+							}}
+							onSecurityFailure={() => sessionMutate(null)}
+							ref={vncRef}
+							rfbOptions={{
+								credentials: {
+									username: "",
+									password: session.password,
+									target: "",
 								},
 							}}
-							ref={vncRef}
-							connectionOptions={[
-								session.url,
-								{
-									username: "stardust",
-									password: session.password,
-									stealSession: true,
-								},
-							]}
-							loader={<Loading text="Connecting" />}
+							focusOnClick
 							className="absolute z-20 h-screen w-screen overflow-clip"
 						/>
 					) : (

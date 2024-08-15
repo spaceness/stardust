@@ -49,8 +49,9 @@ const providersList = {
 
 const providers: Provider[] = [];
 for (const [name, { provider }] of Object.entries(providersList)) {
-	// @ts-expect-error all functions are callable lol
-	if (authConfig.oauth && name in authConfig.oauth.providers) providers.push(provider(providerArgs(name)));
+	if (authConfig.oauth && name in authConfig.oauth.providers)
+		// @ts-expect-error This is fine
+		providers.push(provider(providerArgs(name)));
 }
 
 const config: NextAuthConfig = {

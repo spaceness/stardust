@@ -1,5 +1,5 @@
 "use client";
-
+// @ts-expect-error
 import RFB, { type NoVncCredentials, type NoVncEvents, type NoVncOptions } from "@novnc/novnc/core/rfb";
 import { type ReactNode, useEffect, useImperativeHandle, useRef, useState } from "react";
 
@@ -27,11 +27,15 @@ export type VncViewerProps = {
 	onConnect?: (rfb?: RFB) => void;
 	onDisconnect?: (rfb?: RFB) => void;
 	onCredentialsRequired?: (rfb?: RFB) => void;
-	onSecurityFailure?: (e?: { detail: { status: number; reason: string } }) => void;
+	onSecurityFailure?: (e?: {
+		detail: { status: number; reason: string };
+	}) => void;
 	onClipboard?: (e?: { detail: { text: string } }) => void;
 	onBell?: () => void;
 	onDesktopName?: (e?: { detail: { name: string } }) => void;
-	onCapabilities?: (e?: { detail: { capabilities: RFB["capabilities"] } }) => void;
+	onCapabilities?: (e?: {
+		detail: { capabilities: RFB["capabilities"] };
+	}) => void;
 };
 
 export type VncViewerHandle = {

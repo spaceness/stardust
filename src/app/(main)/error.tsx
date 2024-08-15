@@ -2,7 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
-export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function ErrorPage({
+	error,
+	reset,
+}: {
+	error: Error & { digest?: string };
+	reset: () => void;
+}) {
 	return (
 		<div className="flex h-full flex-col items-center justify-center">
 			<div className="flex h-[32rem] w-96 flex-col items-center justify-center gap-4">
@@ -15,7 +21,9 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
 					<p className="text-center">Stardust has encountered an error</p>
 					<p className="text-center">Digest: {error.digest ?? "none"}</p>
 					{error.message ? (
-						<code className="text-center text-lg font-bold text-destructive">{error.message}</code>
+						<code className="text-center text-lg font-bold text-destructive">
+							{process.env.NODE_ENV === "production" ? "Contact the server host for more info" : error.message}
+						</code>
 					) : null}
 					<Button className="text-center" onClick={reset}>
 						Reset

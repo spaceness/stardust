@@ -127,9 +127,22 @@
 		"SessionConfig": {
 			"additionalProperties": false,
 			"properties": {
+				"dnsServers": {
+					"default": "system default",
+					"description": "Dns servers for the container to use",
+					"items": {
+						"type": "string"
+					},
+					"type": "array"
+				},
 				"keepaliveDuration": {
 					"default": 1440,
 					"description": "The amount of time to keep an inactive session alive for, in minutes.",
+					"type": "number"
+				},
+				"maxStorage": {
+					"default": "10GB",
+					"description": "Max amount of storage a container can use, in gigabytes",
 					"type": "number"
 				}
 			},

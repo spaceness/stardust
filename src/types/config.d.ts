@@ -101,6 +101,16 @@ export interface SessionConfig {
 	 * @default 1440
 	 */
 	keepaliveDuration?: number;
+	/**
+	 * Dns servers for the container to use
+	 * @default system default
+	 */
+	dnsServers?: string[];
+	/**
+	 * Max amount of storage a container can use, in gigabytes
+	 * @default 10GB
+	 */
+	maxStorage?: number;
 }
 
 export interface TurnstileConfig {

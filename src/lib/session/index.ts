@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { getConfig } from "../config";
+import { dockerErrCatcher } from "./error";
 import { getSession } from "./get-session";
 /**
  * Creates a new Stardust session
@@ -26,6 +27,10 @@ async function createSession(image: string) {
 				ShmSize: 1024,
 				NetworkMode: config.docker.network,
 				ExtraHosts: ["stardust-host:host-gateway"],
+				Dns: config.session?.dnsServers,
+				// StorageOpt: {
+				//   size: `${config.session?.maxStorage || 10}G`,
+				// },
 			},
 			Env: [`USER_ID=${userSession.user.id}`, `STARDUST_PORT=${process.env.PORT || 3000}`],
 		});
@@ -86,7 +91,7 @@ async function deleteSession(containerId: string, admin?: boolean) {
 	const { id } = (await getSession(containerId, userSession)) || {};
 	if ((admin && isAdmin) || id) {
 		const container = docker.getContainer(id || containerId);
-		await container.remove({ force: true });
+		await container.remove({ force: true }).catch(dockerErrCatcher);
 		await db.delete(session).where(eq(session.id, id || containerId));
 		revalidatePath("/");
 	}
