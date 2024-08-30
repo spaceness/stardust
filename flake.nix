@@ -8,7 +8,7 @@
       url = "github:numtide/flake-utils";
     };
   };
-  outputs = { self, nixpkgs, flake-utils, ... }:
+  outputs = { nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -24,6 +24,7 @@
               nodePackages_latest.pnpm # PNPM package manager
               postgresql_16
               libpqxx
+              jq
             ];
           };
       }
