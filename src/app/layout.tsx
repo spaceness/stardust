@@ -6,25 +6,21 @@ import { ThemeProvider } from "next-themes";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--sans" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
-const shouldDisplayMetadata = () => {
-	const config = getConfig();
-	return (
-		config.metadataUrl &&
-		(headers().get("x-forwarded-host") ?? headers().get("host"))?.includes(new URL(config.metadataUrl).host)
-	);
-};
 export function generateMetadata(): Metadata {
+	const config = getConfig();
+	const disp = Boolean(
+		config.metadataUrl &&
+			(headers().get("x-forwarded-host") ?? headers().get("host"))?.includes(new URL(config.metadataUrl).host),
+	);
 	return {
 		title: {
 			default: "Stardust",
 			template: "%s | Stardust",
 		},
-		description: shouldDisplayMetadata()
-			? "Stardust is the platform for streaming isolated desktop containers."
-			: undefined,
-		openGraph: shouldDisplayMetadata()
+		description: disp ? "Stardust is the platform for streaming isolated desktop containers." : undefined,
+		openGraph: disp
 			? {
 					title: "Stardust",
 					description: "Stardust is the platform for streaming isolated desktop containers.",
@@ -41,7 +37,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={`${inter.className} ${jetbrains.variable}`}>
+			<body className={`${inter.variable} ${jetbrains.variable}`}>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme={getConfig().auth.huDb ? "nord" : "system"}

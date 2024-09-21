@@ -74,6 +74,7 @@ const config = {
 			},
 			fontFamily: {
 				mono: ["var(--mono)"],
+				sans: ["var(--sans)"],
 			},
 		},
 	},

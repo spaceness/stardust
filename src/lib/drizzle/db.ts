@@ -2,22 +2,14 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { getConfig } from "../config";
 import * as schema from "./schema";
-
-const drizzleSingleton = () => drizzle(client, { schema });
-// biome-ignore lint: this hack is for HMR to stop creating more instances
+const client = postgres(getConfig().databaseUrl);
+// biome-ignore lint: shadowing is intentional
 declare const globalThis: {
 	db: ReturnType<typeof drizzleSingleton>;
 } & typeof global;
+const drizzleSingleton = () => drizzle(client, { schema });
 
-const client = postgres(getConfig().databaseUrl);
-let db: ReturnType<typeof drizzleSingleton>;
-if (process.env.NODE_ENV === "production") {
-	db = drizzleSingleton();
-} else {
-	if (!globalThis.db) {
-		globalThis.db = drizzleSingleton();
-	}
-	db = globalThis.db;
-}
+const db = globalThis.db ?? drizzleSingleton();
 export { db, client };
+if (process.env.NODE_ENV !== "production") globalThis.db = db;
 export * from "./schema";

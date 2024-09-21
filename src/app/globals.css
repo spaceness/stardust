@@ -100,6 +100,9 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-sans;
+    }
+    pre, code {
+        @apply font-mono;
     }
 }

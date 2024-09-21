@@ -125,7 +125,7 @@ export default function View({ params }: { params: { slug: string } }) {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			if (connected && document.hasFocus()) fetch(`/api/session/${params.slug}/keepalive`, { method: "POST" });
-		}, 10000);
+		}, 60000);
 		return () => clearInterval(interval);
 	}, [connected, params.slug]);
 	useEffect(() => {
@@ -486,7 +486,7 @@ export default function View({ params }: { params: { slug: string } }) {
 								},
 							]}
 							loader={<Loading text="Connecting" />}
-							className="absolute z-20 h-screen w-screen overflow-clip"
+							className="absolute h-screen w-screen overflow-clip"
 						/>
 					) : (
 						<Alert className="w-auto">
