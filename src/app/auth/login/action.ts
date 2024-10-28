@@ -1,12 +1,13 @@
+// For future use
 "use server";
 import { signIn } from "@/lib/auth";
-import { getConfig } from "@/lib/config";
-import type { UserModel } from "@/lib/hu-provider";
+// import { getConfig } from "@/lib/config";
+// import type { UserModel } from "@/lib/hu-provider";
 import turnstileCheck from "@/lib/turnstile";
 import type { CredentialsSignin } from "next-auth";
 import { redirect } from "next/navigation";
-import { authenticator } from "otplib";
-import postgres from "postgres";
+// import { authenticator } from "otplib";
+// import postgres from "postgres";
 export async function logIn(data: FormData) {
 	try {
 		if (await turnstileCheck(data)) {
@@ -19,18 +20,20 @@ export async function logIn(data: FormData) {
 	}
 }
 export async function otpCheck(data: FormData) {
-	if (data.has("otp")) return true;
-	const sql = postgres(getConfig().auth.huDb as string);
-	const [user] = await sql<UserModel[] | undefined[]>`SELECT * FROM users WHERE EMAIL = ${data.get("email") as string}`;
-	await sql.end();
-	return Boolean(user?.totp_enabled);
+	// if (data.has("otp")) return true;
+	// const sql = postgres(getConfig().auth.huDb as string);
+	// const [user] = await sql<UserModel[] | undefined[]>`SELECT * FROM users WHERE EMAIL = ${data.get("email") as string}`;
+	// await sql.end();
+	// return Boolean(user?.totp_enabled);
+	return true;
 }
 export async function checkCode(data: FormData, code: string) {
-	const sql = postgres(getConfig().auth.huDb as string);
-	const [user] = await sql<UserModel[] | undefined[]>`SELECT * FROM users WHERE EMAIL = ${data.get("email") as string}`;
-	await sql.end();
-	return authenticator.verify({
-		token: code,
-		secret: user.totp_secret || "",
-	});
+	// const sql = postgres(getConfig().auth.huDb as string);
+	// const [user] = await sql<UserModel[] | undefined[]>`SELECT * FROM users WHERE EMAIL = ${data.get("email") as string}`;
+	// await sql.end();
+	// return authenticator.verify({
+	// 	token: code,
+	// 	secret: user.totp_secret || "",
+	// });
+	return true;
 }

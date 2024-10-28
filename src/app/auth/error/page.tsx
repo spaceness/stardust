@@ -1,12 +1,10 @@
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { ShieldX } from "lucide-react";
 
-export default function AuthError({
-	searchParams,
-}: {
-	searchParams: { [key: string]: string | string[] | undefined };
+export default async function AuthError(props: {
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-	const { error } = searchParams;
+	const { error } = await props.searchParams;
 	return (
 		<>
 			<CardHeader className="mx-auto mb-2 flex flex-col items-center justify-center">

@@ -70,28 +70,6 @@
         --input: 240 3.7% 15.9%;
         --ring: 240 4.9% 83.9%;
     }
-
-    .nord {
-        --background: 220 16% 22%;
-        --foreground: 219 28% 88%;
-        --muted: 220 12% 26%;
-        --muted-foreground: 220 12% 76%;
-        --popover: 220 16% 19%;
-        --popover-foreground: 219 28% 98%;
-        --card: 222 16% 28;
-        --card-foreground: 219 28% 93%;
-        --border: 220 6% 27%;
-        --input: 220 6% 30%;
-        --primary: 213 32% 52%;
-        --primary-foreground: 219 28% 88%;
-        --secondary: 219 18% 25%;
-        --secondary-foreground: 219 18% 85%;
-        --accent: 220 16% 37%;
-        --accent-foreground: 220 16% 97%;
-        --destructive: 354 42% 56%;
-        --destructive-foreground: 0 0% 100%;
-        --ring: 219 28% 88%;
-    }
 }
 
 @layer base {

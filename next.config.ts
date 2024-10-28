@@ -1,8 +1,7 @@
-// @ts-check
 import { execSync } from "node:child_process";
 import NextBundleAnalyzer from "@next/bundle-analyzer";
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+const nextConfig: NextConfig = {
 	images: {
 		remotePatterns: [
 			{
@@ -21,7 +20,6 @@ const nextConfig = {
 	experimental: {
 		ppr: true,
 		typedRoutes: true,
-		instrumentationHook: true,
 		webpackBuildWorker: true,
 		reactCompiler: true,
 		after: true,

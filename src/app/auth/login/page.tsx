@@ -12,16 +12,13 @@ import { AlertCircle, Info } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logIn } from "./action";
-import HuLogin from "./hu";
 
-export default async function Login({
-	searchParams,
-}: {
-	searchParams: { [key: string]: string | string[] | undefined };
+export default async function Login(props: {
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+	const { error, message } = await props.searchParams;
 	const session = await auth();
 	if (session) redirect("/");
-	const { error, message } = searchParams;
 	const config = getConfig();
 	return (
 		<CardContent className="m-1 w-full flex-col flex justify-center items-center">
@@ -65,8 +62,7 @@ export default async function Login({
 					<StyledSubmit className="w-full">Log in</StyledSubmit>
 				</form>
 			) : null}
-			{config.auth.huDb ? <HuLogin /> : null}
-			{config.auth.credentials?.signups || config.auth.huDb ? (
+			{config.auth.credentials?.signups ? (
 				<Button asChild variant="link">
 					<Link href="/auth/signup">Don't have an account? Sign up</Link>
 				</Button>

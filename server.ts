@@ -1,13 +1,13 @@
 import { createServer } from "node:http";
-import type { Socket } from "node:net";
+import { Socket } from "node:net";
 import { getConfig } from "@/lib/config";
 import docker from "@/lib/docker";
 import { db, session } from "@/lib/drizzle/db";
 import { consola } from "consola";
 import { and, eq } from "drizzle-orm";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import next from "next";
 import { getToken } from "next-auth/jwt";
+import { WebSocketServer } from "ws";
 const config = getConfig();
 const port = Number.parseInt(process.env.PORT as string) || 3000;
 const dev = process.env.NODE_ENV !== "production";
@@ -48,11 +48,37 @@ httpServer
 			if (dbSession) {
 				const ip = (await docker.getContainer(dbSession.id).inspect()).NetworkSettings.Networks[config.docker.network]
 					.IPAddress;
-				const proxy = createProxyMiddleware({
-					target: `ws://${ip}:5901`,
-					ws: true,
+				const websockify = new WebSocketServer({ noServer: true }).on("connection", (ws) => {
+					const socket = new Socket();
+					socket.connect(5901, ip);
+					ws.on("message", (message: Uint8Array) => {
+						socket.write(message);
+					});
+					ws.on("close", (code, reason) => {
+						consola.info(
+							`✨ Stardust: Connection closed with code ${code} and ${
+								reason.toString() ? `reason ${reason.toString()}` : "no reason"
+							}`,
+						);
+						socket.end();
+					});
+
+					socket.on("data", (data) => {
+						ws.send(data);
+					});
+
+					socket.on("error", (err) => {
+						consola.warn(`✨ Stardust: ${err.message}`);
+						ws.close();
+					});
+
+					socket.on("close", () => {
+						ws.close();
+					});
 				});
-				proxy.upgrade(req, socket as Socket, head);
+				websockify.handleUpgrade(req, socket, head, (ws) => {
+					websockify.emit("connection", ws, req);
+				});
 			} else {
 				socket.end();
 			}

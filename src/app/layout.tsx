@@ -8,11 +8,12 @@ import { headers } from "next/headers";
 import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--sans" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
 	const config = getConfig();
+	const headersList = await headers();
 	const disp = Boolean(
 		config.metadataUrl &&
-			(headers().get("x-forwarded-host") ?? headers().get("host"))?.includes(new URL(config.metadataUrl).host),
+			(headersList.get("x-forwarded-host") ?? headersList.get("host"))?.includes(new URL(config.metadataUrl).host),
 	);
 	return {
 		title: {
@@ -40,8 +41,8 @@ export default function RootLayout({
 			<body className={`${inter.variable} ${jetbrains.variable}`}>
 				<ThemeProvider
 					attribute="class"
-					defaultTheme={getConfig().auth.huDb ? "nord" : "system"}
-					themes={["light", "dark", "nord", "zinc"]}
+					defaultTheme="system"
+					themes={["light", "dark", "zinc"]}
 					enableSystem
 					disableTransitionOnChange
 				>

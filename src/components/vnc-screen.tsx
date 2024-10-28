@@ -1,6 +1,6 @@
 "use client";
-// @ts-expect-error
-import RFB, { type NoVncCredentials, type NoVncEvents, type NoVncOptions } from "@novnc/novnc/core/rfb";
+// @ts-expect-error bruh what
+import RFB, { type NoVncCredentials, type NoVncEvents, type NoVncOptions } from "@novnc/novnc/lib/rfb";
 import { type ReactNode, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 export type rfbOptions = Partial<NoVncOptions>;

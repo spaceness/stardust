@@ -3,7 +3,8 @@ import { getSession } from "@/lib/session/get-session";
 import { sessionRunning } from "@/lib/session/session-running";
 import type { NextRequest } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+	const params = await props.params;
 	const userSession = await auth();
 	const fileName = req.nextUrl.searchParams.get("name");
 	const { id, ip } = (await getSession(params.slug, userSession)) || {};
@@ -27,7 +28,8 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 	}
 	return fetch(`http://${ip}:6080/files/list`);
 }
-export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function PUT(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+	const params = await props.params;
 	const userSession = await auth();
 	const buffer = await req.arrayBuffer();
 	const fileName = req.nextUrl.searchParams.get("name");

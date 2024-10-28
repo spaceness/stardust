@@ -4,7 +4,8 @@ import { db, session } from "@/lib/drizzle/db";
 import { getSession } from "@/lib/session/get-session";
 import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-export async function POST(_req: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(_req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+	const params = await props.params;
 	const userSession = await auth();
 	const { id } = (await getSession(params.slug, userSession)) || {};
 	const date = new Date();

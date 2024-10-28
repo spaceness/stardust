@@ -13,16 +13,14 @@ import { hash } from "argon2";
 import { Info } from "lucide-react";
 import { redirect, unstable_rethrow } from "next/navigation";
 
-export default async function Page({
-	searchParams,
-}: {
-	searchParams: { [key: string]: string | string[] | undefined };
+export default async function Page(props: {
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+	const searchParams = await props.searchParams;
 	const session = await auth();
 	if (session) redirect("/");
 	const config = getConfig();
 	const { message, error } = searchParams;
-	if (config.auth.huDb) redirect(`${config.auth.huUrl || "https://holyubofficial.net"}/pro/signup`);
 	if (!config.auth.credentials || !config.auth.credentials.signups)
 		redirect(`/auth/error?error=${encodeURIComponent("Signups are disabled for this instance.")}`);
 	return (

@@ -9,7 +9,10 @@ setInterval(async () => {
 		const staleSessions = await tx.select().from(session).where(lte(session.expiresAt, Date.now()));
 		await Promise.all(
 			staleSessions.map(async (s) => {
-				await docker.getContainer(s.id).remove({ force: true });
+				await docker
+					.getContainer(s.id)
+					.remove({ force: true })
+					.catch((e) => consola.error(e));
 				await tx.delete(session).where(eq(session.id, s.id));
 			}),
 		);

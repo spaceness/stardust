@@ -43,7 +43,6 @@ export async function changeUserAdminStatus(userId: string, isAdmin: boolean) {
 
 export async function resetUserPassword(userId: string, data: FormData) {
 	await throwErrorIfitsCurrentUser(userId);
-	if (getConfig().auth.huDb) throw new Error("Cannot reset password for HU");
 	await db
 		.update(user)
 		.set({

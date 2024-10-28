@@ -14,7 +14,6 @@ import type { Provider } from "next-auth/providers";
 import Credentials from "next-auth/providers/credentials";
 import { config } from "./auth.config";
 import { getConfig } from "./config";
-import HuProvider from "./hu-provider";
 const newProvider: Provider[] = [];
 const { auth: authConfig } = getConfig();
 if (authConfig.credentials) {
@@ -44,7 +43,6 @@ if (authConfig.credentials) {
 export const { auth, handlers, signIn, signOut } = NextAuth({
 	callbacks: {
 		async signIn({ profile: { email, name } = {} }) {
-			if (authConfig.huDb) return true;
 			await db.transaction(async (tx) => {
 				const currentUsers = await tx.query.user.findMany();
 				const id =
@@ -87,5 +85,5 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 		},
 	},
 	...config,
-	providers: config.providers.concat(authConfig.huDb ? HuProvider : newProvider),
+	providers: config.providers.concat(newProvider),
 });

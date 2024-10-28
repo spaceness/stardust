@@ -16,6 +16,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuPortal,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuSub,
 	DropdownMenuSubContent,
@@ -48,7 +50,7 @@ export default function Navigation({
 }) {
 	const { name, email, image } = session?.user || {};
 	const [open, setDialogOpen] = useState(false);
-	const { themes, setTheme } = useTheme();
+	const { themes, setTheme, theme: currentTheme } = useTheme();
 	const navigationItems: {
 		icon: React.ReactNode;
 		label: string;
@@ -86,7 +88,7 @@ export default function Navigation({
 			url: "https://authjs.dev/",
 		},
 	];
-	const developers = ["incognitotgt", "1yusof", "genericness", "uhidontkno"];
+	const developers = ["incognitotgt", "1yusof", "genericness"];
 	return (
 		<nav className="flex h-16 min-w-full items-center justify-between px-4">
 			<div className="flex items-center justify-start gap-2">
@@ -229,11 +231,13 @@ export default function Navigation({
 							</DropdownMenuSubTrigger>
 							<DropdownMenuPortal>
 								<DropdownMenuSubContent>
-									{themes.map((theme) => (
-										<DropdownMenuItem key={theme} onClick={() => setTheme(theme)}>
-											{theme.charAt(0).toUpperCase() + theme.slice(1)}
-										</DropdownMenuItem>
-									))}
+									<DropdownMenuRadioGroup value={currentTheme} onValueChange={setTheme}>
+										{themes.map((theme) => (
+											<DropdownMenuRadioItem key={theme} value={theme}>
+												{theme.charAt(0).toUpperCase() + theme.slice(1)}
+											</DropdownMenuRadioItem>
+										))}
+									</DropdownMenuRadioGroup>
 								</DropdownMenuSubContent>
 							</DropdownMenuPortal>
 						</DropdownMenuSub>

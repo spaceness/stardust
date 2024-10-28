@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+	const params = await props.params;
 	return {
 		title: `Session ${params.slug.slice(0, 6)}`,
 	};
