@@ -22,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 	return (
 		<div className="flex flex-row gap-4">
 			<AdminSidebar />
-			<div className="h-full min-h-[calc(100vh_-_theme(spacing.16))] w-full px-4">{children}</div>
+			<div className="h-full min-h-[calc(100vh_-_theme(spacing.16))] w-full px-4 mb-2">{children}</div>
 		</div>
 	);
 }
