@@ -2,7 +2,7 @@ import { config as authConfig } from "@/lib/auth.config";
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 const { auth } = NextAuth(authConfig);
-const allowedPaths = ["/auth/login", "/auth/error", "/auth/verify", "/auth/signup"];
+const allowedPaths = ["/auth/login", "/auth/error", "/auth/verify", "/auth/signup", "/api/container-auth"];
 export const middleware = auth(async (req) => {
 	if (req.auth || allowedPaths.includes(req.nextUrl.pathname)) {
 		return NextResponse.next();
@@ -12,5 +12,5 @@ export const middleware = auth(async (req) => {
 	return NextResponse.redirect(url);
 });
 export const config = {
-	matcher: ["/((?!_next/static|_next/image|icon.svg|websockify|api/container-auth|api/auth|manifest.webmanifest).*)"],
+	matcher: ["/((?!_next/static|_next/image|icon.svg|websockify|api/auth|manifest.webmanifest).*)"],
 };

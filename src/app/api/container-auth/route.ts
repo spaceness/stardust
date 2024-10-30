@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
 	if (req.nextUrl.hostname !== "localhost") {
 		return new Response("Unauthorized - IP does not match", { status: 401 });
 	}
-	const [{ Id }] = (await docker.listContainers()).filter((container) => container.Id.startsWith(containerId));
+	const { Id } = (await docker.listContainers()).find((container) => container.Id.startsWith(containerId)) || {};
+	if (!Id) {
+		return new Response("Unauthorized - ehh this aint supposed to happen: container not found", { status: 401 });
+	}
 	const [dbEntry] = await db
 		.select()
 		.from(session)

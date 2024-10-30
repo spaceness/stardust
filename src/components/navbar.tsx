@@ -2,14 +2,7 @@
 import packageJson from "@/../package.json";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -76,6 +69,10 @@ export default function Navigation({
 			url: "https://nextjs.org/",
 		},
 		{
+			name: "Docker",
+			url: "https://www.docker.com/",
+		},
+		{
 			name: "noVNC",
 			url: "https://github.com/noVNC/noVNC",
 		},
@@ -120,7 +117,7 @@ export default function Navigation({
 							Stardust {packageJson.version}
 						</DialogTitle>
 					</DialogHeader>
-					<DialogDescription className="flex flex-col items-start justify-start gap-2 text-foreground">
+					<div className="flex flex-col items-start justify-start gap-2 text-foreground text-sm">
 						Stardust is the platform for streaming isolated desktop containers.
 						<br />
 						Stardust uses the following things in an important way:
@@ -200,7 +197,7 @@ export default function Navigation({
 								<TooltipContent>Spaceness</TooltipContent>
 							</Tooltip>
 						</DialogFooter>
-					</DialogDescription>
+					</div>
 				</DialogContent>
 			</Dialog>
 			<div className="flex justify-end">
