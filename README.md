@@ -8,8 +8,7 @@
     </a>
 </p>
 <p align="center">
-    <a href="https://st.spaceness.one/">Production demo instance</a>
+    <a href="https://st.spaceness.xyz/">Production demo instance (CURRENTLY DOWN)</a>
 <br>
 
-See [documentation](https://stardust.spaceness.one/docs) for setup and usage
-
+See [documentation](https://stardust-docs.vercel.app/docs) for setup and usage

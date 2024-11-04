@@ -179,7 +179,7 @@ export default function Navigation({
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Button variant="outline" size="icon" asChild>
-										<a href="https://stardust.spaceness.one/docs" target="_blank" rel="noreferrer nopener">
+										<a href="https://stardust-docs.vercel.app/docs" target="_blank" rel="noreferrer nopener">
 											<Book className="size-5" />
 										</a>
 									</Button>
@@ -189,7 +189,7 @@ export default function Navigation({
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Button variant="outline" size="icon" asChild>
-										<a href="https://spaceness.one/" target="_blank" rel="noreferrer nopener">
+										<a href="https://stardust-docs.vercel.app/" target="_blank" rel="noreferrer nopener">
 											<Globe className="size-5" />
 										</a>
 									</Button>

@@ -17,15 +17,6 @@
 					},
 					"type": "object"
 				},
-				"huDb": {
-					"description": "HU authentication database URL. Leave `undefined` to disable HU authentication. This is not for the end user and is meant for compatibility with https://holyubofficial.net/'s authentication backend",
-					"type": "string"
-				},
-				"huUrl": {
-					"default": "https://holyubofficial.net",
-					"description": "URL for the HU instance, if integrating with one",
-					"type": "string"
-				},
 				"oauth": {
 					"additionalProperties": false,
 					"description": "OAuth configuration. Leave `undefined` to disable OAuth signups.",

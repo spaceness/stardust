@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 					title: "Stardust",
 					description: "Stardust is the platform for streaming isolated desktop containers.",
 					type: "website",
-					url: "https://stardust.spaceness.one",
+					url: "https://stardust-docs.vercel.app",
 				}
 			: undefined,
 	};
