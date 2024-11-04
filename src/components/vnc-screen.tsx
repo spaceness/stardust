@@ -192,8 +192,11 @@ const VncScreen = ({
 						eventListeners.current[event] = undefined;
 					}
 				}
-
-				rfb.disconnect();
+				try {
+					rfb.disconnect();
+				} catch (e) {
+					console.info("disconnect error, this is normally not an issue.");
+				}
 				rfb = null;
 				setRfb(null);
 				setConnected(false);

@@ -165,7 +165,7 @@ export default function View(props: { params: Promise<{ slug: string }> }) {
 	return (
 		<div className="h-screen w-screen justify-center items-center flex">
 			{connected ? (
-				<section className="flex flex-col gap-2 z-40 absolute -translate-y-1/2 left-0 top-1/2 rounded-r-lg bg-background/80 p-[0.25rem] text-xs backdrop-blur-lg w-12">
+				<section className="flex flex-col gap-2 z-40 absolute -translate-y-1/2 left-0 top-1/2 rounded-r-md bg-background/80 p-[0.25rem] text-xs backdrop-blur-lg w-12">
 					<Button variant="ghost" size="icon" onClick={() => setFullScreen(!fullScreen)}>
 						{fullScreen ? <Minimize /> : <Maximize />}
 					</Button>
@@ -190,7 +190,10 @@ export default function View(props: { params: Promise<{ slug: string }> }) {
 					filesMutate();
 				}}
 			>
-				<SheetContent side="left" className="z-50 flex flex-col overflow-y-auto overflow-x-clip bg-background/90">
+				<SheetContent
+					side="left"
+					className="z-50 flex flex-col overflow-y-auto overflow-x-clip bg-background/90 backdrop-blur-sm"
+				>
 					<SheetHeader>
 						<SheetTitle className="py-2 text-2xl">Control Panel</SheetTitle>
 						<SheetDescription className="text-muted-foreground">

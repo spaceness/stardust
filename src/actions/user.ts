@@ -1,7 +1,6 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getConfig } from "@/lib/config";
 import { db, session, user } from "@/lib/drizzle/db";
 import { deleteSession } from "@/lib/session";
 import { hash } from "argon2";
