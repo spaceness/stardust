@@ -3,6 +3,7 @@ import { LogIn } from "lucide-react";
 import type { NextAuthConfig } from "next-auth";
 import type { OAuthUserConfig, OIDCUserConfig, Provider } from "next-auth/providers";
 import Auth0 from "next-auth/providers/auth0";
+import Authentik from "next-auth/providers/authentik";
 import Discord from "next-auth/providers/discord";
 import GitHub from "next-auth/providers/github";
 import GitLab from "next-auth/providers/gitlab";
@@ -39,6 +40,10 @@ const providersList = {
 	},
 	okta: {
 		provider: Okta,
+		Icon: LogIn,
+	},
+	authentik: {
+		provider: Authentik,
 		Icon: LogIn,
 	},
 	mattermost: {
