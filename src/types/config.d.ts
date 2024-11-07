@@ -107,8 +107,4 @@ export interface TurnstileConfig {
 	 * The Turnstile site key, used by the frontend
 	 */
 	siteKey: string;
-	/**
-	 * The hosts to enable Turnstile on
-	 */
-	hosts?: string[];
 }
