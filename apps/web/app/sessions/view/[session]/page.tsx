@@ -13,7 +13,7 @@ export default function SessionVNC() {
     })
     setTimeout(() => {
       setConnecting(false)
-    }, 10000)
+    }, 2000)
   })
   return <div>{connecting ? <VncStatus status={status} /> : <VNC />}</div>
 }
