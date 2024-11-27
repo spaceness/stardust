@@ -1,16 +1,17 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Camera, CirclePause, CirclePlay, CirclePower, Clipboard, Computer, Download, Files, GripVertical, Maximize, Trash2, Unplug, Upload } from 'lucide-react'
+import { Camera, CirclePause, CirclePower, Clipboard, Computer, Download, Files, GripVertical, HardDriveUpload, Maximize, Trash2, Unplug, Upload } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'
 
 import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function VNC() {
   return (
     <div>
-      <img src={'https://assets.ubuntu.com/v1/7f84bfa4-Jellyfish.png'} className="h-screen w-screen" />
+      <img alt="background" src={'https://assets.ubuntu.com/v1/7f84bfa4-Jellyfish.png'} className="h-screen w-screen" />
 
       <Sheet>
         <SheetTrigger asChild>
@@ -20,37 +21,31 @@ export default function VNC() {
         </SheetTrigger>
         <SheetContent side="left" className="w-2/5 overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="text-2xl">Session Options</SheetTitle>
+            <SheetTitle className="text-2xl">Session Controls</SheetTitle>
           </SheetHeader>
 
-          <Accordion type="multiple">
-            <AccordionItem value="actions">
-              <AccordionTrigger>
-                <div className="flex items-center gap-4">
-                  <CirclePlay className="h-9 w-9 rounded-md bg-accent p-1.5" /> Actions
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4">
-                  <Button className="w-full">
-                    <CirclePause className="mr-2 h-5 w-5" /> Pause Session
-                  </Button>
-                  <Button className="w-full">
-                    <CirclePower className="mr-2 h-5 w-5" /> Restart Session
-                  </Button>
-                  <Button className="w-full">
-                    <Camera className="mr-2 h-5 w-5" /> Save Screenshot
-                  </Button>
-                  <Button className="w-full">
-                    <Maximize className="mr-2 h-5 w-5" /> Enter Fullscreen
-                  </Button>
-                  <Button className="w-full" variant="destructive">
-                    <Trash2 className="mr-2 h-5 w-5" /> Destroy Session
-                  </Button>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <Button className="w-full">
+              <Unplug className="mr-2 h-5 w-5" /> Disconnect
+            </Button>
+            <Button className="w-full">
+              <CirclePause className="mr-2 h-5 w-5" /> Pause Session
+            </Button>
+            <Button className="w-full">
+              <CirclePower className="mr-2 h-5 w-5" /> Restart Session
+            </Button>
+            <Button className="w-full">
+              <Camera className="mr-2 h-5 w-5" /> Save Screenshot
+            </Button>
+            <Button className="w-full">
+              <Maximize className="mr-2 h-5 w-5" /> Enter Fullscreen
+            </Button>
+            <Button className="w-full" variant="destructive">
+              <Trash2 className="mr-2 h-5 w-5" /> Destroy Session
+            </Button>
+          </div>
 
+          <Accordion type="multiple">
             <AccordionItem value="clipboard">
               <AccordionTrigger>
                 <div className="flex items-center gap-4">
@@ -65,7 +60,7 @@ export default function VNC() {
                     <Upload className="mr-2 h-5 w-5" /> Send Clipboard
                   </Button>
                   <Button className="w-full">
-                    <Download className="mr-2 h-5 w-5" /> Get Clipboard
+                    <Download className="mr-2 h-5 w-5" /> Fetch Clipboard
                   </Button>
                 </div>
               </AccordionContent>
@@ -78,7 +73,20 @@ export default function VNC() {
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4"></div>
+                <div className="space-y-4">
+                  <Card className="border-dashed border-2">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Uploaded files</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">None detected - add files to the Downloads folder to download them here</p>
+                    </CardContent>
+                  </Card>
+
+                  <Button className="w-full">
+                    <HardDriveUpload className="mr-2 h-5 w-5" /> Upload File
+                  </Button>
+                </div>
               </AccordionContent>
             </AccordionItem>
 
@@ -88,17 +96,9 @@ export default function VNC() {
                   <Computer className="h-9 w-9 rounded-md bg-accent p-1.5" /> VNC Options
                 </div>
               </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4"></div>
-              </AccordionContent>
+              <AccordionContent>{/* <div className="space-y-4"></div> */}</AccordionContent>
             </AccordionItem>
           </Accordion>
-
-          <Link href="/">
-            <Button className="w-full">
-              <Unplug className="mr-2 h-5 w-5" /> Disconnect
-            </Button>
-          </Link>
         </SheetContent>
       </Sheet>
     </div>
