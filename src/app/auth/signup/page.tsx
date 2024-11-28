@@ -51,6 +51,14 @@ export default async function Page(props: {
 						});
 						const users = await db.select().from(user);
 						if (userCheck) redirect("/auth/login?error=Email%20already%20in%20use");
+						const email = data.get("email")?.toString() || "";
+						const name = data.get("name")?.toString() || "";
+						if (!["@", "."].includes(email) || [" ", "%", "!", "$", "%", "&", "<", ">", "/", "\\"].includes(email)) {
+							redirect("/auth/signup?error=Bad%20email");
+						}
+						if (email.length >= 64 || email.length >= 64 || email.length <= 7 || name.length <= 3) {
+							redirect("/auth/signup?error=Bad%20email%20or%20name");
+						}
 						await db.insert(user).values({
 							name: data.get("name")?.toString(),
 							email: data.get("email")?.toString() as string,
