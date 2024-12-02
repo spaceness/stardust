@@ -20,6 +20,25 @@ async function createSession(image: string) {
 		const config = getConfig();
 		const userSession = await auth();
 		if (!userSession?.user) throw new Error("User not found");
+		if (config.session?.usageLimits) {
+			const { userIsAdmin, allSessions } = await db.transaction(async (tx) => ({
+				userIsAdmin: (
+					await tx.query.user.findFirst({
+						where: (user, { eq }) => eq(user.id, userSession?.user?.id as string),
+						columns: {
+							isAdmin: true,
+						},
+					})
+				)?.isAdmin,
+				allSessions: await tx.select().from(session),
+			}));
+			if (config.session?.usageLimits.instance && config.session?.usageLimits.instance <= allSessions.length)
+				throw new Error("Instance limit exceeded");
+			if (config.session.usageLimits.user && !userIsAdmin) {
+				const userSessions = allSessions.filter((v) => v.userId === userSession.user.id);
+				if (config.session?.usageLimits.user <= userSessions.length) throw new Error("User session limit exceeded");
+			}
+		}
 		const container = await docker.createContainer({
 			name: `stardust-${createId()}-${image.split("/")[2] || image.split("/")[1]}`,
 			Image: image,

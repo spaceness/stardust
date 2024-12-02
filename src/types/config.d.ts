@@ -96,6 +96,13 @@ export interface SessionConfig {
 	 * @default system default
 	 */
 	dnsServers?: string[];
+	/**
+	 * Session per user usage limit configuration
+	 */
+	usageLimits?: {
+		instance?: number;
+		user?: number;
+	};
 }
 
 export interface TurnstileConfig {

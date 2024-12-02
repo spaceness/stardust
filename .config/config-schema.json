@@ -130,6 +130,19 @@
 					"default": 1440,
 					"description": "The amount of time to keep an inactive session alive for, in minutes.",
 					"type": "number"
+				},
+				"usageLimits": {
+					"additionalProperties": false,
+					"description": "Session per user usage limit configuration",
+					"properties": {
+						"instance": {
+							"type": "number"
+						},
+						"user": {
+							"type": "number"
+						}
+					},
+					"type": "object"
 				}
 			},
 			"type": "object"
