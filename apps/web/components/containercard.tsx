@@ -14,7 +14,7 @@ export default function ContainerCard({ image, name, type }: Props) {
     <>
       <Dialog>
         <DialogTrigger>
-          <div className="relative w-64 aspect-[5/3] rounded-lg overflow-hidden shadow-lg bg-primary/10 backdrop-blur-sm group">
+          <div className="relative w-64 aspect-[5/3] rounded-lg overflow-hidden shadow-lg bg-accent/40 backdrop-blur-lg group">
             <NextImage src={image} alt={name} fill className="object-cover group-hover:scale-105 duration-200" />
             <div className="absolute inset-0 bg-gradient-to-t from-accent/90 to-transparent" />
             <div className="absolute bottom-2 left-2 text-white flex flex-col">

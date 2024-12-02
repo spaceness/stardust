@@ -19,7 +19,7 @@ export default function Navbar() {
 
   return (
     <div className="pt-16">
-      <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between bg-card/40 backdrop-blur-sm px-6">
+      <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between bg-accent/80 backdrop-blur-sm px-6">
         <div className="flex items-center gap-2">
           <Sparkles className="h-8 w-8" />
           <h1 className="text-2xl font-semibold">Stardust</h1>
