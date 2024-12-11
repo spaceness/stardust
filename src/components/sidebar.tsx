@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { Container, Layers, LayoutDashboard, Users } from "lucide-react";
+import { Cog, Container, Layers, LayoutDashboard, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
@@ -19,6 +19,7 @@ export function AdminSidebar() {
 		{ href: "/admin/users", label: "Users", Icon: Users },
 		{ href: "/admin/images", label: "Images", Icon: Layers },
 		{ href: "/admin/sessions", label: "Sessions", Icon: Container },
+		{ href: "/admin/config", label: "Config Viewer", Icon: Cog },
 	];
 	return (
 		<nav className="grid gap-x-4 text-sm text-muted-foreground">
