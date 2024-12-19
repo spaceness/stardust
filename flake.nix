@@ -25,6 +25,7 @@
               postgresql_16
               libpqxx
               jq
+              docker
             ];
           };
       }
