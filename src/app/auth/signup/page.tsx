@@ -53,7 +53,7 @@ export default async function Page(props: {
 						if (userCheck) redirect("/auth/login?error=Email%20already%20in%20use");
 						const email = data.get("email")?.toString() || "";
 						const name = data.get("name")?.toString() || "";
-						if (!["@", "."].includes(email) || [" ", "%", "!", "$", "%", "&", "<", ">", "/", "\\"].includes(email)) {
+						if (!String(email).match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
 							redirect("/auth/signup?error=Bad%20email");
 						}
 						if (email.length >= 64 || email.length >= 64 || email.length <= 7 || name.length <= 3) {
