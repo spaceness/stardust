@@ -26,11 +26,25 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SelectUser } from "@/lib/drizzle/schema";
-import { Book, ComputerIcon, Globe, Info, Key, LogOut, Settings, Sparkles, SwatchBook, Trash } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+	Book,
+	ComputerIcon,
+	Globe,
+	Info,
+	Key,
+	LogOut,
+	Monitor,
+	Settings,
+	Sparkles,
+	SwatchBook,
+	Trash,
+} from "lucide-react";
 import type { Route } from "next";
 import type { Session } from "next-auth";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Fragment, useState } from "react";
 import { GitHubIcon } from "./icons";
 
@@ -44,17 +58,17 @@ export default function Navigation({
 	const { name, email, image } = session?.user || {};
 	const [open, setDialogOpen] = useState(false);
 	const { themes, setTheme, theme: currentTheme } = useTheme();
+	const pathname = usePathname();
 	const navigationItems: {
 		icon: React.ReactNode;
 		label: string;
 		href: Route;
-		adminOnly: boolean;
+		adminOnly?: boolean;
 	}[] = [
 		{
-			icon: <ComputerIcon />,
-			label: "Dashboard",
-			href: "/",
-			adminOnly: false,
+			icon: <Monitor />,
+			label: "Sessions",
+			href: "/sessions",
 		},
 		{
 			label: "Admin",
@@ -85,20 +99,34 @@ export default function Navigation({
 			url: "https://authjs.dev/",
 		},
 	];
-	const developers = ["incognitotgt", "1yusof", "genericness"];
+	const developers = ["incognitotgt", "proudparrot2", "genericness"];
 	return (
-		<nav className="flex h-16 min-w-full items-center justify-between px-4">
-			<div className="flex items-center justify-start gap-2">
+		<nav className="flex h-16 min-w-full items-center justify-between px-4 border-b">
+			<div className="flex items-center gap-2">
 				<Sparkles className="size-6" />
 				<span className="text-2xl font-bold md:block hidden mr-2">Stardust</span>
-				<NavigationMenu className="flex items-center justify-start">
+			</div>
+			<div className="flex justify-end gap-2">
+				<NavigationMenu>
 					<NavigationMenuList>
+						<NavigationMenuItem>
+							<Link href="/" legacyBehavior passHref>
+								<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), pathname === "/" && "bg-muted")}>
+									<span className="mr-2 flex size-4 items-center justify-center">
+										<ComputerIcon />
+									</span>{" "}
+									Workspaces
+								</NavigationMenuLink>
+							</Link>
+						</NavigationMenuItem>
 						{navigationItems.map((item) => (
 							<Fragment key={item.href}>
 								{!item.adminOnly || (item.adminOnly && dbUser.isAdmin) ? (
 									<NavigationMenuItem key={item.href}>
 										<Link href={item.href} legacyBehavior passHref>
-											<NavigationMenuLink className={navigationMenuTriggerStyle()}>
+											<NavigationMenuLink
+												className={cn(navigationMenuTriggerStyle(), pathname.startsWith(item.href) && "bg-muted")}
+											>
 												<span className="mr-2 flex size-4 items-center justify-center">{item.icon}</span> {item.label}
 											</NavigationMenuLink>
 										</Link>
@@ -108,99 +136,97 @@ export default function Navigation({
 						))}
 					</NavigationMenuList>
 				</NavigationMenu>
-			</div>
-			<Dialog open={open} onOpenChange={setDialogOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle className="m-2 flex items-center justify-center text-center text-2xl text-foreground">
-							<Sparkles className="mr-2 flex size-6 flex-row" />
-							Stardust {packageJson.version}
-						</DialogTitle>
-					</DialogHeader>
-					<div className="flex flex-col items-start justify-start gap-2 text-foreground text-sm">
-						Stardust is the platform for streaming isolated desktop containers.
-						<br />
-						Stardust uses the following things in an important way:
-						<br />
-						<ul className="list-inside list-disc">
-							{projectsUsed.map((project) => (
-								<li key={project.name}>
-									<a
-										href={project.url}
-										className="inline font-medium text-primary underline-offset-4 hover:underline"
-										target="_blank"
-										rel="noreferrer nopener"
-									>
-										{project.name}
-									</a>
-								</li>
-							))}
-						</ul>
-						Developers:
-						<br />
-						<ul className="list-inside list-disc">
-							{developers.map((developer) => (
-								<li key={developer}>
-									<a
-										href={`https://github.com/${developer}`}
-										className="inline font-medium text-primary underline-offset-4 hover:underline"
-										target="_blank"
-										rel="noreferrer nopener"
-									>
-										{developer}
-									</a>
-								</li>
-							))}
-						</ul>
-						Copyleft 2024 Spaceness.
-						<section>
-							This version of Stardust is from commit{" "}
-							<a
-								href={`https://github.com/spaceness/stardust/commit/${process.env.GIT_COMMIT}`}
-								className="inline font-medium text-primary underline-offset-4 hover:underline"
-								target="_blank"
-								rel="noreferrer nopener"
-							>
-								{process.env.GIT_COMMIT?.slice(0, 7)}
-							</a>
-							, built on {new Date(Number(process.env.BUILD_DATE)).toLocaleString()}
-						</section>
-						<DialogFooter>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button asChild variant="outline" size="icon">
-										<a href="https://github.com/spaceness/stardust" target="_blank" rel="noreferrer nopener">
-											<GitHubIcon className="size-5" />
+				<Dialog open={open} onOpenChange={setDialogOpen}>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle className="m-2 flex items-center justify-center text-center text-2xl text-foreground">
+								<Sparkles className="mr-2 flex size-6 flex-row" />
+								Stardust {packageJson.version}
+							</DialogTitle>
+						</DialogHeader>
+						<div className="flex flex-col items-start justify-start gap-2 text-foreground text-sm">
+							Stardust is the platform for streaming isolated desktop containers.
+							<br />
+							Stardust uses the following things in an important way:
+							<br />
+							<ul className="list-inside list-disc">
+								{projectsUsed.map((project) => (
+									<li key={project.name}>
+										<a
+											href={project.url}
+											className="inline font-medium text-primary underline-offset-4 hover:underline"
+											target="_blank"
+											rel="noreferrer nopener"
+										>
+											{project.name}
 										</a>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Github</TooltipContent>
-							</Tooltip>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button variant="outline" size="icon" asChild>
-										<a href="https://stardust-docs.vercel.app/docs" target="_blank" rel="noreferrer nopener">
-											<Book className="size-5" />
+									</li>
+								))}
+							</ul>
+							Developers:
+							<br />
+							<ul className="list-inside list-disc">
+								{developers.map((developer) => (
+									<li key={developer}>
+										<a
+											href={`https://github.com/${developer}`}
+											className="inline font-medium text-primary underline-offset-4 hover:underline"
+											target="_blank"
+											rel="noreferrer nopener"
+										>
+											{developer}
 										</a>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Documentation</TooltipContent>
-							</Tooltip>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button variant="outline" size="icon" asChild>
-										<a href="https://stardust-docs.vercel.app/" target="_blank" rel="noreferrer nopener">
-											<Globe className="size-5" />
-										</a>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Spaceness</TooltipContent>
-							</Tooltip>
-						</DialogFooter>
-					</div>
-				</DialogContent>
-			</Dialog>
-			<div className="flex justify-end">
+									</li>
+								))}
+							</ul>
+							Copyleft 2024 Spaceness.
+							<section>
+								This version of Stardust is from commit{" "}
+								<a
+									href={`https://github.com/spaceness/stardust/commit/${process.env.GIT_COMMIT}`}
+									className="inline font-medium text-primary underline-offset-4 hover:underline"
+									target="_blank"
+									rel="noreferrer nopener"
+								>
+									{process.env.GIT_COMMIT?.slice(0, 7)}
+								</a>
+								, built on {new Date(Number(process.env.BUILD_DATE)).toLocaleString()}
+							</section>
+							<DialogFooter>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button asChild variant="outline" size="icon">
+											<a href="https://github.com/spaceness/stardust" target="_blank" rel="noreferrer nopener">
+												<GitHubIcon className="size-5" />
+											</a>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>Github</TooltipContent>
+								</Tooltip>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant="outline" size="icon" asChild>
+											<a href="https://stardust-docs.vercel.app/docs" target="_blank" rel="noreferrer nopener">
+												<Book className="size-5" />
+											</a>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>Documentation</TooltipContent>
+								</Tooltip>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant="outline" size="icon" asChild>
+											<a href="https://stardust-docs.vercel.app/" target="_blank" rel="noreferrer nopener">
+												<Globe className="size-5" />
+											</a>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>Spaceness</TooltipContent>
+								</Tooltip>
+							</DialogFooter>
+						</div>
+					</DialogContent>
+				</Dialog>
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<Avatar>
