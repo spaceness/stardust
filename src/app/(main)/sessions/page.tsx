@@ -61,7 +61,7 @@ export default async function Dashboard() {
 	const containerStates = await Promise.all(sessions.map((session) => docker.getContainer(session.id).inspect()));
 	return (
 		<div className="m-auto flex w-full flex-col p-4">
-			<h1 className="text-4xl font-bold mb-4">Sessions</h1>
+			<h1 className="text-2xl font-bold mb-6">Sessions</h1>
 			<section className="flex flex-wrap gap-1">
 				<Suspense fallback={<Loader2 size={64} className="animate-spin" />}>
 					{sessions.length ? (

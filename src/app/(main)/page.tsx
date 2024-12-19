@@ -20,7 +20,7 @@ export default async function Dashboard() {
 	const images = await db.select().from(image);
 	return (
 		<div className="m-auto flex w-full flex-col p-4">
-			<h1 className="text-4xl font-bold mb-4">Workspaces</h1>
+			<h1 className="text-2xl font-bold mb-6">Workspaces</h1>
 			<section className="flex flex-wrap gap-2">
 				<Suspense fallback={<Loader2 size={64} className="animate-spin" />}>
 					{images.map((image) => (

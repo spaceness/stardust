@@ -380,30 +380,28 @@ export default function View(props: { params: Promise<{ slug: string }> }) {
 										<CardHeader>
 											<CardTitle className="text-lg">Downloads</CardTitle>
 										</CardHeader>
-										<CardContent>
+										<CardContent className="flex flex-col gap-2">
 											{!filesError ? (
 												!filesLoading ? (
 													filesList && filesList?.length > 0 ? (
 														filesList.map((file) => (
-															<Card key={file} className="flex justify-between items-center p-4 h-16 w-full gap-2">
-																<File className="size-5 flex-shrink-0" />
-																<span className="text-sm truncate overflow-x-scroll">{file}</span>
-																<Button size="icon" className="flex-shrink-0" asChild>
-																	<Link
-																		download={file}
-																		href={{
-																			pathname: `/api/session/${params.slug}/files`,
-																			query: { name: file },
-																		}}
-																	>
-																		<HardDriveDownload />
-																	</Link>
-																</Button>
-															</Card>
+															<Link
+																key={file}
+																download={file}
+																href={{
+																	pathname: `/api/session/${params.slug}/files`,
+																	query: { name: file },
+																}}
+															>
+																<Card className="flex justify-start items-center p-4 h-12 w-full gap-2 hover:bg-muted duration-150">
+																	<File className="size-5 flex-shrink-0" />
+																	<span className="text-sm truncate overflow-x-scroll">{file}</span>
+																</Card>
+															</Link>
 														))
 													) : (
 														<p className="text-muted-foreground">
-															None detected - add files to the Downloads folder to download them here
+															Add files to the Downloads folder to download them here
 														</p>
 													)
 												) : (
